@@ -16,6 +16,16 @@
     "outOfSupply1": { "attackMultiplier": 0.5, "moveDelta": -1 },
     "outOfSupply2": { "attackMultiplier": 0.5, "defenseMultiplier": 0.75, "moveMultiplier": 0.5, "strengthLossPerTurn": 1 }
   },
+  "support": {
+    "maxOffensiveAdjacent": 2,
+    "offensiveAdjacentBonus": 0.15,
+    "maxDefensiveAdjacent": 1,
+    "defensiveAdjacentBonus": 0.15,
+    "maxArtilleryOffensive": 1,
+    "artilleryDefenseReduction": 0.25,
+    "maxArtilleryDefensive": 1,
+    "artilleryBarrageAttackPenalty": 0.2
+  },
   "victory": { "enemyStepsPerPoint": 5 },
   "ai": {
     "turnTimeLimitMs": 1000,

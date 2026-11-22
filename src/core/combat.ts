@@ -1,10 +1,11 @@
-import { attackPower, defenderResponds, defensePower } from './combatPower';
+import { defenderResponds } from './combatPower';
 import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
 import { type GameState, addLosses, getUnit, liveUnits } from './game';
 import { type Axial, hexDistance } from './hex';
 import { type LossRange, lossRange, probAtLeast, rollLosses } from './losses';
 import { findRetreatHex } from './retreat';
+import { type SupportSet, type SupportedPowers, findSupport, supportIds, supportedPowers } from './support';
 import { isWeak } from './weakness';
 import { type Unit, hasTag, isAlive } from './units';
 
@@ -46,6 +47,8 @@ export interface CombatPreview {
   /** Probabilità che scatti la ritirata (o la perdita extra se non può ritirarsi). */
   readonly retreatChance: number;
   readonly retreatHex: Axial | null;
+  readonly support: Readonly<Record<keyof SupportSet, readonly string[]>>;
+  readonly modifiers: SupportedPowers;
 }
 
 interface CombatSetup {
@@ -58,14 +61,18 @@ interface CombatSetup {
   readonly baseDef: number;
   readonly responds: boolean;
   readonly retreatHex: Axial | null;
+  readonly support: SupportSet;
+  readonly modifiers: SupportedPowers;
 }
 
 function setupCombat(state: GameState, data: GameData, attackerId: string, targetId: string): CombatSetup | null {
   if (!canAttack(state, data, attackerId, targetId).ok) return null;
   const attacker = getUnit(state, attackerId)!;
   const defender = getUnit(state, targetId)!;
-  const pa = attackPower(state, data, attacker, defender);
-  const pd = defensePower(state, data, defender);
+  const support = findSupport(state, data, attacker, defender);
+  const modifiers = supportedPowers(state, data, attacker, defender, support);
+  const pa = modifiers.attack;
+  const pd = modifiers.defense;
   const ratio = pd > 0 ? pa / pd : Infinity;
   const k = data.rules.combat.maxLossesK;
   const responds = defenderResponds(attacker, defender);
@@ -79,6 +86,8 @@ function setupCombat(state: GameState, data: GameData, attackerId: string, targe
     baseAtt: responds && Number.isFinite(ratio) ? k / (1 + ratio) : 0,
     responds,
     retreatHex: findRetreatHex(state, data, defender, attacker),
+    support,
+    modifiers,
   };
 }
 
@@ -115,6 +124,8 @@ export function previewCombat(state: GameState, data: GameData, attackerId: stri
     defenderResponds: s.responds,
     retreatChance,
     retreatHex: s.retreatHex,
+    support: supportIds(s.support),
+    modifiers: s.modifiers,
   };
 }
 
@@ -153,7 +164,11 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
   const canAdvance =
     vacated && attStrength > 0 && s.responds && !hasTag(attackerType, 'artillery');
 
+  const supportedAttack = new Set([...s.support.offensive, ...s.support.artilleryCover].map((u) => u.id));
+  const reacted = new Set([...s.support.defensive, ...s.support.barrage].map((u) => u.id));
   const units = state.units.map((u) => {
+    if (supportedAttack.has(u.id)) return { ...u, hasAttacked: true, movesLeft: 0 };
+    if (reacted.has(u.id)) return { ...u, hasReacted: true };
     if (u.id === s.attacker.id) return { ...u, strength: attStrength, hasAttacked: true, movesLeft: 0 };
     if (u.id === s.defender.id) {
       return { ...u, strength: defStrength, pos: retreatTo ?? u.pos, entrenched: retreatTo ? false : u.entrenched };
@@ -165,6 +180,7 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
     kind: 'combat',
     attackerId,
     targetId,
+    targetPos: s.defender.pos,
     ratio: s.ratio,
     attackerLosses: attLoss,
     defenderLosses: defLoss,
@@ -172,6 +188,7 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
     retreatTo,
     attackerDestroyed: attStrength === 0,
     defenderDestroyed: defStrength === 0,
+    support: supportIds(s.support),
   };
 
   const withLosses = addLosses(addLosses(state, s.attacker.side, attLoss), s.defender.side, defLoss);

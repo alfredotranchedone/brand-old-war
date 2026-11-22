@@ -1,6 +1,6 @@
 import { AdvanceHint } from './AdvanceHint';
+import { AttackWindow } from './AttackWindow';
 import { BottomBar } from './BottomBar';
-import { CombatPanel } from './CombatPanel';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EndScreen } from './EndScreen';
 import { EventLog } from './EventLog';
@@ -21,12 +21,12 @@ export function App() {
       <TopBar />
       <main className={styles.map}>
         <MapCanvas />
+        <AttackWindow />
       </main>
       <aside className={styles.side}>
         <UnitInspector />
         <UnitCard />
         <AdvanceHint />
-        <CombatPanel />
         <EventLog />
       </aside>
       <BottomBar />

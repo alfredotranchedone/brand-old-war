@@ -23,7 +23,8 @@ export function useShortcuts(): void {
         s.selectNextUnit();
       } else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
         e.preventDefault();
-        requestEndTurn();
+        if (s.preview) s.confirmAttack();
+        else requestEndTurn();
       }
     };
     window.addEventListener('keydown', onKey);

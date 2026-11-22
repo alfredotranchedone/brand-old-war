@@ -20,13 +20,17 @@ export function attackPower(state: GameState, data: GameData, attacker: Unit, de
   return attacker.strength * aType.attack[dType.targetClass] * mod;
 }
 
-/** P_dif = F × D × M_terreno × M_dif */
-export function defensePower(state: GameState, data: GameData, defender: Unit): number {
-  const type = getUnitType(data, defender.typeId);
+/** Moltiplicatore difensivo del terreno, trincea compresa. */
+export function terrainDefenseMod(state: GameState, data: GameData, defender: Unit): number {
   const terrain = terrainAt(state.map, data.terrain, defender.pos);
-  let mod = supplyEffects(data.rules, defender).defense;
-  if (isEntrenchedEffective(data, defender)) mod *= terrain.entrenchmentMod;
-  return defender.strength * type.defense * terrain.defenseMod * mod;
+  return terrain.defenseMod * (isEntrenchedEffective(data, defender) ? terrain.entrenchmentMod : 1);
+}
+
+/** P_dif = F × D × M_terreno × M_dif; `terrainMod` sostituisce quello del terreno (copertura d'artiglieria). */
+export function defensePower(state: GameState, data: GameData, defender: Unit, terrainMod?: number): number {
+  const type = getUnitType(data, defender.typeId);
+  const mod = supplyEffects(data.rules, defender).defense;
+  return defender.strength * type.defense * (terrainMod ?? terrainDefenseMod(state, data, defender)) * mod;
 }
 
 /** Il difensore risponde solo agli attacchi da esagono adiacente. */

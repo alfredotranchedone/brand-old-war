@@ -6,7 +6,7 @@ import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { Animations } from './animations';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
-import { drawAdvance, drawPath, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
+import { drawAdvance, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { TileImages } from './tiles';
 import { drawUnit } from './units';
@@ -35,6 +35,8 @@ export interface RenderInput {
   readonly supply: readonly SupplyOverlay[];
   readonly targets: readonly Axial[];
   readonly chosenTarget: Axial | null;
+  /** Unità che danno supporto nell'attacco in anteprima: amiche dell'attaccante e del difensore. */
+  readonly supportHexes: { readonly attacker: readonly Axial[]; readonly defender: readonly Axial[] };
   readonly advanceHex: Axial | null;
   /** Unità della fazione attiva che non hanno più azioni disponibili. */
   readonly spent: ReadonlySet<string>;
@@ -191,6 +193,8 @@ export class MapRenderer {
     if (input.showCoords) drawCoords(ctx, input.map);
     this.drawHover(input, s);
     drawTargets(ctx, input.targets, input.chosenTarget);
+    drawSupport(ctx, input.supportHexes.attacker, MAP_THEME.supportFriendly);
+    drawSupport(ctx, input.supportHexes.defender, MAP_THEME.supportEnemy);
     if (input.advanceHex) drawAdvance(ctx, input.advanceHex);
     this.drawSelection(input);
     drawLabels(ctx, input.map);
@@ -199,6 +203,7 @@ export class MapRenderer {
       const type = input.unitTypes[u.typeId];
       if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr, input.spent.has(u.id), this.animations.unitPoint(u.id, now));
     }
+    this.animations.drawTracers(ctx, now);
     this.animations.drawLosses(ctx, now);
     if (this.animations.isActive(now)) this.requestDraw();
     if (input.path) drawPath(ctx, input.path.hexes, input.path.cost);

@@ -36,6 +36,10 @@ export function eventText(e: GameEvent, state: GameState, data: GameData): strin
         `R ${Number.isFinite(e.ratio) ? e.ratio.toFixed(2) : '∞'}`,
         `perdite ${e.attackerLosses} / ${e.defenderLosses} step`,
       ];
+      const sup = e.support;
+      const att = sup.offensive.length + sup.artilleryCover.length;
+      const def = sup.defensive.length + sup.barrage.length;
+      if (att || def) parts.push(`supporto ${att} / ${def}`);
       if (e.defenderDestroyed) parts.push('difensore distrutto');
       else if (e.retreatTo) parts.push(`ritirata in ${at(e.retreatTo)}`);
       else if (e.extraLoss > 0) parts.push('ritirata impossibile');

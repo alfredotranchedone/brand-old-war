@@ -62,6 +62,8 @@ export interface Unit {
   movesLeft: number;
   hasMoved: boolean;
   hasAttacked: boolean;
+  /** Ha già dato supporto difensivo (o sbarramento) in questo turno nemico. */
+  hasReacted: boolean;
   entrenched: boolean;
   /** Turni consecutivi fuori rifornimento (0 = rifornita). */
   outOfSupplyTurns: number;

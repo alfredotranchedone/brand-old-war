@@ -19,6 +19,8 @@ export type GameEvent =
       readonly kind: 'combat';
       readonly attackerId: string;
       readonly targetId: string;
+      /** Esagono del difensore al momento dello scontro (prima della ritirata). */
+      readonly targetPos: Axial;
       readonly ratio: number;
       readonly attackerLosses: number;
       /** Perdite totali del difensore, perdita extra inclusa. */
@@ -27,6 +29,13 @@ export type GameEvent =
       readonly retreatTo: Axial | null;
       readonly attackerDestroyed: boolean;
       readonly defenderDestroyed: boolean;
+      /** Id delle unità che hanno dato supporto. */
+      readonly support: {
+        readonly offensive: readonly string[];
+        readonly artilleryCover: readonly string[];
+        readonly defensive: readonly string[];
+        readonly barrage: readonly string[];
+      };
     }
   | { readonly kind: 'advance'; readonly unitId: string; readonly to: Axial }
   | {

@@ -44,6 +44,18 @@ export interface Rules {
       readonly strengthLossPerTurn: number;
     };
   };
+  /** Fuoco di supporto: unità adiacenti e artiglieria (docs/specifiche_fuoco_di_supporto.md). */
+  readonly support: {
+    readonly maxOffensiveAdjacent: number;
+    readonly offensiveAdjacentBonus: number;
+    readonly maxDefensiveAdjacent: number;
+    readonly defensiveAdjacentBonus: number;
+    readonly maxArtilleryOffensive: number;
+    /** Riduzione della parte di bonus difensivo (terreno, trincea) sopra ×1. */
+    readonly artilleryDefenseReduction: number;
+    readonly maxArtilleryDefensive: number;
+    readonly artilleryBarrageAttackPenalty: number;
+  };
   readonly victory: { readonly enemyStepsPerPoint: number };
   readonly ai: {
     readonly turnTimeLimitMs: number;
@@ -64,6 +76,9 @@ export function parseRules(raw: unknown): Rules {
   const s1 = record(s.outOfSupply1, `${p}.supply.outOfSupply1`);
   const s2 = record(s.outOfSupply2, `${p}.supply.outOfSupply2`);
   const v = record(o.victory, `${p}.victory`);
+  const sp = record(o.support, `${p}.support`);
+  const spNum = (k: string, max = Infinity) => num(sp[k], `${p}.support.${k}`, 0, max);
+  const spInt = (k: string) => int(sp[k], `${p}.support.${k}`, 0);
   const ai = record(o.ai, `${p}.ai`);
   const postures = record(ai.postures, `${p}.ai.postures`);
 
@@ -122,6 +137,16 @@ export function parseRules(raw: unknown): Rules {
         moveMultiplier: num(s2.moveMultiplier, `${p}.supply.outOfSupply2.moveMultiplier`, 0),
         strengthLossPerTurn: int(s2.strengthLossPerTurn, `${p}.supply.outOfSupply2.strengthLossPerTurn`, 0),
       },
+    },
+    support: {
+      maxOffensiveAdjacent: spInt('maxOffensiveAdjacent'),
+      offensiveAdjacentBonus: spNum('offensiveAdjacentBonus'),
+      maxDefensiveAdjacent: spInt('maxDefensiveAdjacent'),
+      defensiveAdjacentBonus: spNum('defensiveAdjacentBonus'),
+      maxArtilleryOffensive: spInt('maxArtilleryOffensive'),
+      artilleryDefenseReduction: spNum('artilleryDefenseReduction', 1),
+      maxArtilleryDefensive: spInt('maxArtilleryDefensive'),
+      artilleryBarrageAttackPenalty: spNum('artilleryBarrageAttackPenalty', 1),
     },
     victory: { enemyStepsPerPoint: num(v.enemyStepsPerPoint, `${p}.victory.enemyStepsPerPoint`, 1) },
     ai: {

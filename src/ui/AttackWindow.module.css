@@ -1,0 +1,35 @@
+.window {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  width: 300px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
+.rows {
+  grid-template-columns: 1fr auto;
+  font-size: 13px;
+}
+
+.rows dd {
+  text-align: right;
+}
+
+.total {
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.good {
+  color: #6fcf8a;
+}
+
+.bad {
+  color: #f07a72;
+}

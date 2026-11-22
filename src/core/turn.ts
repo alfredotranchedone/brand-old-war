@@ -7,10 +7,12 @@ import { startOfTurnSupply } from './supply';
 import { SIDES, type Side, isAlive, otherSide } from './units';
 import { computeResult } from './victory';
 
-/** Inizio del turno della fazione attiva: azzera i flag e applica il rifornimento. */
+/** Inizio del turno della fazione attiva: azzera i flag (le reazioni per l'altra fazione) e applica il rifornimento. */
 export function startTurn(state: GameState, data: GameData): GameState {
   const side = state.activeSide;
-  const units = state.units.map((u) => (u.side === side ? { ...u, hasMoved: false, hasAttacked: false } : u));
+  const units = state.units.map((u) =>
+    u.side === side ? { ...u, hasMoved: false, hasAttacked: false } : { ...u, hasReacted: false },
+  );
   const event: GameEvent = { kind: 'turnStart', turn: state.turn, side };
   const roundStartLosses = side === state.setup.firstSide ? state.stepsLost : state.roundStartLosses;
   return startOfTurnSupply({ ...state, units, roundStartLosses, log: [...state.log, event] }, data, side);

@@ -57,6 +57,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
     movesLeft: getUnitType(data, u.typeId).move,
     hasMoved: false,
     hasAttacked: false,
+    hasReacted: false,
     entrenched: u.entrenched,
     outOfSupplyTurns: 0,
   }));

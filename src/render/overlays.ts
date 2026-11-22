@@ -107,6 +107,16 @@ export function drawTargets(ctx: CanvasRenderingContext2D, targets: readonly Axi
   }
 }
 
+/** Contorno tratteggiato sulle unità che danno supporto. */
+export function drawSupport(ctx: CanvasRenderingContext2D, hexes: readonly Axial[], color: string): void {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([4, 4]);
+  for (const h of hexes) ctx.stroke(hexPath(h, 0.9));
+  ctx.restore();
+}
+
 export function drawAdvance(ctx: CanvasRenderingContext2D, h: Axial): void {
   const p = hexPath(h, 0.88);
   ctx.save();

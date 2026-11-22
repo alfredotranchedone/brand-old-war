@@ -38,6 +38,13 @@ export function supplyFor(s: UiState): SupplyOverlay[] {
   return overlays;
 }
 
+function supportHexesFor({ game, preview }: UiState): RenderInput['supportHexes'] {
+  const pos = (ids: readonly string[]) => ids.flatMap((id) => getUnit(game, id)?.pos ?? []);
+  if (!preview) return { attacker: [], defender: [] };
+  const sup = preview.support;
+  return { attacker: pos([...sup.offensive, ...sup.artilleryCover]), defender: pos([...sup.defensive, ...sup.barrage]) };
+}
+
 /** Traduce lo stato dello store nei dati che il renderer disegna. */
 export function buildRenderInput(s: UiState): RenderInput {
   const { game, data, reach, hovered } = s;
@@ -68,6 +75,7 @@ export function buildRenderInput(s: UiState): RenderInput {
     supply: s.showSupply ? supplyFor(s) : [],
     targets: s.targets.flatMap((id) => getUnit(game, id)?.pos ?? []),
     chosenTarget: s.preview ? (getUnit(game, s.preview.targetId)?.pos ?? null) : null,
+    supportHexes: supportHexesFor(s),
     advanceHex:
       game.pendingAdvance && game.pendingAdvance.unitId === s.selectedUnitId ? game.pendingAdvance.to : null,
     spent: spentFor(s),

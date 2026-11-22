@@ -15,6 +15,8 @@ export const MAP_THEME = {
   targetFill: 'rgba(208, 38, 43, 0.22)',
   targetStroke: '#b3141a',
   advanceStroke: '#1f7a3a',
+  supportFriendly: '#5cf08a',
+  supportEnemy: '#ff6a5c',
   coordText: 'rgba(60, 70, 50, 0.55)',
   labelText: '#3d4434',
   labelHalo: 'rgba(238, 240, 228, 0.9)',
