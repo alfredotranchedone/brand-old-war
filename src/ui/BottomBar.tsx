@@ -49,7 +49,7 @@ export function BottomBar() {
       </span>
       <span className={styles.barPlace}>{facts.place}</span>
       <span className={styles.barEnd}>
-        <button type="button" className={`${styles.button} ${styles.primary}`} onClick={requestEndTurn} disabled={!playerTurn} title="Fine turno (Invio)">
+        <button type="button" className={`${styles.button} ${styles.warning}`} onClick={requestEndTurn} disabled={!playerTurn} title="Fine turno (Invio)">
           Fine turno
         </button>
       </span>

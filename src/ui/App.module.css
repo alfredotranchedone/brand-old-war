@@ -189,6 +189,18 @@
   background: #004f8a;
 }
 
+.warning {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #1d2119;
+  font-weight: 600;
+}
+
+.warning:hover:not(:disabled) {
+  background: #d4a23a;
+  border-color: #d4a23a;
+}
+
 .actions {
   display: flex;
   gap: 8px;
