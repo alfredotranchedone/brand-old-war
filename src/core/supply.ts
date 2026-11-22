@@ -2,7 +2,7 @@ import { type GameData, getUnitType } from './data';
 import { type GameState, addLosses } from './game';
 import type { Rules } from './rules';
 import { isInSupply, supplyNetwork } from './supplyNetwork';
-import { type Side, type Unit, isAirType, isAlive } from './units';
+import { type Side, type Unit, type UnitType, isAirType, isAlive } from './units';
 import { isWeak } from './weakness';
 
 export interface SupplyEffects {
@@ -10,22 +10,36 @@ export interface SupplyEffects {
   readonly defense: number;
 }
 
+/**
+ * Stadio dei malus di rifornimento: 0 nessuno, 1 primo turno, 2 dal secondo (con logoramento).
+ * Le unità con `supplyEndurance` N ci arrivano N volte più tardi.
+ */
+export function supplyStage(data: GameData, unit: Unit): number {
+  return supplyStageFor(getUnitType(data, unit.typeId), unit.outOfSupplyTurns);
+}
+
+function supplyStageFor(type: UnitType, outOfSupplyTurns: number): number {
+  return Math.floor(outOfSupplyTurns / type.supplyEndurance);
+}
+
 /** Effetti del rifornimento sul combattimento. */
-export function supplyEffects(rules: Rules, unit: Unit): SupplyEffects {
-  if (unit.outOfSupplyTurns >= 2) {
+export function supplyEffects(data: GameData, unit: Unit): SupplyEffects {
+  const rules = data.rules;
+  const stage = supplyStage(data, unit);
+  if (stage >= 2) {
     return { attack: rules.supply.outOfSupply2.attackMultiplier, defense: rules.supply.outOfSupply2.defenseMultiplier };
   }
-  if (unit.outOfSupplyTurns === 1) return { attack: rules.supply.outOfSupply1.attackMultiplier, defense: 1 };
+  if (stage === 1) return { attack: rules.supply.outOfSupply1.attackMultiplier, defense: 1 };
   return { attack: 1, defense: 1 };
 }
 
 /** PM a inizio turno: tiene conto del rifornimento, della debolezza e dello status debilitato. I dimezzamenti non si sommano. */
-export function startingMoves(rules: Rules, baseMove: number, outOfSupplyTurns: number, strength: number): number {
+export function startingMoves(rules: Rules, baseMove: number, stage: number, strength: number): number {
   let mult = 1;
-  if (outOfSupplyTurns >= 2) mult = Math.min(mult, rules.supply.outOfSupply2.moveMultiplier);
+  if (stage >= 2) mult = Math.min(mult, rules.supply.outOfSupply2.moveMultiplier);
   if (isWeak(rules, { strength })) mult = Math.min(mult, rules.weakUnit.moveMultiplier);
   const moves = mult < 1 ? Math.ceil(baseMove * mult) : baseMove;
-  return outOfSupplyTurns === 1 ? Math.max(0, moves + rules.supply.outOfSupply1.moveDelta) : moves;
+  return stage === 1 ? Math.max(0, moves + rules.supply.outOfSupply1.moveDelta) : moves;
 }
 
 /** Aggiorna il rifornimento e il logoramento di tutte le unità della fazione all'inizio del turno. */
@@ -43,12 +57,13 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
     const turns = isAirType(type) || isInSupply(network, u) ? 0 : u.outOfSupplyTurns + 1;
     let strength = u.strength;
     if (turns > 0) outOfSupply.push(u.id);
-    if (turns >= 2 && strength > 1 && loss > 0) {
+    const stage = supplyStageFor(type, turns);
+    if (stage >= 2 && strength > 1 && loss > 0) {
       strength = Math.max(1, strength - loss);
       lost += u.strength - strength;
       attrition.push(u.id);
     }
-    const movesLeft = startingMoves(data.rules, type.move, turns, strength);
+    const movesLeft = startingMoves(data.rules, type.move, stage, strength);
     return { ...u, outOfSupplyTurns: turns, strength, movesLeft };
   });
 

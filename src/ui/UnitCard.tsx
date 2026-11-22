@@ -61,7 +61,7 @@ export function UnitCard() {
         <dd>{status}</dd>
         <dt>Rifornimento</dt>
         <dd className={unit.outOfSupplyTurns > 0 ? styles.warn : undefined}>
-          {supplyText(data.rules, unit)}
+          {supplyText(data, unit)}
         </dd>
         <dt>Trincerata</dt>
         <dd>{canEntrench ? (unit.entrenched ? 'Sì' : 'No') : '—'}</dd>

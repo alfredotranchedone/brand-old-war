@@ -30,6 +30,8 @@ export interface UnitType {
   readonly name: string;
   /** Codice simbolo APP-6 / 2525 (15 caratteri). L'affiliazione (2° carattere) viene impostata per fazione. */
   readonly sidc: string;
+  /** Testo dentro la cornice al posto dell'icona (es. «HQ»). */
+  readonly symbolText?: string;
   readonly move: number;
   readonly attack: Readonly<Record<TargetClass, number>>;
   readonly defense: number;
@@ -40,6 +42,8 @@ export interface UnitType {
   /** Portata di avvistamento: usata solo con la futura nebbia di guerra. */
   readonly spotting: number;
   readonly tags: readonly UnitTag[];
+  /** Turni fuori rifornimento che valgono come uno (1 = normale, 3 = resiste il triplo). */
+  readonly supplyEndurance: number;
   /** Raggio della bolla contraerea in esagoni (0 = nessuna). */
   readonly aaRadius: number;
   /** Raggio della bolla di guerra elettronica in esagoni (0 = nessuna). */
@@ -106,6 +110,7 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       id,
       name: str(o.name, `${path}.name`),
       sidc,
+      ...(o.symbolText !== undefined ? { symbolText: str(o.symbolText, `${path}.symbolText`) } : {}),
       move: int(o.move, `${path}.move`, 0),
       attack: {
         armored: num(attack.armored, `${path}.attack.armored`, 0),
@@ -118,6 +123,7 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       mobility: oneOf(o.mobility, `${path}.mobility`, MOBILITIES),
       spotting: int(o.spotting, `${path}.spotting`, 1),
       tags: array(o.tags ?? [], `${path}.tags`).map((t, i) => oneOf(t, `${path}.tags[${i}]`, UNIT_TAGS)),
+      supplyEndurance: int(o.supplyEndurance ?? 1, `${path}.supplyEndurance`, 1),
       aaRadius: int(o.aaRadius ?? 0, `${path}.aaRadius`, 0),
       ewRadius: int(o.ewRadius ?? 0, `${path}.ewRadius`, 0),
       organic: {

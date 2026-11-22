@@ -60,7 +60,7 @@ function UnitDetails({ unit }: { unit: Unit }) {
             </div>
           ))}
       </dl>
-      {unit.outOfSupplyTurns > 0 && <p className={styles.badge}>{supplyText(data.rules, unit)}</p>}
+      {unit.outOfSupplyTurns > 0 && <p className={styles.badge}>{supplyText(data, unit)}</p>}
     </div>
   );
 }

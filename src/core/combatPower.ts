@@ -23,7 +23,7 @@ export function entrenchmentNegated(state: GameState, data: GameData, defender: 
 export function attackPower(state: GameState, data: GameData, attacker: Unit, defender: Unit): number {
   const aType = getUnitType(data, attacker.typeId);
   const dType = getUnitType(data, defender.typeId);
-  let mod = supplyEffects(data.rules, attacker).attack;
+  let mod = supplyEffects(data, attacker).attack;
   if (hasTag(aType, 'artillery')) mod *= data.weather[currentConditions(state).weather]?.artilleryMod ?? 1;
   return attacker.strength * aType.attack[dType.targetClass] * mod;
 }
@@ -39,7 +39,7 @@ export function terrainDefenseMod(state: GameState, data: GameData, defender: Un
 /** Potenza difensiva: forza × difesa × effetti del terreno e della trincea. Se `terrainMod` è passato, sostituisce il terreno (es. copertura d'artiglieria). */
 export function defensePower(state: GameState, data: GameData, defender: Unit, terrainMod?: number): number {
   const type = getUnitType(data, defender.typeId);
-  const mod = supplyEffects(data.rules, defender).defense;
+  const mod = supplyEffects(data, defender).defense;
   return defender.strength * type.defense * (terrainMod ?? terrainDefenseMod(state, data, defender)) * mod;
 }
 

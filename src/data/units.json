@@ -53,6 +53,24 @@
       "supportVehicles": 40
     }
   },
+  "light_inf": {
+    "name": "Fanteria leggera",
+    "sidc": "SFGPUCIL---F---",
+    "move": 3,
+    "attack": { "armored": 2, "unarmored": 6, "air": 2 },
+    "defense": 7,
+    "range": 1,
+    "targetClass": "unarmored",
+    "mobility": "foot",
+    "spotting": 2,
+    "tags": ["infantry"],
+    "organic": {
+      "personnel": 600,
+      "mainVehicles": 20,
+      "mainVehiclesLabel": "Veicoli leggeri",
+      "supportVehicles": 20
+    }
+  },
   "recon": {
     "name": "Ricognizione",
     "sidc": "SFGPUCR----F---",
@@ -91,7 +109,8 @@
   },
   "hq": {
     "name": "Comando (HQ)",
-    "sidc": "SFGPU-----AF---",
+    "sidc": "SFGPU------N---",
+    "symbolText": "HQ",
     "move": 5,
     "attack": { "armored": 2, "unarmored": 3, "air": 1 },
     "defense": 4,
@@ -109,7 +128,7 @@
   },
   "special_forces": {
     "name": "Forze speciali",
-    "sidc": "SFFPG------F---",
+    "sidc": "SFFPGS-----F---",
     "move": 4,
     "attack": { "armored": 3, "unarmored": 7, "air": 2 },
     "defense": 5,
@@ -117,6 +136,7 @@
     "targetClass": "unarmored",
     "mobility": "foot",
     "spotting": 4,
+    "supplyEndurance": 3,
     "tags": ["infantry", "infiltrator"],
     "organic": {
       "personnel": 200,

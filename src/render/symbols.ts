@@ -28,6 +28,8 @@ const OPTIONS = {
   outlineWidth: 0,
 } as const;
 
+const optionsFor = (type: UnitType) => (type.symbolText ? { ...OPTIONS, specialHeadquarters: type.symbolText } : OPTIONS);
+
 const cache = new Map<string, SymbolRaster>();
 
 /** Genere il raster del simbolo per la scala richiesta (zoom × DPI), con caching per riuso. */
@@ -38,7 +40,7 @@ export function getSymbolRaster(type: UnitType, side: Side, pixelsPerUnit: numbe
   const hit = cache.get(key);
   if (hit) return hit;
 
-  const symbol = new ms.Symbol(sidcForSide(type, side), { ...OPTIONS, size: SYMBOL_SIZE * scale });
+  const symbol = new ms.Symbol(sidcForSide(type, side), { ...optionsFor(type), size: SYMBOL_SIZE * scale });
   const canvas = symbol.asCanvas();
   const anchor = symbol.getOctagonAnchor();
   const raster: SymbolRaster = { canvas, anchorX: anchor.x, anchorY: anchor.y, pixelsPerUnit: scale };
@@ -48,6 +50,6 @@ export function getSymbolRaster(type: UnitType, side: Side, pixelsPerUnit: numbe
 
 /** Ritorna il data URL SVG del simbolo per l'uso nei pannelli React. */
 export function symbolDataUrl(type: UnitType, side: Side, size = 30): string {
-  const svg = new ms.Symbol(sidcForSide(type, side), { ...OPTIONS, size }).asSVG();
+  const svg = new ms.Symbol(sidcForSide(type, side), { ...optionsFor(type), size }).asSVG();
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }

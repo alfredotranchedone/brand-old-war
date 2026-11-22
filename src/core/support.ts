@@ -4,6 +4,7 @@
 import { type AirAttackMods, airAttackMods } from './air';
 import { attackPower, defensePower, terrainDefenseMod } from './combatPower';
 import { type GameData, getUnitType } from './data';
+import { supplyStage } from './supply';
 import { type GameState, liveUnits } from './game';
 import { hexDistance } from './hex';
 import { type Unit, hasTag } from './units';
@@ -22,7 +23,7 @@ export interface SupportSet {
 
 /** Una unità può dare supporto se è rifornita e non è debilitata. */
 function canSupport(data: GameData, u: Unit): boolean {
-  return u.outOfSupplyTurns === 0 && !isWeak(data.rules, u);
+  return supplyStage(data, u) === 0 && !isWeak(data.rules, u);
 }
 
 const isArtillery = (data: GameData, u: Unit) => hasTag(getUnitType(data, u.typeId), 'artillery');
