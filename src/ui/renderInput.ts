@@ -10,7 +10,7 @@ import { exertsZoc, zocOf } from '../core/zoc';
 import type { RenderInput, SupplyOverlay, ZocOverlay } from '../render/mapRenderer';
 import type { UiState } from './store';
 
-/** Area della ZOC di una fazione, esagoni delle sue unità inclusi (per un contorno senza buchi). */
+/** Calcola la zona di controllo della fazione: unità che esercitano ZOC e loro esagoni vicini. */
 function zocArea({ game, data }: UiState, side: Side): ZocOverlay {
   const hexes = zocOf(game, data, side);
   for (const u of liveUnits(game, side)) if (exertsZoc(data, u)) hexes.add(hexKey(u.pos));
@@ -46,7 +46,7 @@ function supportHexesFor({ game, preview }: UiState): RenderInput['supportHexes'
   return { attacker: pos([...sup.offensive, ...sup.artilleryCover]), defender: pos([...sup.defensive, ...sup.barrage]) };
 }
 
-/** Bolle AA ed EW dell'unità selezionata e di quelle sotto il cursore. */
+/** Visualizza le bolle di contraerea e guerra elettronica dell'unità selezionata e di quelle sotto il cursore. */
 function bubblesFor({ game, data, hovered, selectedUnitId }: UiState): NonNullable<RenderInput['bubbles']> {
   const units = [...(hovered ? unitsAt(game, data, hovered) : [])];
   const selected = selectedUnitId ? getUnit(game, selectedUnitId) : undefined;
@@ -62,7 +62,7 @@ function bubblesFor({ game, data, hovered, selectedUnitId }: UiState): NonNullab
   return out;
 }
 
-/** Traduce lo stato dello store nei dati che il renderer disegna. */
+/** Converte lo stato del gioco e dell'interfaccia nei dati che il renderer disegna. */
 export function buildRenderInput(s: UiState): RenderInput {
   const { game, data, reach, hovered } = s;
   const selected = s.selectedUnitId ? getUnit(game, s.selectedUnitId) : undefined;

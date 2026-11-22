@@ -9,7 +9,7 @@ export interface RngResult<T> {
   readonly state: number;
 }
 
-/** Normalizza un seme qualsiasi in uno stato a 32 bit senza segno. */
+/** Converte un seed qualsiasi in uno stato RNG a 32 bit. */
 export function seedRng(seed: number): number {
   return seed >>> 0;
 }

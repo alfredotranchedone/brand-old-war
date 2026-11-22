@@ -6,7 +6,7 @@ export interface LossRange {
   readonly max: number;
 }
 
-/** Perdite base: x = base × v, con v uniforme in [vMin, vMax), poi arrotondamento stocastico. */
+/** Calcola l'intervallo di perdite: valore base × variazione casuale, poi arrotonda. */
 export function lossRange(base: number, vMin: number, vMax: number): LossRange {
   return {
     min: Math.floor(base * vMin),
@@ -15,13 +15,13 @@ export function lossRange(base: number, vMin: number, vMax: number): LossRange {
   };
 }
 
-/** Probabilità che le perdite arrotondate siano almeno n. */
+/** Probabilità che le perdite totali raggiungano almeno n unità. */
 export function probAtLeast(base: number, vMin: number, vMax: number, n: number): number {
   if (n <= 0) return 1;
   const lo = base * vMin;
   const hi = base * vMax;
   if (hi <= lo) return lo >= n ? 1 : lo > n - 1 ? lo - (n - 1) : 0;
-  // P(L ≥ n | x) vale 1 per x ≥ n, (x − (n−1)) per n−1 ≤ x < n, 0 altrimenti.
+  // Calcola la probabilità cumulative della zona di transizione tra n-1 e n.
   const a = Math.max(lo, n - 1);
   const b = Math.min(hi, n);
   const partial = b > a ? ((b - (n - 1)) ** 2 - (a - (n - 1)) ** 2) / 2 : 0;

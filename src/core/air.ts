@@ -12,7 +12,7 @@ import { type Side, type Unit, type UnitType, hasTag, isAirType, otherSide } fro
 
 const typeOf = (data: GameData, u: Unit) => getUnitType(data, u.typeId);
 
-/** Unità di `side` la cui bolla (AA o EW) copre l'esagono. */
+/** Ritorna le unità il cui raggio AA o EW copre questo esagono. */
 export function bubbleUnits(state: GameState, data: GameData, side: Side, h: Axial, kind: 'aa' | 'ew'): Unit[] {
   return liveUnits(state, side).filter((u) => {
     const t = typeOf(data, u);
@@ -21,12 +21,12 @@ export function bubbleUnits(state: GameState, data: GameData, side: Side, h: Axi
   });
 }
 
-/** Drone disturbato: dentro una bolla EW nemica. */
+/** True se il drone è dentro una bolla di guerra elettronica nemica. */
 export function isJammed(state: GameState, data: GameData, u: Unit): boolean {
   return hasTag(typeOf(data, u), 'uav') && bubbleUnits(state, data, otherSide(u.side), u.pos, 'ew').length > 0;
 }
 
-/** Drone amico dell'attaccante sopra il bersaglio, non disturbato. */
+/** Ritorna il drone osservatore amico sopra il bersaglio, se non è disturbato. */
 export function spotter(state: GameState, data: GameData, attacker: Unit, defender: Unit): Unit | undefined {
   const uav = airUnitAt(state, data, defender.pos);
   if (!uav || uav.side !== attacker.side || uav.id === attacker.id) return undefined;
@@ -69,7 +69,7 @@ function hitChance(data: GameData, aa: Unit, type: UnitType): number {
   return Math.min(cfg.aaMaxHitChance, cfg.aaHitPerAttack * type.attack.air * (aa.strength / data.rules.maxStrength));
 }
 
-/** La contraerea nemica più pericolosa che copre l'unità aerea, se c'è. */
+/** Ritorna la contraerea nemica più pericolosa che copre l'unità aerea. */
 export function aaThreat(state: GameState, data: GameData, unit: Unit): AaThreat | null {
   if (!isAirType(typeOf(data, unit))) return null;
   let best: AaThreat | null = null;

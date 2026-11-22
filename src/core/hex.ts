@@ -24,7 +24,7 @@ export interface Point {
 export type HexKey = string;
 
 export function hex(q: number, r: number): Axial {
-  // Normalizza -0 in 0, così chiavi e confronti restano stabili.
+  // Converte -0 a 0 per mantenere chiavi stabili.
   return { q: q + 0, r: r + 0 };
 }
 
@@ -101,7 +101,7 @@ export function hexDistance(a: Axial, b: Axial): number {
 // Arrotondamento, linee, anelli, aree
 // ---------------------------------------------------------------------------
 
-/** Arrotonda coordinate assiali frazionarie all'esagono più vicino (arrotondamento cubico). */
+/** Arrotonda coordinate esadecimali frazionarie all'esagono più vicino. */
 export function hexRound(fq: number, fr: number): Axial {
   const fs = -fq - fr;
   let q = Math.round(fq);
@@ -119,8 +119,8 @@ export function hexRound(fq: number, fr: number): Axial {
 }
 
 /**
- * Esagoni sulla linea da `a` a `b`, estremi inclusi (lunghezza = distanza + 1).
- * Un piccolo spostamento evita ambiguità quando la linea corre esattamente su un lato.
+ * Ritorna tutti gli esagoni sulla linea retta da `a` a `b`, inclusi gli estremi.
+ * Aggiunge un piccolo offset per evitare ambiguità quando la linea passa sul confine tra esagoni.
  */
 export function hexLine(a: Axial, b: Axial): Axial[] {
   const n = hexDistance(a, b);
@@ -138,12 +138,12 @@ export function hexLine(a: Axial, b: Axial): Axial[] {
   return result;
 }
 
-/** Esagoni a distanza esatta `radius` da `center` (radius 0 = solo il centro). */
+/** Ritorna un anello di esagoni a distanza esatta da `center`. */
 export function hexRing(center: Axial, radius: number): Axial[] {
   if (radius < 0) return [];
   if (radius === 0) return [hex(center.q, center.r)];
   const result: Axial[] = [];
-  // Parte dall'esagono a distanza `radius` in direzione 4, poi gira lungo i 6 lati.
+  // Inizia dal bordo in direzione 4 e percorre i 6 lati dell'anello.
   let h = hexAdd(center, hexScale(hexDirection(4), radius));
   for (let side = 0; side < 6; side++) {
     for (let step = 0; step < radius; step++) {
@@ -154,7 +154,7 @@ export function hexRing(center: Axial, radius: number): Axial[] {
   return result;
 }
 
-/** Tutti gli esagoni entro `radius` da `center`, centro incluso. */
+/** Ritorna tutti gli esagoni entro raggio `radius` dal centro, centro incluso. */
 export function hexesInRange(center: Axial, radius: number): Axial[] {
   const result: Axial[] = [];
   for (let dq = -radius; dq <= radius; dq++) {

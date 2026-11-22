@@ -9,7 +9,7 @@ export function victoryPoints(state: GameState, data: GameData, side: Side): num
   return objectives + Math.floor(state.stepsLost[otherSide(side)] / data.rules.victory.enemyStepsPerPoint);
 }
 
-/** Esito dal punto di vista del giocatore. */
+/** Calcola il risultato della partita dal punto di vista del giocatore. */
 export function computeResult(state: GameState, data: GameData): GameResult {
   const player = state.setup.player;
   const enemy = otherSide(player);

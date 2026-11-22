@@ -9,7 +9,7 @@ import { positionScore, scoreContext } from './positionScore';
 
 const EPS = 1e-6;
 
-/** Prima unità (in ordine di id) che ha un esagono migliore di quello in cui si trova. */
+/** Muove la prima unità disponibile verso una posizione migliore (in ordine di id). */
 export function chooseMove(state: GameState, data: GameData, side: Side): Action | null {
   const units = liveUnits(state, side)
     .filter((u) => !u.hasMoved && !u.hasAttacked && canUnitMove(state, u).ok)
@@ -32,7 +32,7 @@ export function chooseMove(state: GameState, data: GameData, side: Side): Action
   return null;
 }
 
-/** Avanzata dopo il combattimento: sempre sugli obiettivi, altrimenti se migliora la posizione. */
+/** Dopo un combattimento, avanza sempre su un obiettivo, altrimenti solo se migliora la posizione. */
 export function chooseAdvance(state: GameState, data: GameData, side: Side): Action | null {
   const p = state.pendingAdvance;
   const u = p && getUnit(state, p.unitId);

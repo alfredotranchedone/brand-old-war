@@ -24,7 +24,7 @@ export function drawObjectives(
   }
 }
 
-/** Nomi di località sopra l'esagono; per gli obiettivi anche il valore in stelle. */
+/** Disegna i nomi dei luoghi e il valore degli obiettivi in stelle. */
 export function drawLabels(ctx: CanvasRenderingContext2D, map: MapData): void {
   const names = new Map<string, { h: Axial; text: string; bold: boolean }>();
   for (const h of mapHexes(map)) {

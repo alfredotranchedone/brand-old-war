@@ -10,7 +10,7 @@ export interface SupplyEffects {
   readonly defense: number;
 }
 
-/** Effetti sul combattimento dello stato di rifornimento. */
+/** Effetti del rifornimento sul combattimento. */
 export function supplyEffects(rules: Rules, unit: Unit): SupplyEffects {
   if (unit.outOfSupplyTurns >= 2) {
     return { attack: rules.supply.outOfSupply2.attackMultiplier, defense: rules.supply.outOfSupply2.defenseMultiplier };
@@ -19,7 +19,7 @@ export function supplyEffects(rules: Rules, unit: Unit): SupplyEffects {
   return { attack: 1, defense: 1 };
 }
 
-/** PM a inizio turno: rifornimento e logoramento. I dimezzamenti non si sommano. */
+/** PM a inizio turno: tiene conto del rifornimento, della debolezza e dello status debilitato. I dimezzamenti non si sommano. */
 export function startingMoves(rules: Rules, baseMove: number, outOfSupplyTurns: number, strength: number): number {
   let mult = 1;
   if (outOfSupplyTurns >= 2) mult = Math.min(mult, rules.supply.outOfSupply2.moveMultiplier);
@@ -28,7 +28,7 @@ export function startingMoves(rules: Rules, baseMove: number, outOfSupplyTurns: 
   return outOfSupplyTurns === 1 ? Math.max(0, moves + rules.supply.outOfSupply1.moveDelta) : moves;
 }
 
-/** Fase di rifornimento di inizio turno: aggiorna contatori, PM e logoramento della fazione. */
+/** Aggiorna il rifornimento e il logoramento di tutte le unità della fazione all'inizio del turno. */
 export function startOfTurnSupply(state: GameState, data: GameData, side: Side): GameState {
   const network = supplyNetwork(state, data, side);
   const outOfSupply: string[] = [];
@@ -38,7 +38,7 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
 
   const units = state.units.map((u) => {
     if (u.side !== side || !isAlive(u)) return u;
-    // Le unità aeree per ora sono sempre rifornite (gli aeroporti sono rimandati).
+    // Per ora le unità aeree non soffrono di carenza di rifornimento (gli aeroporti arriveranno dopo).
     const type = getUnitType(data, u.typeId);
     const turns = isAirType(type) || isInSupply(network, u) ? 0 : u.outOfSupplyTurns + 1;
     let strength = u.strength;

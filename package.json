@@ -1,7 +1,13 @@
 {
-  "name": "hex-wargame",
+  "name": "Brand Old War",
   "private": true,
   "version": "0.1.0",
+  "description": "A strategic hex-based wargame.",
+  "author": {
+    "name": "Alfredo Tranchedone",
+    "url": "https://github.com/alfredotranchedone"
+  },
+  "license": "AGPL-3.0-only",
   "type": "module",
   "engines": {
     "node": ">=22.12"

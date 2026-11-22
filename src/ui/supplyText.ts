@@ -3,7 +3,7 @@ import type { Unit } from '../core/units';
 
 const mult = (n: number) => `×${String(n).replace('.', ',')}`;
 
-/** Stato di rifornimento con gli effetti in corso. */
+/** Descrive lo stato di rifornimento dell'unità e i malus attuali. */
 export function supplyText(rules: Rules, unit: Unit): string {
   const t = unit.outOfSupplyTurns;
   if (t === 0) return 'Rifornita';

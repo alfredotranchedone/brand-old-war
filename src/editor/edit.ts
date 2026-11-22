@@ -1,11 +1,11 @@
-/** Modifiche pure allo scenario in editor: ognuna restituisce un nuovo documento. */
+/** Funzioni di modifica dello scenario (ognuna crea un nuovo documento immutabile). */
 import type { HexJson, ScenarioJson } from './model';
 
 export const LIMITS = { minSize: 4, maxSize: 60, minTurns: 1, maxTurns: 30 } as const;
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, Math.round(n)));
 
-/** Imposta il terreno di un esagono; il terreno di default non viene scritto nel file. */
+/** Disegna il terreno di un esagono (il terreno di default non viene scritto nel file). */
 export function paintTerrain(doc: ScenarioJson, col: number, row: number, terrain: string): ScenarioJson {
   const i = doc.map.hexes.findIndex((h) => h.col === col && h.row === row);
   const prev: HexJson = i >= 0 ? doc.map.hexes[i]! : { col, row };
@@ -17,7 +17,7 @@ export function paintTerrain(doc: ScenarioJson, col: number, row: number, terrai
   return { ...doc, map: { ...doc.map, hexes } };
 }
 
-/** Cambia le dimensioni; quello che resta fuori mappa viene tolto. */
+/** Ridimensiona la mappa (gli oggetti fuori mappa vengono rimossi). */
 export function resize(doc: ScenarioJson, width: number, height: number): ScenarioJson {
   const w = clamp(width, LIMITS.minSize, LIMITS.maxSize);
   const h = clamp(height, LIMITS.minSize, LIMITS.maxSize);
@@ -30,7 +30,7 @@ export function resize(doc: ScenarioJson, width: number, height: number): Scenar
   };
 }
 
-/** Numero di turni: le condizioni dei turni nuovi copiano l'ultimo turno. */
+/** Imposta il numero di turni (i turni nuovi copiano le condizioni dell'ultimo turno). */
 export function setTurns(doc: ScenarioJson, turns: number): ScenarioJson {
   const max = clamp(turns, LIMITS.minTurns, LIMITS.maxTurns);
   const last = doc.turns.conditions.at(-1) ?? { weather: 'clear', daylight: 'day' };
@@ -48,7 +48,7 @@ export interface UnitDraft {
   entrenched: boolean;
 }
 
-/** Id libero con il prefisso dato: prefisso-1, prefisso-2, … */
+/** Genera un id libero con il prefisso dato (prefisso-1, prefisso-2, …). */
 function freeId(prefix: string, taken: readonly { id: string }[]): string {
   const ids = new Set(taken.map((t) => t.id));
   let n = 1;
@@ -56,7 +56,7 @@ function freeId(prefix: string, taken: readonly { id: string }[]): string {
   return `${prefix}-${n}`;
 }
 
-/** Mette un'unità nell'esagono, sostituendo quella dello stesso posto (terrestre o aereo). */
+/** Posiziona un'unità sull'esagono (sostituisce quella del suo tipo nello stesso posto). */
 export function placeUnit(doc: ScenarioJson, col: number, row: number, d: UnitDraft, isAir: (type: string) => boolean): ScenarioJson {
   const elsewhere = notAt(col, row);
   const others = doc.units.filter((u) => elsewhere(u) || isAir(u.type) !== isAir(d.type));

@@ -4,11 +4,11 @@ import { HEX_SIZE } from './camera';
 import { getSymbolRaster } from './symbols';
 import { MAP_THEME } from './theme';
 
-/** Unità aerea sopra una terrestre: scala e spostamento (in raggi d'esagono) verso l'alto a destra. */
+/** Costanti di disegno della pedina: scala e posizione quando è in stack. */
 const AIR_SCALE = 0.7;
 const AIR_SHIFT = 0.32;
 
-/** Pedina: simbolo, forza in basso a destra, avviso di rifornimento in basso a sinistra. */
+/** Disegna una pedina: simbolo tattico, forza, e avviso di carenza rifornimento. */
 export function drawUnit(
   ctx: CanvasRenderingContext2D,
   unit: Unit,
@@ -26,6 +26,7 @@ export function drawUnit(
   if (dimmed) ctx.globalAlpha = 0.45;
   // Le unità aeree proiettano un'ombra: sono sopra la mappa.
   if (layer.airborne) {
+    // Le unità aeree proiettano un'ombra sotto di loro.
     ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = 5;

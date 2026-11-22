@@ -19,15 +19,15 @@ export interface UiState {
   hovered: Axial | null;
   selectedUnitId: string | null;
   reach: Reach | null;
-  /** Nemici attaccabili dall'unità selezionata. */
+  /** Unità nemiche che l'unità selezionata può attaccare. */
   targets: readonly string[];
-  /** Bersaglio scelto, in attesa di conferma. */
+  /** Anteprima dell'attacco scelto, in attesa di conferma. */
   preview: CombatPreview | null;
   showCoords: boolean;
   showZoc: boolean;
   showSupply: boolean;
   showAnimations: boolean;
-  /** Ultimo turno di cui si è chiuso il riepilogo. */
+  /** Ultimo turno del quale si è visto il riepilogo. */
   summarySeen: number;
   setHovered: (h: Axial | null) => void;
   clickHex: (h: Axial) => void;
@@ -35,7 +35,7 @@ export interface UiState {
   deselect: () => void;
   confirmAttack: () => void;
   cancelTarget: () => void;
-  /** Nell'anteprima, passa all'altro bersaglio nemico dello stesso esagono (terrestre o aereo). */
+  /** Alterna tra bersagli nemici diversi nello stesso esagono (terrestre e aereo). */
   switchTarget: () => void;
   dispatch: (action: Action) => boolean;
   undo: () => void;
@@ -45,7 +45,7 @@ export interface UiState {
   toggleAnimations: () => void;
   endTurn: () => void;
   readonly scenarios: readonly ScenarioEntry[];
-  /** Nuova partita sullo scenario dato (di default quello in corso). */
+  /** Inizia una nuova partita, opzionalmente su uno scenario diverso. */
   restart: (scenarioId?: string) => void;
   selectNextUnit: () => void;
   closeSummary: () => void;

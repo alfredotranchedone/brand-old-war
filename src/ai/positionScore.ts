@@ -25,7 +25,7 @@ export function scoreContext(state: GameState, data: GameData, unit: Unit): Scor
   return { state, data, unit, weights: aiWeights(state, data), supply: supplyNetwork(state, data, unit.side) };
 }
 
-/** Potenza nemica che potrebbe colpire l'unità in `h` nel prossimo turno (stima per distanza). */
+/** Stima della potenza nemica che potrebbe colpire qui, basata su distanza. */
 function exposure(ctx: ScoreContext, h: Axial): number {
   const { state, data, unit } = ctx;
   const placed = { ...unit, pos: h };
@@ -37,7 +37,7 @@ function exposure(ctx: ScoreContext, h: Axial): number {
   return sum;
 }
 
-/** Punteggio di posizione dell'unità del contesto se si trovasse in `h`. */
+/** Calcola il punteggio di una posizione per l'IA: vicinanza agli obiettivi, supporto di alleati, esposizione al fuoco nemico. */
 export function positionScore(ctx: ScoreContext, h: Axial): number {
   const { state, unit, weights: w } = ctx;
   let score = 0;

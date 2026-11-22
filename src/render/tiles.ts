@@ -6,13 +6,13 @@ export function tileUrl(name: string): string | undefined {
   return byName.get(name);
 }
 
-/** Immagini delle tile di terreno, caricate una volta; `onLoad` ridisegna quando arrivano. */
+/** Cache delle immagini di tile caricata all'avvio. */
 export class TileImages {
   private readonly images = new Map<string, HTMLImageElement>();
 
   constructor(private readonly onLoad: () => void) {}
 
-  /** L'immagine pronta, oppure undefined finché non è caricata (o se il nome non esiste). */
+  /** Ritorna l'immagine se è stata caricata, altrimenti la scarica. */
   get(name: string): HTMLImageElement | undefined {
     let img = this.images.get(name);
     if (!img) {

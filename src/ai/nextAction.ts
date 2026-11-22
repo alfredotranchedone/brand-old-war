@@ -6,7 +6,7 @@ import { chooseAdvance, chooseMove } from './moves';
 
 const MAX_ACTIONS = 200;
 
-/** Prossima azione dell'IA per la fazione attiva; `endTurn` quando non resta nulla da fare. */
+/** Sceglie la prossima azione dell'IA: avanzata post-combattimento, fuoco d'artiglieria, attacco, movimento. Se nulla è disponibile, termina il turno. */
 export function nextAiAction(state: GameState, data: GameData): Action {
   const side = state.activeSide;
   return (
@@ -17,7 +17,7 @@ export function nextAiAction(state: GameState, data: GameData): Action {
   );
 }
 
-/** Gioca l'intero turno dell'IA senza animazioni (per simulazioni). */
+/** Esegue l'intero turno dell'IA senza animazioni (usato per test e simulazioni). */
 export function runAiTurn(state: GameState, data: GameData): GameState {
   let s = state;
   for (let i = 0; i < MAX_ACTIONS; i++) {

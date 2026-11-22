@@ -28,7 +28,7 @@ function threatensObjective(state: GameState, target: Unit): boolean {
   return state.map.objectives.some((o) => hexDistance(o.pos, target.pos) <= THREAT_RANGE);
 }
 
-/** Artiglieria: bersaglio con più perdite attese, preferendo chi minaccia un obiettivo. */
+/** L'artiglieria cerca il bersaglio che causa più perdite, con bonus se minaccia un obiettivo. */
 export function chooseArtilleryFire(state: GameState, data: GameData, side: Side): Action | null {
   const list: Candidate[] = [];
   for (const u of liveUnits(state, side)) {
@@ -44,7 +44,7 @@ export function chooseArtilleryFire(state: GameState, data: GameData, side: Side
   return best(list);
 }
 
-/** Unità di manovra: attacchi favorevoli o che riconquistano un obiettivo. */
+/** La fanteria sceglie attacchi favorevoli o che catturano obiettivi. */
 export function chooseAttack(state: GameState, data: GameData, side: Side): Action | null {
   const ratio = data.rules.ai.favorableAttackRatio;
   const list: Candidate[] = [];

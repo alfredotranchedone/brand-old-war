@@ -28,7 +28,7 @@ export interface RenderInput {
   readonly units: readonly Unit[];
   readonly objectives: Readonly<Record<string, Side>>;
   readonly hovered: Axial | null;
-  /** Area evidenziata sotto il cursore al posto del solo esagono (pennello dell'editor). */
+  /** Area del pennello sotto il cursore (usata nell'editor). */
   readonly hoverArea?: readonly Axial[];
   readonly selectedUnitId: string | null;
   readonly reachable: readonly Axial[];
@@ -37,13 +37,13 @@ export interface RenderInput {
   readonly supply: readonly SupplyOverlay[];
   readonly targets: readonly Axial[];
   readonly chosenTarget: Axial | null;
-  /** Unità che danno supporto nell'attacco in anteprima: amiche dell'attaccante e del difensore. */
+  /** Esagoni delle unità che forniscono supporto in combattimento. */
   readonly supportHexes: { readonly attacker: readonly Axial[]; readonly defender: readonly Axial[] };
   readonly advanceHex: Axial | null;
-  /** Unità della fazione attiva che non hanno più azioni disponibili. */
+  /** Esagoni delle unità che non hanno più azioni disponibili questo turno. */
   readonly spent: ReadonlySet<string>;
   readonly showCoords: boolean;
-  /** Bolle AA ed EW da mostrare (unità selezionata o sotto il cursore). */
+  /** Bolle di contraerea e guerra elettronica da disegnare. */
   readonly bubbles?: readonly { readonly kind: 'aa' | 'ew'; readonly hexes: ReadonlySet<HexKey> }[];
 }
 
@@ -109,7 +109,7 @@ export class MapRenderer {
     this.requestDraw();
   }
 
-  /** Anima gli eventi appena accaduti (movimenti e perdite). */
+  /** Accoda gli eventi per l'animazione (movimenti e perdite). */
   animate(events: readonly GameEvent[], moveMs: number): void {
     const units = this.input?.units ?? [];
     this.animations.add(events, (id) => units.find((u) => u.id === id)?.pos, moveMs, performance.now());

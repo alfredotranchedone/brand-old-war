@@ -3,7 +3,7 @@ import { liveUnits } from '../core/game';
 import { askConfirm } from './confirm';
 import { isPlayerTurn, useUiStore } from './store';
 
-/** Fine turno, con conferma se restano unità che possono ancora agire. */
+/** Termina il turno del giocatore, chiedendo conferma se ci sono ancora unità disponibili. */
 export function requestEndTurn(): void {
   const s = useUiStore.getState();
   if (!isPlayerTurn(s.game)) return;

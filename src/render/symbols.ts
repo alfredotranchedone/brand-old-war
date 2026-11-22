@@ -7,15 +7,15 @@ import { type Side, type UnitType, sidcForSide } from '../core/units';
 
 ms.setStandard('APP6');
 
-/** Dimensione del simbolo in unità mondo (parametro `size` di milsymbol a zoom 1). */
+/** Costante di dimensione standard per i simboli tattici APP-6. */
 export const SYMBOL_SIZE = 28;
 
 export interface SymbolRaster {
   readonly canvas: HTMLCanvasElement;
-  /** Punto del raster da far coincidere con il centro dell'esagono (centro della cornice). */
+  /** Centro del raster da allineare col centro dell'esagono. */
   readonly anchorX: number;
   readonly anchorY: number;
-  /** Pixel del raster per unità mondo. */
+  /** Pixel per unità mondo (scala di questo raster). */
   readonly pixelsPerUnit: number;
 }
 
@@ -30,9 +30,9 @@ const OPTIONS = {
 
 const cache = new Map<string, SymbolRaster>();
 
-/** Raster del simbolo per la scala in pixel richiesta (zoom × dpr). */
+/** Genere il raster del simbolo per la scala richiesta (zoom × DPI), con caching per riuso. */
 export function getSymbolRaster(type: UnitType, side: Side, pixelsPerUnit: number): SymbolRaster {
-  // Arrotonda la scala a passi di 0,25 per riusare i raster.
+  // Quantizza la scala a step di 0,25 per massimizzare il riuso.
   const scale = Math.max(0.25, Math.round(pixelsPerUnit * 4) / 4);
   const key = `${type.id}|${side}|${scale}`;
   const hit = cache.get(key);
@@ -46,7 +46,7 @@ export function getSymbolRaster(type: UnitType, side: Side, pixelsPerUnit: numbe
   return raster;
 }
 
-/** Immagine SVG del simbolo (data URL) per i pannelli React. */
+/** Ritorna il data URL SVG del simbolo per l'uso nei pannelli React. */
 export function symbolDataUrl(type: UnitType, side: Side, size = 30): string {
   const svg = new ms.Symbol(sidcForSide(type, side), { ...OPTIONS, size }).asSVG();
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

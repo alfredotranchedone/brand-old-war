@@ -2,7 +2,7 @@ import type { GameData } from './data';
 import { type GameState, groundUnitAt } from './game';
 import type { Side } from './units';
 
-/** Un obiettivo passa alla fazione dell'unità terrestre che lo occupa. */
+/** Passa il controllo degli obiettivi alla fazione dell'unità terrestre che li occupa. */
 export function claimObjectives(state: GameState, data: GameData): GameState {
   let objectives: Record<string, Side> | null = null;
   for (const o of state.map.objectives) {

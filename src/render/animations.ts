@@ -26,7 +26,7 @@ interface LossAnim {
   readonly start: number;
 }
 
-/** Animazioni brevi sopra la mappa: movimento lungo il percorso e perdite sulle pedine. */
+/** Gestisce le animazioni di movimento delle pedine e le onde d'impatto dei supporti. */
 export class Animations {
   private moves: MoveAnim[] = [];
   private losses: LossAnim[] = [];
@@ -76,7 +76,7 @@ export class Animations {
     this.tracers = [];
   }
 
-  /** Traccianti dei supporti: un impulso che corre dall'unità di supporto all'esagono. */
+  /** Disegna le onde di supporto: impulsi che corrono dal supporto al bersaglio. */
   drawTracers(ctx: CanvasRenderingContext2D, now: number): void {
     for (const tr of this.tracers) {
       const t = Math.min(1, (now - tr.start) / TRACER_MS);
@@ -99,7 +99,7 @@ export class Animations {
     }
   }
 
-  /** Posizione animata della pedina, se sta muovendo. */
+  /** Ritorna la posizione animata della pedina se sta muovendo. */
   unitPoint(unitId: string, now: number): Point | null {
     const m = this.moves.find((a) => a.unitId === unitId);
     if (!m || m.points.length < 2) return null;

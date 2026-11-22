@@ -11,7 +11,7 @@ export function drawReachable(ctx: CanvasRenderingContext2D, hexes: readonly Axi
   ctx.fill(p);
 }
 
-/** Lati verso l'esterno di un'area di esagoni. */
+/** Calcola il bordo esterno di un'area di esagoni (tratto continuo dei lati verso l'esterno). */
 export function areaBorder(area: ReadonlySet<HexKey>): Path2D {
   const p = new Path2D();
   for (const key of area) {
@@ -19,7 +19,7 @@ export function areaBorder(area: ReadonlySet<HexKey>): Path2D {
     const corners = hexCorners(h, HEX_SIZE);
     for (let d = 0; d < 6; d++) {
       if (area.has(hexKey(hexNeighbor(h, d)))) continue;
-      // Il lato verso la direzione d unisce i vertici d e d+1.
+      // Il lato d collegad i due vertici d e d+1.
       const a = corners[d]!;
       const b = corners[(d + 1) % 6]!;
       p.moveTo(a.x, a.y);
@@ -29,7 +29,7 @@ export function areaBorder(area: ReadonlySet<HexKey>): Path2D {
   return p;
 }
 
-/** Contorno tratteggiato dell'area coperta dalla ZOC. */
+/** Disegna il bordo tratteggiato della zona di controllo. */
 export function drawZocBorder(ctx: CanvasRenderingContext2D, zoc: ReadonlySet<HexKey>, color: string, scale: number): void {
   if (zoc.size === 0) return;
   ctx.save();
@@ -41,7 +41,7 @@ export function drawZocBorder(ctx: CanvasRenderingContext2D, zoc: ReadonlySet<He
   ctx.restore();
 }
 
-/** Rete di rifornimento: area velata e bordo continuo nel colore della fazione. */
+/** Disegna la rete di rifornimento: area tinta + bordo continuo della fazione. */
 export function drawSupplyNetwork(
   ctx: CanvasRenderingContext2D,
   hexes: ReadonlySet<HexKey>,
@@ -107,7 +107,7 @@ export function drawTargets(ctx: CanvasRenderingContext2D, targets: readonly Axi
   }
 }
 
-/** Contorno tratteggiato sulle unità che danno supporto. */
+/** Disegna il contorno tratteggiato delle unità che forniscono supporto. */
 export function drawSupport(ctx: CanvasRenderingContext2D, hexes: readonly Axial[], color: string): void {
   ctx.save();
   ctx.strokeStyle = color;
@@ -117,7 +117,7 @@ export function drawSupport(ctx: CanvasRenderingContext2D, hexes: readonly Axial
   ctx.restore();
 }
 
-/** Bolla AA o EW: contorno tratteggiato dell'area coperta. */
+/** Disegna la bolla AA o EW: area tinta + bordo continuo dell'area di effetto. */
 export function drawBubble(ctx: CanvasRenderingContext2D, hexes: ReadonlySet<HexKey>, color: string, scale: number): void {
   ctx.save();
   ctx.fillStyle = `${color}1f`;

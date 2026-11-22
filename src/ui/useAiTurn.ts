@@ -5,7 +5,7 @@ import { useUiStore } from './store';
 
 const isAiTurn = (g: GameState) => !g.result && g.activeSide === g.setup.aiSide;
 
-/** Gioca il turno dell'IA un'azione alla volta, con una pausa tra le azioni. */
+/** Esegue il turno dell'IA un'azione per volta, con una pausa tra le azioni per le animazioni. */
 export function useAiTurn(): void {
   useEffect(() => {
     let timer: number | undefined;

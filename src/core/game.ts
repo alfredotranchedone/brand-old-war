@@ -1,4 +1,4 @@
-/** Stato di gioco serializzabile. I dati statici (GameData) si passano a parte. */
+/** Lo stato della partita: unità, turno, controllo degli obiettivi, risultati casuali, eventi. I dati statici (GameData) sono gestiti separatamente. */
 import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
 import { type Axial, hexEquals } from './hex';
@@ -13,7 +13,7 @@ export interface GameResult {
   readonly outcome: 'decisive' | 'marginal' | 'defeat';
 }
 
-/** Impostazioni dello scenario che servono durante la partita. Non cambiano. */
+/** Configurazione dello scenario che è disponibile durante la partita e non cambia. */
 export interface GameSetup {
   readonly scenarioName: string;
   readonly sideNames: Readonly<Record<Side, string>>;
@@ -29,21 +29,21 @@ export interface GameSetup {
 export interface GameState {
   readonly scenarioId: string;
   readonly setup: GameSetup;
-  /** 1..maxTurns */
+  /** Numero del turno di gioco (da 1 a maxTurns). */
   readonly turn: number;
   readonly maxTurns: number;
   readonly activeSide: Side;
   readonly map: MapData;
   readonly units: readonly Unit[];
-  /** Controllo attuale di ogni obiettivo, per id. */
+  /** Quale fazione controlla ogni obiettivo. */
   readonly objectives: Readonly<Record<string, Side>>;
-  /** Step di forza persi in totale da ogni fazione. */
+  /** Perdite totali in punti forza per ogni fazione. */
   readonly stepsLost: Readonly<Record<Side, number>>;
-  /** `stepsLost` all'inizio del turno di gioco, per il riepilogo. */
+  /** Perdite all'inizio del turno (usate nel riepilogo). */
   readonly roundStartLosses: Readonly<Record<Side, number>>;
   readonly rngState: number;
   readonly log: readonly GameEvent[];
-  /** Esagono liberato dopo un combattimento che l'attaccante può occupare. */
+  /** Avanzata in sospeso dopo un combattimento: l'attaccante può occupare questo esagono. */
   readonly pendingAdvance?: { readonly unitId: string; readonly to: Axial };
   readonly result?: GameResult;
 }
@@ -100,7 +100,7 @@ export function isAirUnit(data: GameData, unit: Unit): boolean {
   return isAirType(getUnitType(data, unit.typeId));
 }
 
-/** Unità vive nell'esagono: al massimo una terrestre e una aerea, la terrestre per prima. */
+/** Ritorna tutte le unità vive in questo esagono: al massimo una terrestre e una aerea. */
 export function unitsAt(state: GameState, data: GameData, h: Axial): Unit[] {
   return state.units
     .filter((u) => isAlive(u) && hexEquals(u.pos, h))

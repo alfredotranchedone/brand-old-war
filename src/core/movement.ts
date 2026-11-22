@@ -13,7 +13,7 @@ export interface ReachNode {
   readonly pos: Axial;
   readonly cost: number;
   readonly prev: HexKey | null;
-  /** Si può terminare qui il movimento (esagono libero). */
+  /** True se qui l'unità può terminare il movimento (esagono libero). */
   readonly canStop: boolean;
 }
 
@@ -45,7 +45,7 @@ export function canUnitMove(state: GameState, unit: Unit | undefined): MoveCheck
   return { ok: true };
 }
 
-/** Dijkstra sugli esagoni raggiungibili con i PM residui, nel rispetto di ZOC e impilamento. */
+/** Calcola gli esagoni raggiungibili usando l'algoritmo di Dijkstra, rispettando ZOC e ostacoli. */
 export function computeReach(state: GameState, data: GameData, unitId: string): Reach | null {
   const unit = getUnit(state, unitId);
   if (!unit || !canUnitMove(state, unit).ok) return null;

@@ -56,13 +56,13 @@ export function parseTerrain(raw: unknown): TerrainTable {
 // ---------------------------------------------------------------------------
 
 export interface HexData {
-  /** Chiave in terrain.json. */
+  /** Quale tipo di terreno è in questo esagono. */
   readonly terrain: string;
-  /** Nome di località, solo descrittivo. */
+  /** Nome opzionale della località. */
   readonly label?: string;
 }
 
-/** Lato di un esagono (per i futuri fiumi): esagono e direzione 0..5 (vedi HEX_DIRECTIONS). */
+/** Rappresenta un lato di un esagono (es. per fiumi futuri): esagono, direzione 0..5, e tipo. */
 export interface HexEdge {
   readonly hex: Axial;
   readonly direction: number;
@@ -77,16 +77,16 @@ export interface Objective {
 }
 
 export interface MapData {
-  /** Numero di colonne (offset odd-q). */
+  /** Larghezza della mappa in esagoni (coordinate offset odd-q). */
   readonly width: number;
-  /** Numero di righe (offset odd-q). */
+  /** Altezza della mappa in esagoni (coordinate offset odd-q). */
   readonly height: number;
-  /** Esagoni indicizzati per chiave assiale. Oggetto semplice, così lo stato resta serializzabile. */
+  /** Tutti gli esagoni della mappa, indicizzati per chiave assiale. Usato così rimane serializzabile. */
   readonly hexes: Readonly<Record<HexKey, HexData>>;
-  /** Lati speciali (fiumi). Vuoto nella demo. */
+  /** Lati speciali come fiumi. Vuoto per ora. */
   readonly edges: readonly HexEdge[];
   readonly objectives: readonly Objective[];
-  /** Esagoni sorgente di rifornimento per fazione. */
+  /** Esagoni di origine per i rifornimenti, uno per fazione. */
   readonly supplySources: Readonly<Record<Side, readonly HexKey[]>>;
 }
 

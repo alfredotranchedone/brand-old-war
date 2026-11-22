@@ -13,7 +13,7 @@ export function exertsZoc(data: GameData, unit: Unit): boolean {
   return true;
 }
 
-/** Esagoni sotto la ZOC esercitata dalle unità di `side`. */
+/** Ritorna tutti gli esagoni in cui è esercitata la ZOC dalla fazione data. */
 export function zocOf(state: GameState, data: GameData, side: Side): Set<HexKey> {
   const out = new Set<HexKey>();
   for (const u of state.units) {

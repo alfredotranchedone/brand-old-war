@@ -19,7 +19,7 @@ export function entrenchmentNegated(state: GameState, data: GameData, defender: 
   });
 }
 
-/** P_att = F × A(bersaglio) × M_att */
+/** Potenza d'attacco: forza × attacco vs bersaglio × modificatori. */
 export function attackPower(state: GameState, data: GameData, attacker: Unit, defender: Unit): number {
   const aType = getUnitType(data, attacker.typeId);
   const dType = getUnitType(data, defender.typeId);
@@ -28,7 +28,7 @@ export function attackPower(state: GameState, data: GameData, attacker: Unit, de
   return attacker.strength * aType.attack[dType.targetClass] * mod;
 }
 
-/** Moltiplicatore difensivo del terreno, trincea compresa. */
+/** Moltiplicatore del terreno in difesa, inclusa la trincea se presente. */
 export function terrainDefenseMod(state: GameState, data: GameData, defender: Unit): number {
   if (isAirUnit(data, defender)) return 1;
   const terrain = terrainAt(state.map, data.terrain, defender.pos);
@@ -36,7 +36,7 @@ export function terrainDefenseMod(state: GameState, data: GameData, defender: Un
   return terrain.defenseMod * (entrenched ? terrain.entrenchmentMod : 1);
 }
 
-/** P_dif = F × D × M_terreno × M_dif; `terrainMod` sostituisce quello del terreno (copertura d'artiglieria). */
+/** Potenza difensiva: forza × difesa × effetti del terreno e della trincea. Se `terrainMod` è passato, sostituisce il terreno (es. copertura d'artiglieria). */
 export function defensePower(state: GameState, data: GameData, defender: Unit, terrainMod?: number): number {
   const type = getUnitType(data, defender.typeId);
   const mod = supplyEffects(data.rules, defender).defense;

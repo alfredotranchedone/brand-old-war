@@ -10,17 +10,17 @@ import { type Unit, hasTag } from './units';
 import { isWeak } from './weakness';
 
 export interface SupportSet {
-  /** Unità amiche dell'attaccante adiacenti al bersaglio. */
+  /** Fanteria dell'attaccante adiacente al bersaglio che lo supporta. */
   readonly offensive: readonly Unit[];
-  /** Artiglieria dell'attaccante che copre il bersaglio. */
+  /** Artiglieria dell'attaccante che fornisce fuoco di copertura. */
   readonly artilleryCover: readonly Unit[];
-  /** Unità amiche del difensore adiacenti a lui. */
+  /** Fanteria del difensore adiacente che lo sostiene. */
   readonly defensive: readonly Unit[];
-  /** Artiglieria del difensore che spara sull'attaccante. */
+  /** Artiglieria del difensore che spara in barriera. */
   readonly barrage: readonly Unit[];
 }
 
-/** Rifornita e non logorata. */
+/** Una unità può dare supporto se è rifornita e non è debilitata. */
 function canSupport(data: GameData, u: Unit): boolean {
   return u.outOfSupplyTurns === 0 && !isWeak(data.rules, u);
 }
@@ -31,7 +31,7 @@ const inRange = (data: GameData, u: Unit, target: Unit) => {
   return d >= 1 && d <= getUnitType(data, u.typeId).range;
 };
 
-/** Le migliori `max` unità per potenza, a parità per id (ordine stabile). */
+/** Seleziona fino a `max` unità di miglior potenza, in caso di parità per id (ordine stabile). */
 function best(units: Unit[], power: (u: Unit) => number, max: number): Unit[] {
   return units
     .map((u) => ({ u, p: power(u) }))
@@ -77,18 +77,18 @@ export function findSupport(state: GameState, data: GameData, attacker: Unit, de
 export interface SupportedPowers {
   readonly attack: number;
   readonly defense: number;
-  /** Bonus offensivo dei fianchi (0,30 = +30%). */
+  /** Bonus dai fianchi (es. 0,30 = +30%). */
   readonly offensiveBonus: number;
   readonly defensiveBonus: number;
-  /** Moltiplicatore del terreno prima e dopo la copertura d'artiglieria. */
+  /** Effetto della copertura d'artiglieria prima e dopo. */
   readonly terrainMod: { readonly before: number; readonly after: number };
-  /** Moltiplicatore dello sbarramento sull'attacco (1 = nessuno). */
+  /** Riduzione dell'attacco dallo sbarramento (es. 0,80 = −20%). */
   readonly barrageMod: number;
-  /** Drone osservatore, guerra elettronica, elicotteri al coperto. */
+  /** Effetti aerei: drone osservatore, guerra elettronica, protezione in città. */
   readonly air: AirAttackMods;
 }
 
-/** Potenze di attacco e difesa con i supporti applicati. */
+/** Calcola le potenze di attacco e difesa dopo aver applicato tutti i supporti. */
 export function supportedPowers(state: GameState, data: GameData, attacker: Unit, defender: Unit, set: SupportSet): SupportedPowers {
   const cfg = data.rules.support;
   const offensiveBonus = set.offensive.length * cfg.offensiveAdjacentBonus;

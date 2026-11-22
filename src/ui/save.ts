@@ -16,7 +16,7 @@ export function saveGame(game: GameState): void {
   }
 }
 
-/** Partita salvata, se presente, leggibile e di uno scenario ancora disponibile. */
+/** Carica la partita salvata se è valida e lo scenario è disponibile. */
 export function loadSavedGame(isKnownScenario: (id: string) => boolean): GameState | null {
   try {
     const raw = localStorage.getItem(KEY);

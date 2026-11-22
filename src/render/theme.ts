@@ -1,4 +1,4 @@
-/** Palette della mappa: colori tenui e piatti. I colori NATO saturi restano alle unità. */
+/** Colori della mappa: tonalità tenui e uniformi (i colori NATO saturi restano sui simboli tattici). */
 export const MAP_THEME = {
   background: '#d9dccf',
   terrain: {
@@ -27,7 +27,7 @@ export const MAP_THEME = {
     red: { solid: '#d0262b', tint: 'rgba(208, 38, 43, 0.13)' },
   },
   strengthBox: { stroke: '#22261e' },
-  /** Colore del box forza per fascia: si usa la prima con `max` ≥ forza. */
+  /** Colore del box di forza per ogni fascia (scelto il primo il cui `max` copre la forza attuale). */
   strengthBands: [
     { max: 3, fill: '#d0262b', text: '#ffffff' },
     { max: 6, fill: '#f2c400', text: '#22261e' },

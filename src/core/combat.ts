@@ -24,7 +24,7 @@ export function canAttack(state: GameState, data: GameData, attackerId: string, 
   const type = getUnitType(data, a.typeId);
   if (hasTag(type, 'artillery') && a.hasMoved) return { ok: false, reason: "L'artiglieria ha già mosso" };
   if (type.attack[getUnitType(data, d.typeId).targetClass] <= 0) return { ok: false, reason: 'Non può colpire questo bersaglio' };
-  // Distanza 0: un'unità aerea e una terrestre nello stesso esagono.
+  // Consenti distanza 0 se sono un'unità aerea e una terrestre nello stesso esagono.
   const minDist = isAirUnit(data, a) !== isAirUnit(data, d) ? 0 : 1;
   const dist = hexDistance(a.pos, d.pos);
   if (dist < minDist || dist > type.range) return { ok: false, reason: 'Bersaglio fuori portata' };
@@ -144,7 +144,7 @@ export interface CombatOutcome {
 export function resolveAttack(before: GameState, data: GameData, attackerId: string, targetId: string): CombatOutcome | string {
   const check = canAttack(before, data, attackerId, targetId);
   if (!check.ok) return check.reason;
-  // Fuoco preventivo dell'AA sull'attaccante aereo: se lo distrugge o lo logora, niente attacco.
+  // Se la contraerea colpisce l'attaccante aereo prima dello scontro, l'attacco si annulla.
   const fire = aaFire(before, data, attackerId);
   const state = fire?.state ?? before;
   const pre = fire ? [fire.event] : [];

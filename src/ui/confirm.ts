@@ -5,7 +5,7 @@ interface ConfirmState {
   onYes: (() => void) | null;
 }
 
-/** Conferma dentro l'app: `window.confirm` non è affidabile in tutti i browser incorporati. */
+/** Dialogo di conferma dentro l'app (più affidabile di `window.confirm` su browser incorporati). */
 export const useConfirm = create<ConfirmState>()(() => ({ message: null, onYes: null }));
 
 export function askConfirm(message: string, onYes: () => void): void {
