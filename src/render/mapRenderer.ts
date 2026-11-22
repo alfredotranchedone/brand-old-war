@@ -1,8 +1,10 @@
+import type { GameEvent } from '../core/events';
 import { type Axial, type HexKey, hexCorners, hexKey } from '../core/hex';
 import { type MapData, mapHexes } from '../core/map';
 import { type Side, type Unit, type UnitTypeTable, isAlive } from '../core/units';
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
+import { Animations } from './animations';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
 import { drawAdvance, drawPath, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
@@ -60,6 +62,7 @@ export class MapRenderer {
   private dpr = 1;
   private input: RenderInput | null = null;
   private frame = 0;
+  private readonly animations = new Animations();
 
   private cachedMap: MapData | null = null;
   private terrainPaths = new Map<string, Path2D>();
@@ -88,6 +91,18 @@ export class MapRenderer {
   update(input: RenderInput): void {
     if (input.map !== this.cachedMap) this.rebuildGeometry(input.map);
     this.input = input;
+    this.requestDraw();
+  }
+
+  /** Anima gli eventi appena accaduti (movimenti e perdite). */
+  animate(events: readonly GameEvent[], moveMs: number): void {
+    const units = this.input?.units ?? [];
+    this.animations.add(events, (id) => units.find((u) => u.id === id)?.pos, moveMs, performance.now());
+    this.requestDraw();
+  }
+
+  stopAnimations(): void {
+    this.animations.clear();
     this.requestDraw();
   }
 
@@ -150,6 +165,7 @@ export class MapRenderer {
     if (!input) return;
 
     const s = camera.scale;
+    const now = performance.now();
     ctx.setTransform(
       dpr * s,
       0,
@@ -173,8 +189,10 @@ export class MapRenderer {
 
     for (const u of input.units) {
       const type = input.unitTypes[u.typeId];
-      if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr, input.spent.has(u.id));
+      if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr, input.spent.has(u.id), this.animations.unitPoint(u.id, now));
     }
+    this.animations.drawLosses(ctx, now);
+    if (this.animations.isActive(now)) this.requestDraw();
     if (input.path) drawPath(ctx, input.path.hexes, input.path.cost);
   }
 

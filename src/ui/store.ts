@@ -24,6 +24,7 @@ export interface UiState {
   showCoords: boolean;
   showZoc: boolean;
   showSupply: boolean;
+  showAnimations: boolean;
   setHovered: (h: Axial | null) => void;
   clickHex: (h: Axial) => void;
   select: (unitId: string | null) => void;
@@ -35,6 +36,7 @@ export interface UiState {
   toggleCoords: () => void;
   toggleZoc: () => void;
   toggleSupply: () => void;
+  toggleAnimations: () => void;
   endTurn: () => void;
   restart: () => void;
 }
@@ -44,8 +46,11 @@ const sameHex = (a: Axial | null, b: Axial | null): boolean =>
 
 export function isCommandable(game: GameState, unitId: string | null): boolean {
   const u = unitId ? getUnit(game, unitId) : undefined;
-  // Finché non c'è l'IA si giocano a mano entrambe le fazioni.
-  return !!u && u.side === game.activeSide;
+  return !!u && u.side === game.activeSide && u.side === game.setup.player;
+}
+
+export function isPlayerTurn(game: GameState): boolean {
+  return !game.result && game.activeSide === game.setup.player;
 }
 
 function selectionFor(game: GameState, data: GameData, unitId: string | null) {
@@ -73,6 +78,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   showCoords: false,
   showZoc: false,
   showSupply: false,
+  showAnimations: true,
 
   setHovered: (h) => {
     if (!sameHex(get().hovered, h)) set({ hovered: h });
@@ -120,6 +126,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
       console.warn(result.error);
       return false;
     }
+    if (action.kind === 'endTurn') saveGame(result.state);
     set({
       game: result.state,
       undoStack: recordAction(undoStack, game, action),
@@ -130,6 +137,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
 
   undo: () => {
     const { undoStack, data, selectedUnitId } = get();
+    if (!isPlayerTurn(get().game)) return;
     const popped = popUndo(undoStack);
     if (!popped) return;
     set({ game: popped.state, undoStack: popped.stack, ...selectionFor(popped.state, data, selectedUnitId) });
@@ -138,14 +146,13 @@ export const useUiStore = create<UiState>()((set, get) => ({
   toggleCoords: () => set((s) => ({ showCoords: !s.showCoords })),
   toggleZoc: () => set((s) => ({ showZoc: !s.showZoc })),
   toggleSupply: () => set((s) => ({ showSupply: !s.showSupply })),
+  toggleAnimations: () => set((s) => ({ showAnimations: !s.showAnimations })),
   restart: () => {
     clearSave();
     const game = startGame(scenario, data);
     set({ game, undoStack: [], ...selectionFor(game, data, null) });
   },
   endTurn: () => {
-    if (!get().dispatch({ kind: 'endTurn' })) return;
-    saveGame(get().game);
-    get().deselect();
+    if (isPlayerTurn(get().game) && get().dispatch({ kind: 'endTurn' })) get().deselect();
   },
 }));

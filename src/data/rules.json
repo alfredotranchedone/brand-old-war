@@ -25,7 +25,7 @@
         "objectiveProximity": 1.0,
         "friendlyAdjacent": 0.5,
         "outOfSupplyPenalty": 2.0,
-        "exposurePenalty": 0.05,
+        "exposurePenalty": 0.02,
         "holdObjectiveBonus": 3.0
       }
     }

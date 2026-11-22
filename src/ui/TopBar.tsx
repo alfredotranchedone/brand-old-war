@@ -1,6 +1,6 @@
 import { canUndo } from '../core/history';
 import { SIDE_LABEL } from './labels';
-import { useUiStore } from './store';
+import { isPlayerTurn, useUiStore } from './store';
 import { requestEndTurn } from './requestEndTurn';
 import styles from './App.module.css';
 
@@ -9,7 +9,9 @@ export function TopBar() {
   const maxTurns = useUiStore((s) => s.game.maxTurns);
   const activeSide = useUiStore((s) => s.game.activeSide);
   const scenarioName = useUiStore((s) => s.game.setup.scenarioName);
-  const undoable = useUiStore((s) => canUndo(s.undoStack));
+  const playerTurn = useUiStore((s) => isPlayerTurn(s.game));
+  const aiThinking = useUiStore((s) => !s.game.result && s.game.activeSide === s.game.setup.aiSide);
+  const undoable = useUiStore((s) => canUndo(s.undoStack) && isPlayerTurn(s.game));
   const undo = useUiStore((s) => s.undo);
   const showCoords = useUiStore((s) => s.showCoords);
   const toggleCoords = useUiStore((s) => s.toggleCoords);
@@ -18,6 +20,8 @@ export function TopBar() {
   const showSupply = useUiStore((s) => s.showSupply);
   const toggleSupply = useUiStore((s) => s.toggleSupply);
   const restart = useUiStore((s) => s.restart);
+  const showAnimations = useUiStore((s) => s.showAnimations);
+  const toggleAnimations = useUiStore((s) => s.toggleAnimations);
   const newGame = () => {
     if (window.confirm('Ricominciare da capo? La partita in corso andrà persa.')) restart();
   };
@@ -31,7 +35,12 @@ export function TopBar() {
       <span className={`${styles.sideBadge} ${activeSide === 'blue' ? styles.blue : styles.red}`}>
         {SIDE_LABEL[activeSide]}
       </span>
+      {aiThinking && <span className={styles.muted}>Turno dell'IA…</span>}
       <span className={styles.spacer} />
+      <label className={styles.toggle}>
+        <input type="checkbox" checked={showAnimations} onChange={toggleAnimations} />
+        Animazioni
+      </label>
       <label className={styles.toggle}>
         <input type="checkbox" checked={showSupply} onChange={toggleSupply} />
         Rifornimenti
@@ -50,7 +59,7 @@ export function TopBar() {
       <button type="button" className={styles.button} onClick={undo} disabled={!undoable} title="Annulla (Ctrl+Z)">
         Annulla
       </button>
-      <button type="button" className={`${styles.button} ${styles.primary}`} onClick={requestEndTurn} title="Fine turno (Invio)">
+      <button type="button" className={`${styles.button} ${styles.primary}`} onClick={requestEndTurn} disabled={!playerTurn} title="Fine turno (Invio)">
         Fine turno
       </button>
     </header>

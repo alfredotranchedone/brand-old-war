@@ -6,11 +6,13 @@ import { HexInfo } from './HexInfo';
 import { MapCanvas } from './MapCanvas';
 import { TopBar } from './TopBar';
 import { UnitCard } from './UnitCard';
+import { useAiTurn } from './useAiTurn';
 import { useShortcuts } from './useShortcuts';
 import styles from './App.module.css';
 
 export function App() {
   useShortcuts();
+  useAiTurn();
   return (
     <div className={styles.app}>
       <TopBar />

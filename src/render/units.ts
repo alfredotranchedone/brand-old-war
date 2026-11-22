@@ -1,4 +1,4 @@
-import { hexToPixel } from '../core/hex';
+import { type Point, hexToPixel } from '../core/hex';
 import type { Unit, UnitType } from '../core/units';
 import { HEX_SIZE } from './camera';
 import { getSymbolRaster } from './symbols';
@@ -11,8 +11,9 @@ export function drawUnit(
   type: UnitType,
   pixelsPerUnit: number,
   dimmed: boolean,
+  at?: Point | null,
 ): void {
-  const c = hexToPixel(unit.pos, HEX_SIZE);
+  const c = at ?? hexToPixel(unit.pos, HEX_SIZE);
   ctx.save();
   if (dimmed) ctx.globalAlpha = 0.45;
 

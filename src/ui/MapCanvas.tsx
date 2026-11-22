@@ -28,7 +28,18 @@ export function MapCanvas() {
 
     const renderer = new MapRenderer(canvas);
     const store = useUiStore;
-    const push = () => renderer.update(buildRenderInput(store.getState()));
+    let lastLog = store.getState().game.log;
+    const push = () => {
+      const s = store.getState();
+      renderer.update(buildRenderInput(s));
+      const log = s.game.log;
+      if (log === lastLog) return;
+      // Animo solo eventi nuovi in coda; annulla o nuova partita fermano tutto.
+      const grew = log.length > lastLog.length && log[lastLog.length - 1] === lastLog[lastLog.length - 1];
+      if (grew && s.showAnimations) renderer.animate(log.slice(lastLog.length), s.data.rules.ai.animationMs);
+      else if (!grew) renderer.stopAnimations();
+      lastLog = log;
+    };
     push();
     const unsubscribe = store.subscribe(push);
 
