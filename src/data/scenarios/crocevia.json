@@ -10,7 +10,23 @@
     "hexes": [
       { "col": 5, "row": 3, "label": "Case Rosse" },
       { "col": 7, "row": 10, "label": "Mulino" },
-      { "col": 16, "row": 9, "label": "San Bernardo" }
+      { "col": 16, "row": 9, "label": "San Bernardo" },
+      { "col": 3, "row": 12, "terrain": "dirt" },
+      { "col": 4, "row": 12, "terrain": "dirt" },
+      { "col": 5, "row": 12, "terrain": "dirt" },
+      { "col": 4, "row": 13, "terrain": "dirt" },
+      { "col": 5, "row": 13, "terrain": "dirt" },
+      { "col": 15, "row": 12, "terrain": "shallow_water" },
+      { "col": 16, "row": 11, "terrain": "water" },
+      { "col": 16, "row": 12, "terrain": "water" },
+      { "col": 17, "row": 12, "terrain": "water" },
+      { "col": 16, "row": 13, "terrain": "water" },
+      { "col": 9, "row": 11, "terrain": "forest" },
+      { "col": 10, "row": 11, "terrain": "forest" },
+      { "col": 10, "row": 12, "terrain": "forest" },
+      { "col": 12, "row": 11, "terrain": "hills" },
+      { "col": 13, "row": 11, "terrain": "hills" },
+      { "col": 12, "row": 12, "terrain": "mountain" }
     ],
     "edges": []
   },

@@ -1,7 +1,7 @@
 import type { GameData } from './data';
 import { type GameState, unitAt } from './game';
 import { type Axial, hexDistance, hexKey, hexNeighbors, parseHexKey } from './hex';
-import { isOnMap } from './map';
+import { isPassable } from './map';
 import type { Unit } from './units';
 import { enemyZocOf } from './zoc';
 
@@ -20,7 +20,7 @@ export function findRetreatHex(state: GameState, data: GameData, defender: Unit,
   const current = hexDistance(defender.pos, attacker.pos);
   const candidates = hexNeighbors(defender.pos).filter(
     (h) =>
-      isOnMap(state.map, h) &&
+      isPassable(state.map, data.terrain, h) &&
       !unitAt(state, h) &&
       !zoc.has(hexKey(h)) &&
       hexDistance(h, attacker.pos) > current,

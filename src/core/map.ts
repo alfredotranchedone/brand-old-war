@@ -1,6 +1,5 @@
 /**
  * Mappa, terreno, obiettivi e sorgenti di rifornimento.
- * Nella demo ogni esagono è "clear", ma tutte le regole leggono già il terreno da qui.
  */
 import { type Axial, type HexKey, axialToOffset, hexKey, offsetToAxial } from './hex';
 import type { Mobility, Side } from './units';
@@ -20,6 +19,12 @@ export interface TerrainType {
   /** Moltiplicatore della difesa per chi è trincerato nell'esagono. */
   readonly entrenchmentMod: number;
   readonly blocksLOS: boolean;
+  /** Nessuna unità ci entra (né per movimento, ritirata o avanzata) e i rifornimenti non ci passano. */
+  readonly impassable: boolean;
+  /** Immagine di fondo (nome in src/assets/tiles); senza, il renderer usa un colore piatto. */
+  readonly tile?: string;
+  /** Immagine disegnata sopra il fondo (foreste, colline, montagne): solo grafica. */
+  readonly overlay?: string;
 }
 
 export type TerrainTable = Readonly<Record<string, TerrainType>>;
@@ -39,6 +44,9 @@ export function parseTerrain(raw: unknown): TerrainTable {
       defenseMod: num(o.defenseMod, `${path}.defenseMod`, 0),
       entrenchmentMod: num(o.entrenchmentMod, `${path}.entrenchmentMod`, 0),
       blocksLOS: bool(o.blocksLOS, `${path}.blocksLOS`),
+      impassable: o.impassable === undefined ? false : bool(o.impassable, `${path}.impassable`),
+      ...(o.tile === undefined ? {} : { tile: str(o.tile, `${path}.tile`) }),
+      ...(o.overlay === undefined ? {} : { overlay: str(o.overlay, `${path}.overlay`) }),
     } satisfies TerrainType;
   });
 }
@@ -98,6 +106,11 @@ export function terrainAt(map: MapData, terrain: TerrainTable, h: Axial): Terrai
   const t = terrain[data.terrain];
   if (!t) throw new Error(`Terreno sconosciuto: ${data.terrain}`);
   return t;
+}
+
+/** Sulla mappa e su terreno attraversabile. */
+export function isPassable(map: MapData, terrain: TerrainTable, h: Axial): boolean {
+  return isOnMap(map, h) && !terrainAt(map, terrain, h).impassable;
 }
 
 export function objectiveAt(map: MapData, h: Axial): Objective | undefined {

@@ -2,7 +2,7 @@ import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
 import { type GameState, currentConditions, getUnit, unitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors } from './hex';
-import { isOnMap, terrainAt } from './map';
+import { isPassable, terrainAt } from './map';
 import { type Unit, type UnitType, hasTag, isAlive } from './units';
 import { enemyZocOf } from './zoc';
 
@@ -70,7 +70,7 @@ export function computeReach(state: GameState, data: GameData, unitId: string): 
     if (!isOrigin && zoc.has(key)) continue;
 
     for (const n of hexNeighbors(node.pos)) {
-      if (!isOnMap(state.map, n)) continue;
+      if (!isPassable(state.map, data.terrain, n)) continue;
       const nKey = hexKey(n);
       if (done.has(nKey)) continue;
       const occupant = unitAt(state, n);

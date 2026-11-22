@@ -1,6 +1,6 @@
 import type { GameEvent } from '../core/events';
-import { type Axial, type HexKey, hexCorners, hexKey } from '../core/hex';
-import { type MapData, mapHexes } from '../core/map';
+import { type Axial, type HexKey, hexCorners, hexKey, hexToPixel } from '../core/hex';
+import { type MapData, type TerrainTable, mapHexes } from '../core/map';
 import { type Side, type Unit, type UnitTypeTable, isAlive } from '../core/units';
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
@@ -8,6 +8,7 @@ import { Animations } from './animations';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
 import { drawAdvance, drawPath, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
+import { TileImages } from './tiles';
 import { drawUnit } from './units';
 
 export interface ZocOverlay {
@@ -23,6 +24,7 @@ export interface SupplyOverlay {
 export interface RenderInput {
   readonly map: MapData;
   readonly unitTypes: UnitTypeTable;
+  readonly terrain: TerrainTable;
   readonly units: readonly Unit[];
   readonly objectives: Readonly<Record<string, Side>>;
   readonly hovered: Axial | null;
@@ -63,9 +65,11 @@ export class MapRenderer {
   private input: RenderInput | null = null;
   private frame = 0;
   private readonly animations = new Animations();
+  private readonly tiles = new TileImages(() => this.requestDraw());
 
   private cachedMap: MapData | null = null;
   private terrainPaths = new Map<string, Path2D>();
+  private terrainHexes = new Map<string, Axial[]>();
   private gridPath = new Path2D();
   private bounds: Bounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
 
@@ -141,6 +145,7 @@ export class MapRenderer {
   private rebuildGeometry(map: MapData): void {
     this.cachedMap = map;
     this.terrainPaths = new Map();
+    this.terrainHexes = new Map();
     this.gridPath = new Path2D();
     for (const h of mapHexes(map)) {
       const terrain = map.hexes[hexKey(h)]?.terrain ?? 'clear';
@@ -151,6 +156,9 @@ export class MapRenderer {
       }
       traceHex(path, h);
       traceHex(this.gridPath, h);
+      const list = this.terrainHexes.get(terrain) ?? [];
+      list.push(h);
+      this.terrainHexes.set(terrain, list);
     }
     this.bounds = mapBounds(map);
   }
@@ -175,7 +183,7 @@ export class MapRenderer {
       dpr * (viewport.height / 2 - camera.center.y * s),
     );
 
-    this.drawTerrain(s);
+    this.drawTerrain(input.terrain, s);
     for (const n of input.supply) drawSupplyNetwork(ctx, n.hexes, MAP_THEME.side[n.side], s);
     drawObjectives(ctx, input.map, input.objectives);
     drawReachable(ctx, input.reachable);
@@ -196,7 +204,7 @@ export class MapRenderer {
     if (input.path) drawPath(ctx, input.path.hexes, input.path.cost);
   }
 
-  private drawTerrain(scale: number): void {
+  private drawTerrain(table: TerrainTable, scale: number): void {
     const { ctx } = this;
     // Il tratto spesso sotto i riempimenti resta visibile solo sul bordo esterno.
     ctx.lineJoin = 'round';
@@ -206,6 +214,12 @@ export class MapRenderer {
     for (const [terrain, path] of this.terrainPaths) {
       ctx.fillStyle = MAP_THEME.terrain[terrain] ?? MAP_THEME.terrainFallback;
       ctx.fill(path);
+      const t = table[terrain];
+      const hexes = this.terrainHexes.get(terrain) ?? [];
+      for (const name of [t?.tile, t?.overlay]) {
+        const img = name ? this.tiles.get(name) : undefined;
+        if (img) drawTiles(ctx, img, hexes);
+      }
     }
     ctx.strokeStyle = MAP_THEME.gridLine;
     ctx.lineWidth = 1 / scale;
@@ -229,4 +243,16 @@ export class MapRenderer {
     this.ctx.lineWidth = 3.5;
     this.ctx.stroke(hexPath(selected.pos, 0.9));
   }
+}
+
+/** Tile pixel art ingrandite senza smussatura e adattate al riquadro dell'esagono. */
+function drawTiles(ctx: CanvasRenderingContext2D, img: HTMLImageElement, hexes: readonly Axial[]): void {
+  const w = HEX_SIZE * 2;
+  const h = HEX_SIZE * Math.sqrt(3);
+  ctx.imageSmoothingEnabled = false;
+  for (const hex of hexes) {
+    const c = hexToPixel(hex, HEX_SIZE);
+    ctx.drawImage(img, c.x - w / 2, c.y - h / 2, w, h);
+  }
+  ctx.imageSmoothingEnabled = true;
 }

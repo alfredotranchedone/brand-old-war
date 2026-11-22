@@ -110,6 +110,10 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     return { hex: pos, direction: int(e.direction, `${path}.direction`, 0, 5), type: str(e.type, `${path}.type`) };
   });
 
+  const assertPassable = (pos: Axial, path: string) => {
+    if (data.terrain[hexes[hexKey(pos)]!.terrain]!.impassable) throw new DataError(path, 'esagono su terreno invalicabile');
+  };
+
   // --- Obiettivi -------------------------------------------------------------
   const objectiveIds = new Set<string>();
   const objectiveHexes = new Set<HexKey>();
@@ -123,6 +127,7 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     assertOnMap(size, pos, path);
     if (objectiveHexes.has(hexKey(pos))) throw new DataError(path, 'due obiettivi sullo stesso esagono');
     objectiveHexes.add(hexKey(pos));
+    assertPassable(pos, path);
     return { id, name: str(ob.name, `${path}.name`), pos, points: int(ob.points, `${path}.points`, 0) };
   });
 
@@ -191,6 +196,7 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     if (!data.unitTypes[typeId]) throw new DataError(`${path}.type`, `tipo "${typeId}" non definito in units.json`);
     const pos = readPos(u, path);
     assertOnMap(size, pos, path);
+    assertPassable(pos, path);
     const other = occupied.get(hexKey(pos));
     if (other) throw new DataError(path, `esagono già occupato da "${other}" (una sola unità per esagono)`);
     occupied.set(hexKey(pos), id);

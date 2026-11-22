@@ -1,7 +1,7 @@
 import type { GameData } from './data';
 import { type GameState, currentConditions, unitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors, parseHexKey } from './hex';
-import { isOnMap, terrainAt } from './map';
+import { isPassable, terrainAt } from './map';
 import type { Side, Unit } from './units';
 import { enemyZocOf } from './zoc';
 
@@ -25,6 +25,7 @@ export function supplyNetwork(state: GameState, data: GameData, side: Side): Sup
   const maxCost = data.rules.supply.maxPathCost * (weather?.supplyRangeMod ?? 1);
   const zoc = enemyZocOf(state, data, side);
   const passable = (h: Axial) => {
+    if (!isPassable(state.map, data.terrain, h)) return false;
     const occupant = unitAt(state, h);
     if (occupant) return occupant.side === side;
     return !zoc.has(hexKey(h));
@@ -45,7 +46,7 @@ export function supplyNetwork(state: GameState, data: GameData, side: Side): Sup
     const node = open.splice(best, 1)[0]!;
     if (node.cost > (cost.get(hexKey(node.pos)) ?? Infinity) + EPS) continue;
     for (const n of hexNeighbors(node.pos)) {
-      if (!isOnMap(state.map, n) || !passable(n)) continue;
+      if (!passable(n)) continue;
       const c = node.cost + supplyCost(state, data, n);
       const key = hexKey(n);
       if (c > maxCost + EPS || c >= (cost.get(key) ?? Infinity) - EPS) continue;

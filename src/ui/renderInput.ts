@@ -57,6 +57,7 @@ export function buildRenderInput(s: UiState): RenderInput {
   return {
     map: game.map,
     unitTypes: data.unitTypes,
+    terrain: data.terrain,
     units: game.units,
     objectives: game.objectives,
     hovered,

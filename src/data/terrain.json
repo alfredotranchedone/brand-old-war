@@ -1,9 +1,62 @@
 {
   "clear": {
     "name": "Aperto",
+    "tile": "grass",
     "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
     "defenseMod": 1.0,
     "entrenchmentMod": 1.2,
     "blocksLOS": false
+  },
+  "dirt": {
+    "name": "Terra battuta",
+    "tile": "dirt",
+    "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.0,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": false
+  },
+  "water": {
+    "name": "Acqua",
+    "tile": "water",
+    "impassable": true,
+    "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.0,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": false
+  },
+  "shallow_water": {
+    "name": "Acqua bassa",
+    "tile": "water",
+    "moveCost": { "tracked": 3, "wheeled": 4, "foot": 2 },
+    "defenseMod": 0.8,
+    "entrenchmentMod": 1.0,
+    "blocksLOS": false
+  },
+  "forest": {
+    "name": "Foresta",
+    "tile": "grass",
+    "overlay": "forest",
+    "moveCost": { "tracked": 2, "wheeled": 3, "foot": 2 },
+    "defenseMod": 1.25,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": true
+  },
+  "hills": {
+    "name": "Colline",
+    "tile": "grass",
+    "overlay": "hills",
+    "moveCost": { "tracked": 2, "wheeled": 2, "foot": 2 },
+    "defenseMod": 1.25,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": true
+  },
+  "mountain": {
+    "name": "Montagna",
+    "tile": "grass",
+    "overlay": "mountain",
+    "moveCost": { "tracked": 3, "wheeled": 4, "foot": 3 },
+    "defenseMod": 1.5,
+    "entrenchmentMod": 1.3,
+    "blocksLOS": true
   }
 }
