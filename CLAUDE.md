@@ -1,4 +1,4 @@
-# Hex Wargame — note per Claude Code
+# Brand Old War — note per Claude Code
 
 Specifica: `../docs/Hex Wargame – Specifica Demo v0.1.md` (fasi 1–8 completate). Altre specifiche in `../docs/`: organici delle unità, fuoco di supporto, dominio aereo.
 
