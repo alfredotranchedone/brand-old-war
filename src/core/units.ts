@@ -37,6 +37,16 @@ export interface UnitType {
   /** Portata di avvistamento: usata solo con la futura nebbia di guerra. */
   readonly spotting: number;
   readonly tags: readonly UnitTag[];
+  /** Organico nominale a forza piena: solo informativo, non entra nelle regole. */
+  readonly organic: Organic;
+}
+
+export interface Organic {
+  readonly personnel: number;
+  readonly mainVehicles: number;
+  /** Nome dei mezzi principali nell'interfaccia (es. «Carri armati»). */
+  readonly mainVehiclesLabel: string;
+  readonly supportVehicles: number;
 }
 
 export type UnitTypeTable = Readonly<Record<string, UnitType>>;
@@ -77,6 +87,7 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
     if (sidc.length !== 15) throw new DataError(`${path}.sidc`, 'il SIDC deve avere 15 caratteri');
     const attack = record(o.attack, `${path}.attack`);
     const range = int(o.range, `${path}.range`, 1);
+    const organic = record(o.organic, `${path}.organic`);
     return {
       id,
       name: str(o.name, `${path}.name`),
@@ -92,6 +103,12 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       mobility: oneOf(o.mobility, `${path}.mobility`, MOBILITIES),
       spotting: int(o.spotting, `${path}.spotting`, 1),
       tags: array(o.tags ?? [], `${path}.tags`).map((t, i) => oneOf(t, `${path}.tags[${i}]`, UNIT_TAGS)),
+      organic: {
+        personnel: int(organic.personnel, `${path}.organic.personnel`, 0),
+        mainVehicles: int(organic.mainVehicles, `${path}.organic.mainVehicles`, 0),
+        mainVehiclesLabel: str(organic.mainVehiclesLabel, `${path}.organic.mainVehiclesLabel`),
+        supportVehicles: int(organic.supportVehicles, `${path}.organic.supportVehicles`, 0),
+      },
     } satisfies UnitType;
   });
 }

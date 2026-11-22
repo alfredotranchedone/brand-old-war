@@ -4,11 +4,11 @@ import { CombatPanel } from './CombatPanel';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EndScreen } from './EndScreen';
 import { EventLog } from './EventLog';
-import { HexInfo } from './HexInfo';
 import { MapCanvas } from './MapCanvas';
 import { TopBar } from './TopBar';
 import { TurnSummary } from './TurnSummary';
 import { UnitCard } from './UnitCard';
+import { UnitInspector } from './UnitInspector';
 import { useAiTurn } from './useAiTurn';
 import { useShortcuts } from './useShortcuts';
 import styles from './App.module.css';
@@ -26,7 +26,7 @@ export function App() {
         <UnitCard />
         <AdvanceHint />
         <CombatPanel />
-        <HexInfo />
+        <UnitInspector />
         <EventLog />
       </aside>
       <BottomBar />

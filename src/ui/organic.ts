@@ -1,0 +1,5 @@
+/** Effettivi stimati in proporzione alla forza; mai 0 finché l'unità è operativa. */
+export function effective(nominal: number, strength: number, maxStrength: number): number {
+  if (strength <= 0 || nominal <= 0) return 0;
+  return Math.max(1, Math.round((nominal * strength) / maxStrength));
+}

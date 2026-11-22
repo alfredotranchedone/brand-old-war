@@ -9,7 +9,13 @@
     "targetClass": "armored",
     "mobility": "tracked",
     "spotting": 2,
-    "tags": []
+    "tags": [],
+    "organic": {
+      "personnel": 500,
+      "mainVehicles": 45,
+      "mainVehiclesLabel": "Carri armati",
+      "supportVehicles": 35
+    }
   },
   "mech_inf": {
     "name": "Fanteria meccanizzata",
@@ -21,7 +27,13 @@
     "targetClass": "armored",
     "mobility": "tracked",
     "spotting": 2,
-    "tags": ["infantry"]
+    "tags": ["infantry"],
+    "organic": {
+      "personnel": 650,
+      "mainVehicles": 60,
+      "mainVehiclesLabel": "Veicoli da trasporto/combattimento",
+      "supportVehicles": 40
+    }
   },
   "mot_inf": {
     "name": "Fanteria motorizzata",
@@ -33,7 +45,13 @@
     "targetClass": "unarmored",
     "mobility": "wheeled",
     "spotting": 2,
-    "tags": ["infantry"]
+    "tags": ["infantry"],
+    "organic": {
+      "personnel": 650,
+      "mainVehicles": 60,
+      "mainVehiclesLabel": "Veicoli da trasporto/combattimento",
+      "supportVehicles": 40
+    }
   },
   "recon": {
     "name": "Ricognizione",
@@ -45,7 +63,13 @@
     "targetClass": "armored",
     "mobility": "wheeled",
     "spotting": 4,
-    "tags": ["recon"]
+    "tags": ["recon"],
+    "organic": {
+      "personnel": 350,
+      "mainVehicles": 25,
+      "mainVehiclesLabel": "Autoblindo / veicoli ricognizione",
+      "supportVehicles": 30
+    }
   },
   "sp_artillery": {
     "name": "Artiglieria semovente",
@@ -57,6 +81,12 @@
     "targetClass": "unarmored",
     "mobility": "tracked",
     "spotting": 1,
-    "tags": ["artillery"]
+    "tags": ["artillery"],
+    "organic": {
+      "personnel": 450,
+      "mainVehicles": 18,
+      "mainVehiclesLabel": "Pezzi d'artiglieria",
+      "supportVehicles": 45
+    }
   }
 }

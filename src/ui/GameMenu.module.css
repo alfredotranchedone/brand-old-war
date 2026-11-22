@@ -23,7 +23,7 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 6px;
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.15);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.45);
 }
 
 .menu hr {
@@ -50,7 +50,7 @@
 }
 
 .item:hover:not(:disabled) {
-  background: var(--panel);
+  background: var(--hover);
 }
 
 .item:disabled {

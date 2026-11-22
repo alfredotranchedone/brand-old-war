@@ -1,12 +1,15 @@
 :root {
   --bg: #d9dccf;
-  --panel: #f6f6f1;
-  --card: #ffffff;
-  --border: #d4d6cb;
-  --text: #22261e;
-  --text-muted: #6b7064;
+  --panel: #1d2119;
+  --card: #262b22;
+  --border: #3a4034;
+  --text: #e4e7dc;
+  --text-muted: #9aa092;
+  --hover: #30362b;
+  --warn: #e8b84a;
   --nato-blue: #0068b5;
   --nato-red: #d0262b;
+  color-scheme: dark;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   color: var(--text);
   background: var(--bg);

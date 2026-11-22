@@ -1,11 +1,18 @@
 import { useShallow } from 'zustand/react/shallow';
 import { axialToOffset, hexKey } from '../core/hex';
-import { getHex, objectiveAt } from '../core/map';
+import { type Objective, getHex, objectiveAt } from '../core/map';
 import { SIDE_LABEL } from './labels';
 import { supplyFor } from './renderInput';
-import { isPlayerTurn, useUiStore } from './store';
+import { type UiState, isPlayerTurn, useUiStore } from './store';
 import { requestEndTurn } from './requestEndTurn';
 import styles from './App.module.css';
+
+function placeText(s: UiState, label: string | undefined, objective: Objective | undefined): string {
+  if (!objective) return label ?? '';
+  const owner = SIDE_LABEL[s.game.objectives[objective.id] ?? s.game.setup.defender];
+  const points = `${objective.points} ${objective.points === 1 ? 'punto' : 'punti'}`;
+  return [label, objective.name, points, owner].filter(Boolean).join(' · ');
+}
 
 function useHexFacts() {
   return useUiStore(useShallow((s) => {
@@ -19,7 +26,7 @@ function useHexFacts() {
       coords: `${col}, ${row}`,
       terrain: hexData ? (s.data.terrain[hexData.terrain]?.name ?? '—') : '—',
       supply: supplied.length ? supplied.join(', ') : 'nessuno',
-      place: hexData?.label ?? objectiveAt(s.game.map, h)?.name ?? '',
+      place: placeText(s, hexData?.label, objectiveAt(s.game.map, h)),
     };
   }));
 }
