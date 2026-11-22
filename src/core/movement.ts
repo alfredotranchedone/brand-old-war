@@ -29,7 +29,7 @@ export function enterCost(state: GameState, data: GameData, type: UnitType, h: A
 }
 
 export function ignoresZoc(type: UnitType): boolean {
-  return hasTag(type, 'recon');
+  return hasTag(type, 'recon') || hasTag(type, 'infiltrator');
 }
 
 export type MoveCheck = { readonly ok: true } | { readonly ok: false; readonly reason: string };

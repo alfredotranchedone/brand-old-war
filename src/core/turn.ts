@@ -1,10 +1,10 @@
-import type { GameData } from './data';
+import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
 import { type GameState, createGame } from './game';
 import { objectivesHeld } from './objectives';
 import type { Scenario } from './scenario';
 import { startOfTurnSupply } from './supply';
-import { SIDES, type Side, isAlive, otherSide } from './units';
+import { SIDES, type Side, type Unit, hasTag, isAlive, otherSide } from './units';
 import { computeResult } from './victory';
 
 /** Inizio del turno della fazione attiva: azzera i flag (le reazioni per l'altra fazione) e applica il rifornimento. */
@@ -37,7 +37,8 @@ function turnSummary(state: GameState): GameEvent {
 export function endTurn(state: GameState, data: GameData): { state: GameState; events: readonly GameEvent[] } | string {
   if (state.result) return 'Partita conclusa';
   const side = state.activeSide;
-  const units = state.units.map((u) => (u.side === side && isAlive(u) ? { ...u, entrenched: !u.hasMoved } : u));
+  const digsIn = (u: Unit) => !u.hasMoved || hasTag(getUnitType(data, u.typeId), 'engineer');
+  const units = state.units.map((u) => (u.side === side && isAlive(u) ? { ...u, entrenched: digsIn(u) } : u));
   const closed: GameState = { ...state, units };
   if (side === state.setup.firstSide) {
     const next = startTurn({ ...closed, activeSide: otherSide(side) }, data);

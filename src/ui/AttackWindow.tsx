@@ -1,3 +1,4 @@
+import { entrenchmentNegated, isEntrenchedEffective } from '../core/combatPower';
 import { getUnit } from '../core/game';
 import type { LossRange } from '../core/losses';
 import { useUiStore } from './store';
@@ -15,7 +16,8 @@ const units = (n: number) => `${n} unità`;
 export function AttackWindow() {
   const preview = useUiStore((s) => s.preview);
   const game = useUiStore((s) => s.game);
-  const unitTypes = useUiStore((s) => s.data.unitTypes);
+  const data = useUiStore((s) => s.data);
+  const unitTypes = data.unitTypes;
   const confirm = useUiStore((s) => s.confirmAttack);
   const cancel = useUiStore((s) => s.cancelTarget);
   if (!preview) return null;
@@ -64,6 +66,12 @@ export function AttackWindow() {
           <>
             <dt>Terreno e trincea</dt>
             <dd>{mult(m.terrainMod.before)}</dd>
+          </>
+        )}
+        {isEntrenchedEffective(data, d) && entrenchmentNegated(game, data, d) && (
+          <>
+            <dt>Trincea annullata (genieri)</dt>
+            <dd className={styles.good}>—</dd>
           </>
         )}
         {sup.artilleryCover.length > 0 && m.terrainMod.after !== m.terrainMod.before && (

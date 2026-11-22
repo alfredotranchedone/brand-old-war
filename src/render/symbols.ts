@@ -40,7 +40,7 @@ export function getSymbolRaster(type: UnitType, side: Side, pixelsPerUnit: numbe
 
   const symbol = new ms.Symbol(sidcForSide(type, side), { ...OPTIONS, size: SYMBOL_SIZE * scale });
   const canvas = symbol.asCanvas();
-  const anchor = symbol.getAnchor();
+  const anchor = symbol.getOctagonAnchor();
   const raster: SymbolRaster = { canvas, anchorX: anchor.x, anchorY: anchor.y, pixelsPerUnit: scale };
   cache.set(key, raster);
   return raster;

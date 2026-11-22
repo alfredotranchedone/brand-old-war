@@ -19,8 +19,8 @@ export type Mobility = 'tracked' | 'wheeled' | 'foot';
 export const MOBILITIES: readonly Mobility[] = ['tracked', 'wheeled', 'foot'];
 
 /** Etichette di comportamento: le regole speciali si agganciano qui, non al nome del tipo. */
-export type UnitTag = 'infantry' | 'recon' | 'artillery';
-export const UNIT_TAGS: readonly UnitTag[] = ['infantry', 'recon', 'artillery'];
+export type UnitTag = 'infantry' | 'recon' | 'artillery' | 'infiltrator' | 'engineer';
+export const UNIT_TAGS: readonly UnitTag[] = ['infantry', 'recon', 'artillery', 'infiltrator', 'engineer'];
 
 export interface UnitType {
   readonly id: string;

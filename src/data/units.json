@@ -88,5 +88,77 @@
       "mainVehiclesLabel": "Pezzi d'artiglieria",
       "supportVehicles": 45
     }
+  },
+  "hq": {
+    "name": "Comando (HQ)",
+    "sidc": "SFGPU-----AF---",
+    "move": 5,
+    "attack": { "armored": 2, "unarmored": 3 },
+    "defense": 4,
+    "range": 1,
+    "targetClass": "unarmored",
+    "mobility": "wheeled",
+    "spotting": 2,
+    "tags": [],
+    "organic": {
+      "personnel": 300,
+      "mainVehicles": 20,
+      "mainVehiclesLabel": "Veicoli comando",
+      "supportVehicles": 40
+    }
+  },
+  "special_forces": {
+    "name": "Forze speciali",
+    "sidc": "SFFPG------F---",
+    "move": 4,
+    "attack": { "armored": 3, "unarmored": 7 },
+    "defense": 5,
+    "range": 1,
+    "targetClass": "unarmored",
+    "mobility": "foot",
+    "spotting": 4,
+    "tags": ["infantry", "infiltrator"],
+    "organic": {
+      "personnel": 200,
+      "mainVehicles": 15,
+      "mainVehiclesLabel": "Veicoli leggeri",
+      "supportVehicles": 10
+    }
+  },
+  "paratroopers": {
+    "name": "Paracadutisti",
+    "sidc": "SFGPUCIA---F---",
+    "move": 3,
+    "attack": { "armored": 3, "unarmored": 7 },
+    "defense": 7,
+    "range": 1,
+    "targetClass": "unarmored",
+    "mobility": "foot",
+    "spotting": 2,
+    "tags": ["infantry"],
+    "organic": {
+      "personnel": 550,
+      "mainVehicles": 20,
+      "mainVehiclesLabel": "Veicoli leggeri",
+      "supportVehicles": 15
+    }
+  },
+  "engineers": {
+    "name": "Genieri",
+    "sidc": "SFGPUCE----F---",
+    "move": 4,
+    "attack": { "armored": 4, "unarmored": 6 },
+    "defense": 7,
+    "range": 1,
+    "targetClass": "armored",
+    "mobility": "tracked",
+    "spotting": 2,
+    "tags": ["infantry", "engineer"],
+    "organic": {
+      "personnel": 450,
+      "mainVehicles": 30,
+      "mainVehiclesLabel": "Mezzi del genio",
+      "supportVehicles": 40
+    }
   }
 }
