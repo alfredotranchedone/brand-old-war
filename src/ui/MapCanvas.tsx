@@ -3,6 +3,7 @@
  * il disegno è tutto imperativo in MapRenderer, che si iscrive allo store
  * e ridisegna solo quando cambia qualcosa (niente re-render React per frame).
  */
+import { Minus, Plus } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { isOnMap } from '../core/map';
 import { attachMapInput } from '../render/mapInput';
@@ -14,6 +15,7 @@ import styles from './MapCanvas.module.css';
 export function MapCanvas() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rendererRef = useRef<MapRenderer | null>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -21,6 +23,7 @@ export function MapCanvas() {
     if (!wrap || !canvas) return;
 
     const renderer = new MapRenderer(canvas);
+    rendererRef.current = renderer;
     const store = useUiStore;
     let lastLog = store.getState().game.log;
     const push = () => {
@@ -47,12 +50,28 @@ export function MapCanvas() {
       unsubscribe();
       detach();
       renderer.dispose();
+      rendererRef.current = null;
     };
   }, []);
+
+  const zoom = (step: number) => {
+    const r = rendererRef.current;
+    if (!r) return;
+    const vp = r.currentViewport;
+    r.zoom(step, { x: vp.width / 2, y: vp.height / 2 });
+  };
 
   return (
     <div ref={wrapRef} className={styles.wrap}>
       <canvas ref={canvasRef} className={styles.canvas} />
+      <div className={styles.zoom}>
+        <button type="button" className={styles.zoomButton} onClick={() => zoom(1)} aria-label="Ingrandisci" title="Ingrandisci">
+          <Plus size={18} />
+        </button>
+        <button type="button" className={styles.zoomButton} onClick={() => zoom(-1)} aria-label="Riduci" title="Riduci">
+          <Minus size={18} />
+        </button>
+      </div>
     </div>
   );
 }
