@@ -5,6 +5,7 @@ import { type GameState, addLosses, getUnit, liveUnits } from './game';
 import { type Axial, hexDistance } from './hex';
 import { type LossRange, lossRange, probAtLeast, rollLosses } from './losses';
 import { findRetreatHex } from './retreat';
+import { isWeak } from './weakness';
 import { type Unit, hasTag, isAlive } from './units';
 
 export type Check = { readonly ok: true } | { readonly ok: false; readonly reason: string };
@@ -17,6 +18,7 @@ export function canAttack(state: GameState, data: GameData, attackerId: string, 
   if (a.side !== state.activeSide) return { ok: false, reason: 'Non è il turno di questa fazione' };
   if (d.side === a.side) return { ok: false, reason: 'Bersaglio amico' };
   if (a.hasAttacked) return { ok: false, reason: "L'unità ha già attaccato" };
+  if (isWeak(data.rules, a)) return { ok: false, reason: "Forza troppo bassa per attaccare" };
   const type = getUnitType(data, a.typeId);
   if (hasTag(type, 'artillery') && a.hasMoved) return { ok: false, reason: "L'artiglieria ha già mosso" };
   const dist = hexDistance(a.pos, d.pos);

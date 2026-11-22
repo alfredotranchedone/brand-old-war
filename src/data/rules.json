@@ -1,6 +1,7 @@
 {
   "maxStrength": 10,
-  "entrenchment": { "defenseMultiplier": 1.2, "appliesToTags": ["infantry"] },
+  "weakUnit": { "maxStrength": 1, "moveMultiplier": 0.5 },
+  "entrenchment": { "appliesToTags": ["infantry"] },
   "zoc": { "minStrength": 1, "artilleryZocOnlyIfNotFired": false },
   "combat": {
     "maxLossesK": 4,
@@ -26,7 +27,8 @@
         "friendlyAdjacent": 0.5,
         "outOfSupplyPenalty": 2.0,
         "exposurePenalty": 0.02,
-        "holdObjectiveBonus": 3.0
+        "holdObjectiveBonus": 3.0,
+        "holdEntrenchedBonus": 8.0
       }
     }
   }

@@ -17,6 +17,8 @@ export interface TerrainType {
   readonly moveCost: Readonly<Record<Mobility, number>>;
   /** Moltiplicatore della difesa per chi sta nell'esagono. */
   readonly defenseMod: number;
+  /** Moltiplicatore della difesa per chi è trincerato nell'esagono. */
+  readonly entrenchmentMod: number;
   readonly blocksLOS: boolean;
 }
 
@@ -35,6 +37,7 @@ export function parseTerrain(raw: unknown): TerrainTable {
         foot: num(mc.foot, `${path}.moveCost.foot`, 0),
       },
       defenseMod: num(o.defenseMod, `${path}.defenseMod`, 0),
+      entrenchmentMod: num(o.entrenchmentMod, `${path}.entrenchmentMod`, 0),
       blocksLOS: bool(o.blocksLOS, `${path}.blocksLOS`),
     } satisfies TerrainType;
   });
@@ -77,16 +80,6 @@ export interface MapData {
   readonly objectives: readonly Objective[];
   /** Esagoni sorgente di rifornimento per fazione. */
   readonly supplySources: Readonly<Record<Side, readonly HexKey[]>>;
-}
-
-export function createUniformMap(width: number, height: number, terrain = 'clear'): MapData {
-  const hexes: Record<HexKey, HexData> = {};
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      hexes[hexKey(offsetToAxial({ col, row }))] = { terrain };
-    }
-  }
-  return { width, height, hexes, edges: [], objectives: [], supplySources: { blue: [], red: [] } };
 }
 
 export function isOnMap(map: MapData, h: Axial): boolean {

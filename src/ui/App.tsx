@@ -5,6 +5,7 @@ import { EventLog } from './EventLog';
 import { HexInfo } from './HexInfo';
 import { MapCanvas } from './MapCanvas';
 import { TopBar } from './TopBar';
+import { TurnSummary } from './TurnSummary';
 import { UnitCard } from './UnitCard';
 import { useAiTurn } from './useAiTurn';
 import { useShortcuts } from './useShortcuts';
@@ -26,6 +27,7 @@ export function App() {
         <HexInfo />
         <EventLog />
       </aside>
+      <TurnSummary />
       <EndScreen />
     </div>
   );

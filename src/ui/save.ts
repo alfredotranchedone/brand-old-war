@@ -1,7 +1,7 @@
 import type { GameState } from '../core/game';
 
 const KEY = 'hex-wargame.save';
-const VERSION = 1;
+const VERSION = 2;
 
 interface SaveFile {
   readonly version: number;

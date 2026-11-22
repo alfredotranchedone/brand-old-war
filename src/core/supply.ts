@@ -3,6 +3,7 @@ import { type GameState, addLosses } from './game';
 import type { Rules } from './rules';
 import { isInSupply, supplyNetwork } from './supplyNetwork';
 import { type Side, type Unit, isAlive } from './units';
+import { isWeak } from './weakness';
 
 export interface SupplyEffects {
   readonly attack: number;
@@ -18,11 +19,13 @@ export function supplyEffects(rules: Rules, unit: Unit): SupplyEffects {
   return { attack: 1, defense: 1 };
 }
 
-/** PM a inizio turno in base ai turni consecutivi fuori rifornimento. */
-export function supplyMoves(rules: Rules, baseMove: number, outOfSupplyTurns: number): number {
-  if (outOfSupplyTurns >= 2) return Math.ceil(baseMove * rules.supply.outOfSupply2.moveMultiplier);
-  if (outOfSupplyTurns === 1) return Math.max(0, baseMove + rules.supply.outOfSupply1.moveDelta);
-  return baseMove;
+/** PM a inizio turno: rifornimento e logoramento. I dimezzamenti non si sommano. */
+export function startingMoves(rules: Rules, baseMove: number, outOfSupplyTurns: number, strength: number): number {
+  let mult = 1;
+  if (outOfSupplyTurns >= 2) mult = Math.min(mult, rules.supply.outOfSupply2.moveMultiplier);
+  if (isWeak(rules, { strength })) mult = Math.min(mult, rules.weakUnit.moveMultiplier);
+  const moves = mult < 1 ? Math.ceil(baseMove * mult) : baseMove;
+  return outOfSupplyTurns === 1 ? Math.max(0, moves + rules.supply.outOfSupply1.moveDelta) : moves;
 }
 
 /** Fase di rifornimento di inizio turno: aggiorna contatori, PM e logoramento della fazione. */
@@ -43,7 +46,7 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
       lost += u.strength - strength;
       attrition.push(u.id);
     }
-    const movesLeft = supplyMoves(data.rules, getUnitType(data, u.typeId).move, turns);
+    const movesLeft = startingMoves(data.rules, getUnitType(data, u.typeId).move, turns, strength);
     return { ...u, outOfSupplyTurns: turns, strength, movesLeft };
   });
 

@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { type Action, applyAction } from '../core/actions';
 import { type CombatPreview, attackableTargets, previewCombat } from '../core/combat';
 import type { GameData } from '../core/data';
-import { type GameState, getUnit, unitAt } from '../core/game';
+import type { GameEvent } from '../core/events';
+import { spentUnits } from '../core/availability';
+import { type GameState, getUnit, liveUnits, unitAt } from '../core/game';
 import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
@@ -25,6 +27,8 @@ export interface UiState {
   showZoc: boolean;
   showSupply: boolean;
   showAnimations: boolean;
+  /** Ultimo turno di cui si è chiuso il riepilogo. */
+  summarySeen: number;
   setHovered: (h: Axial | null) => void;
   clickHex: (h: Axial) => void;
   select: (unitId: string | null) => void;
@@ -39,6 +43,8 @@ export interface UiState {
   toggleAnimations: () => void;
   endTurn: () => void;
   restart: () => void;
+  selectNextUnit: () => void;
+  closeSummary: () => void;
 }
 
 const sameHex = (a: Axial | null, b: Axial | null): boolean =>
@@ -47,6 +53,20 @@ const sameHex = (a: Axial | null, b: Axial | null): boolean =>
 export function isCommandable(game: GameState, unitId: string | null): boolean {
   const u = unitId ? getUnit(game, unitId) : undefined;
   return !!u && u.side === game.activeSide && u.side === game.setup.player;
+}
+
+type TurnSummaryEvent = Extract<GameEvent, { kind: 'turnSummary' }>;
+
+export function lastSummary(game: GameState): TurnSummaryEvent | null {
+  for (let i = game.log.length - 1; i >= 0; i--) {
+    const e = game.log[i]!;
+    if (e.kind === 'turnSummary') return e;
+  }
+  return null;
+}
+
+export function lastSummaryTurn(game: GameState): number {
+  return lastSummary(game)?.turn ?? 0;
 }
 
 export function isPlayerTurn(game: GameState): boolean {
@@ -66,9 +86,11 @@ function selectionFor(game: GameState, data: GameData, unitId: string | null) {
 const data = loadGameData();
 const scenario = loadScenario(data, 'crocevia');
 
+const initialGame = loadSavedGame(scenario.id) ?? startGame(scenario, data);
+
 export const useUiStore = create<UiState>()((set, get) => ({
   data,
-  game: loadSavedGame(scenario.id) ?? startGame(scenario, data),
+  game: initialGame,
   undoStack: [],
   hovered: null,
   selectedUnitId: null,
@@ -79,6 +101,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   showZoc: false,
   showSupply: false,
   showAnimations: true,
+  summarySeen: lastSummaryTurn(initialGame),
+  closeSummary: () => set((s) => ({ summarySeen: lastSummaryTurn(s.game) })),
 
   setHovered: (h) => {
     if (!sameHex(get().hovered, h)) set({ hovered: h });
@@ -147,10 +171,22 @@ export const useUiStore = create<UiState>()((set, get) => ({
   toggleZoc: () => set((s) => ({ showZoc: !s.showZoc })),
   toggleSupply: () => set((s) => ({ showSupply: !s.showSupply })),
   toggleAnimations: () => set((s) => ({ showAnimations: !s.showAnimations })),
+  selectNextUnit: () => {
+    const { game, data, selectedUnitId } = get();
+    if (!isPlayerTurn(game)) return;
+    const spent = spentUnits(game, data);
+    const ready = liveUnits(game, game.activeSide)
+      .filter((u) => !spent.has(u.id))
+      .map((u) => u.id)
+      .sort();
+    if (ready.length === 0) return;
+    const next = ready.find((id) => selectedUnitId !== null && id > selectedUnitId) ?? ready[0]!;
+    get().select(next);
+  },
   restart: () => {
     clearSave();
     const game = startGame(scenario, data);
-    set({ game, undoStack: [], ...selectionFor(game, data, null) });
+    set({ game, undoStack: [], summarySeen: 0, ...selectionFor(game, data, null) });
   },
   endTurn: () => {
     if (isPlayerTurn(get().game) && get().dispatch({ kind: 'endTurn' })) get().deselect();

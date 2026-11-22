@@ -23,10 +23,10 @@ export function attackPower(state: GameState, data: GameData, attacker: Unit, de
 /** P_dif = F × D × M_terreno × M_dif */
 export function defensePower(state: GameState, data: GameData, defender: Unit): number {
   const type = getUnitType(data, defender.typeId);
-  const terrain = terrainAt(state.map, data.terrain, defender.pos).defenseMod;
+  const terrain = terrainAt(state.map, data.terrain, defender.pos);
   let mod = supplyEffects(data.rules, defender).defense;
-  if (isEntrenchedEffective(data, defender)) mod *= data.rules.entrenchment.defenseMultiplier;
-  return defender.strength * type.defense * terrain * mod;
+  if (isEntrenchedEffective(data, defender)) mod *= terrain.entrenchmentMod;
+  return defender.strength * type.defense * terrain.defenseMod * mod;
 }
 
 /** Il difensore risponde solo agli attacchi da esagono adiacente. */

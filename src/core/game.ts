@@ -38,6 +38,8 @@ export interface GameState {
   readonly objectives: Readonly<Record<string, Side>>;
   /** Step di forza persi in totale da ogni fazione. */
   readonly stepsLost: Readonly<Record<Side, number>>;
+  /** `stepsLost` all'inizio del turno di gioco, per il riepilogo. */
+  readonly roundStartLosses: Readonly<Record<Side, number>>;
   readonly rngState: number;
   readonly log: readonly GameEvent[];
   /** Esagono liberato dopo un combattimento che l'attaccante può occupare. */
@@ -81,6 +83,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
     units,
     objectives,
     stepsLost: { blue: 0, red: 0 },
+    roundStartLosses: { blue: 0, red: 0 },
     rngState: seedRng(seed),
     log: [{ kind: 'gameStart', turn: 1, scenarioId: scenario.id }],
   };

@@ -5,6 +5,14 @@ import type { Side } from './units';
 export type GameEvent =
   | { readonly kind: 'gameStart'; readonly turn: number; readonly scenarioId: string }
   | { readonly kind: 'gameEnd'; readonly result: GameResult }
+  | {
+      readonly kind: 'turnSummary';
+      readonly turn: number;
+      /** Step persi da ciascuna fazione nel turno. */
+      readonly losses: Readonly<Record<Side, number>>;
+      /** Id degli obiettivi controllati da ciascuna fazione. */
+      readonly objectives: Readonly<Record<Side, readonly string[]>>;
+    }
   | { readonly kind: 'turnStart'; readonly turn: number; readonly side: Side }
   | { readonly kind: 'move'; readonly unitId: string; readonly path: readonly Axial[]; readonly cost: number }
   | {

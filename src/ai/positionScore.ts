@@ -1,4 +1,4 @@
-import { attackPower } from '../core/combatPower';
+import { attackPower, isEntrenchedEffective } from '../core/combatPower';
 import { type GameData, getUnitType } from '../core/data';
 import { type GameState, liveUnits } from '../core/game';
 import { type Axial, hexDistance, hexEquals, hexKey } from '../core/hex';
@@ -46,6 +46,9 @@ export function positionScore(ctx: ScoreContext, h: Axial): number {
   score += w.friendlyAdjacent * friends.length;
   if (!ctx.supply.cost.has(hexKey(h))) score -= w.outOfSupplyPenalty;
   score -= w.exposurePenalty * exposure(ctx, h);
-  if (hexEquals(h, unit.pos) && unit.entrenched && objectiveAt(state.map, h)) score += w.holdObjectiveBonus;
+  if (hexEquals(h, unit.pos)) {
+    if (unit.entrenched && objectiveAt(state.map, h)) score += w.holdObjectiveBonus;
+    if (isEntrenchedEffective(ctx.data, unit)) score += w.holdEntrenchedBonus;
+  }
   return score;
 }

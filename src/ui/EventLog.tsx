@@ -12,7 +12,7 @@ export function EventLog() {
       <h2 className={styles.cardTitle}>Registro</h2>
       <ol className={styles.logList}>
         {entries.map((e, i) => (
-          <li key={entries.length - i} className={e.kind === 'combat' ? styles.logCombat : e.kind === 'turnStart' ? styles.logTurn : undefined}>
+          <li key={entries.length - i} className={e.kind === 'combat' ? styles.logCombat : e.kind === 'turnStart' || e.kind === 'turnSummary' ? styles.logTurn : undefined}>
             {eventText(e, game, data)}
           </li>
         ))}

@@ -24,6 +24,8 @@ export function eventText(e: GameEvent, state: GameState, data: GameData): strin
       const what = r.outcome === 'decisive' ? 'vittoria decisiva' : r.outcome === 'marginal' ? 'vittoria marginale' : 'sconfitta';
       return `Fine partita: ${what} del ${SIDE_LABEL[state.setup.player]}`;
     }
+    case 'turnSummary':
+      return `Fine turno ${e.turn}: perdite ${SIDE_LABEL.blue} ${e.losses.blue}, ${SIDE_LABEL.red} ${e.losses.red} · obiettivi ${SIDE_LABEL.blue} ${e.objectives.blue.length}, ${SIDE_LABEL.red} ${e.objectives.red.length}`;
     case 'turnStart':
       return `Turno ${e.turn} · ${SIDE_LABEL[e.side]}`;
     case 'move':

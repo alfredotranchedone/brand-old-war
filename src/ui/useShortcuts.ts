@@ -13,6 +13,9 @@ export function useShortcuts(): void {
       } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         s.undo();
+      } else if (e.key === ' ' && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        s.selectNextUnit();
       } else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
         e.preventDefault();
         requestEndTurn();

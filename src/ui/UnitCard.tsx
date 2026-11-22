@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { getUnit } from '../core/game';
 import { hasTag } from '../core/units';
+import { isWeak } from '../core/weakness';
 import { symbolDataUrl } from '../render/symbols';
 import { MOBILITY_LABEL, SIDE_LABEL, TARGET_CLASS_LABEL } from './labels';
 import { useUiStore } from './store';
@@ -20,7 +21,13 @@ export function UnitCard() {
   const max = data.rules.maxStrength;
   const canEntrench = data.rules.entrenchment.appliesToTags.some((t) => hasTag(type, t));
   const role = unit.side === setup.player ? 'giocatore' : 'IA';
-  const status = unit.hasAttacked ? 'Ha attaccato' : unit.hasMoved ? 'Ha mosso' : 'Pronta';
+  const status = unit.hasAttacked
+    ? 'Ha attaccato'
+    : unit.hasMoved
+      ? 'Ha mosso'
+      : isWeak(data.rules, unit)
+        ? 'Logorata: non può attaccare, PM dimezzati'
+        : 'Pronta';
 
   return (
     <section className={styles.card}>

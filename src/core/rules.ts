@@ -10,12 +10,16 @@ export interface AiWeights {
   readonly outOfSupplyPenalty: number;
   readonly exposurePenalty: number;
   readonly holdObjectiveBonus: number;
+  /** Bonus per restare fermi in trincea (fanteria). */
+  readonly holdEntrenchedBonus: number;
 }
 
 export interface Rules {
   readonly maxStrength: number;
+  /** Unità logorate: non attaccano e muovono meno. */
+  readonly weakUnit: { readonly maxStrength: number; readonly moveMultiplier: number };
+  /** Tipi di unità che si trincerano; il moltiplicatore dipende dal terreno. */
   readonly entrenchment: {
-    readonly defenseMultiplier: number;
     readonly appliesToTags: readonly UnitTag[];
   };
   readonly zoc: {
@@ -55,6 +59,7 @@ export function parseRules(raw: unknown): Rules {
   const ent = record(o.entrenchment, `${p}.entrenchment`);
   const zoc = record(o.zoc, `${p}.zoc`);
   const c = record(o.combat, `${p}.combat`);
+  const weak = record(o.weakUnit, `${p}.weakUnit`);
   const s = record(o.supply, `${p}.supply`);
   const s1 = record(s.outOfSupply1, `${p}.supply.outOfSupply1`);
   const s2 = record(s.outOfSupply2, `${p}.supply.outOfSupply2`);
@@ -78,13 +83,17 @@ export function parseRules(raw: unknown): Rules {
       outOfSupplyPenalty: num(wo.outOfSupplyPenalty, `${wp}.outOfSupplyPenalty`),
       exposurePenalty: num(wo.exposurePenalty, `${wp}.exposurePenalty`),
       holdObjectiveBonus: num(wo.holdObjectiveBonus, `${wp}.holdObjectiveBonus`),
+      holdEntrenchedBonus: num(wo.holdEntrenchedBonus, `${wp}.holdEntrenchedBonus`),
     };
   }
 
   return {
     maxStrength: int(o.maxStrength, `${p}.maxStrength`, 1),
+    weakUnit: {
+      maxStrength: int(weak.maxStrength, `${p}.weakUnit.maxStrength`, 0),
+      moveMultiplier: num(weak.moveMultiplier, `${p}.weakUnit.moveMultiplier`, 0),
+    },
     entrenchment: {
-      defenseMultiplier: num(ent.defenseMultiplier, `${p}.entrenchment.defenseMultiplier`, 0),
       appliesToTags: array(ent.appliesToTags, `${p}.entrenchment.appliesToTags`).map((t, i) =>
         oneOf(t, `${p}.entrenchment.appliesToTags[${i}]`, UNIT_TAGS),
       ),

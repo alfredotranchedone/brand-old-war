@@ -1,4 +1,6 @@
 import { canUndo } from '../core/history';
+import { SIDES } from '../core/units';
+import { victoryPoints } from '../core/victory';
 import { SIDE_LABEL } from './labels';
 import { isPlayerTurn, useUiStore } from './store';
 import { requestEndTurn } from './requestEndTurn';
@@ -9,6 +11,7 @@ export function TopBar() {
   const maxTurns = useUiStore((s) => s.game.maxTurns);
   const activeSide = useUiStore((s) => s.game.activeSide);
   const scenarioName = useUiStore((s) => s.game.setup.scenarioName);
+  const points = useUiStore((s) => SIDES.map((side) => `${SIDE_LABEL[side]} ${victoryPoints(s.game, s.data, side)}`).join(' · '));
   const playerTurn = useUiStore((s) => isPlayerTurn(s.game));
   const aiThinking = useUiStore((s) => !s.game.result && s.game.activeSide === s.game.setup.aiSide);
   const undoable = useUiStore((s) => canUndo(s.undoStack) && isPlayerTurn(s.game));
@@ -34,6 +37,9 @@ export function TopBar() {
       </span>
       <span className={`${styles.sideBadge} ${activeSide === 'blue' ? styles.blue : styles.red}`}>
         {SIDE_LABEL[activeSide]}
+      </span>
+      <span className={styles.muted} title="Punti vittoria: obiettivi + 1 ogni 5 step nemici distrutti">
+        Punti: {points}
       </span>
       {aiThinking && <span className={styles.muted}>Turno dell'IA…</span>}
       <span className={styles.spacer} />
