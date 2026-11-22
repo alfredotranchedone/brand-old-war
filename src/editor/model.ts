@@ -1,5 +1,5 @@
 /**
- * Scenario in modifica: stessa forma del file JSON in src/data/scenarios,
+ * Scenario in modifica: stessa forma del file JSON in src/scenarios,
  * così l'esportazione è una semplice serializzazione.
  */
 import { type HexKey, hexKey, offsetToAxial } from '../core/hex';

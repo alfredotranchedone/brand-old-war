@@ -1,5 +1,5 @@
 /**
- * Caricamento e validazione di uno scenario (scenarios/*.json).
+ * Caricamento e validazione di uno scenario (src/scenarios/*.json).
  * Nei file le posizioni sono in offset odd-q (col, row); qui diventano assiali.
  */
 import type { GameData } from './data';

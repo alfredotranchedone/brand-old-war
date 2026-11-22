@@ -13,9 +13,9 @@ export function loadGameData(): GameData {
   return parseGameData({ units: unitsJson, terrain: terrainJson, weather: weatherJson, rules: rulesJson });
 }
 
-/** Tutti i file in scenarios/, per id (nome del file senza .json). Basta aggiungere un file per renderlo giocabile. */
+/** Tutti i file in src/scenarios/, per id (nome del file senza .json). Basta aggiungere un file per renderlo giocabile. */
 const scenarioFiles: Record<string, unknown> = Object.fromEntries(
-  Object.entries(import.meta.glob<unknown>('./scenarios/*.json', { eager: true, import: 'default' })).map(([path, json]) => [
+  Object.entries(import.meta.glob<unknown>('../scenarios/*.json', { eager: true, import: 'default' })).map(([path, json]) => [
     path.replace(/^.*\/(.+)\.json$/, '$1'),
     json,
   ]),

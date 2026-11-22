@@ -7,7 +7,7 @@ import app from '../ui/App.module.css';
 import styles from './Editor.module.css';
 
 /** Scenari già presenti nel gioco, da aprire come punto di partenza. */
-const existing = import.meta.glob<unknown>('../data/scenarios/*.json', { eager: true, import: 'default' });
+const existing = import.meta.glob<unknown>('../scenarios/*.json', { eager: true, import: 'default' });
 const existingNames = Object.keys(existing).map((p) => p.replace(/^.*\/(.+)\.json$/, '$1'));
 
 function SideSelect({ value, onChange }: { value: Side; onChange: (s: Side) => void }) {
@@ -129,7 +129,7 @@ export function FilePanel() {
       </div>
       <label className={`${styles.field} ${styles.spaced}`}>
         Apri uno scenario del gioco
-        <select value="" onChange={(e) => e.target.value && open(existing[`../data/scenarios/${e.target.value}.json`])}>
+        <select value="" onChange={(e) => e.target.value && open(existing[`../scenarios/${e.target.value}.json`])}>
           <option value="">—</option>
           {existingNames.map((n) => (
             <option key={n} value={n}>
@@ -139,7 +139,7 @@ export function FilePanel() {
         </select>
       </label>
       {error && <p className={styles.error}>{error}</p>}
-      <p className={app.hint}>Il file esportato va messo in src/data/scenarios.</p>
+      <p className={app.hint}>Il file esportato va messo in src/scenarios.</p>
     </section>
   );
 }
