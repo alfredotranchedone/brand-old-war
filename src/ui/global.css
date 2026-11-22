@@ -1,0 +1,27 @@
+:root {
+  --bg: #d9dccf;
+  --panel: #f6f6f1;
+  --card: #ffffff;
+  --border: #d4d6cb;
+  --text: #22261e;
+  --text-muted: #6b7064;
+  --nato-blue: #0068b5;
+  --nato-red: #d0262b;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
