@@ -36,12 +36,13 @@ export function drawUnit(
 function drawStrength(ctx: CanvasRenderingContext2D, strength: number, x: number, y: number): void {
   const w = 13;
   const h = 11;
-  ctx.fillStyle = MAP_THEME.strengthBox.fill;
+  const band = MAP_THEME.strengthBands.find((b) => strength <= b.max) ?? MAP_THEME.strengthBands[0]!;
+  ctx.fillStyle = band.fill;
   ctx.strokeStyle = MAP_THEME.strengthBox.stroke;
   ctx.lineWidth = 1;
   ctx.fillRect(x, y, w, h);
   ctx.strokeRect(x, y, w, h);
-  ctx.fillStyle = MAP_THEME.strengthBox.text;
+  ctx.fillStyle = band.text;
   ctx.font = `bold 9px ${MAP_THEME.font}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';

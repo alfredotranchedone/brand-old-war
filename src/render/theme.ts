@@ -24,7 +24,13 @@ export const MAP_THEME = {
     blue: { solid: '#0068b5', tint: 'rgba(0, 104, 181, 0.13)' },
     red: { solid: '#d0262b', tint: 'rgba(208, 38, 43, 0.13)' },
   },
-  strengthBox: { fill: '#ffffff', stroke: '#22261e', text: '#22261e' },
+  strengthBox: { stroke: '#22261e' },
+  /** Colore del box forza per fascia: si usa la prima con `max` ≥ forza. */
+  strengthBands: [
+    { max: 3, fill: '#d0262b', text: '#ffffff' },
+    { max: 6, fill: '#f2c400', text: '#22261e' },
+    { max: Infinity, fill: '#2e9e4f', text: '#ffffff' },
+  ],
   warning: { fill: '#f2b705', stroke: '#5a4300', text: '#22261e' },
   font: '"Inter", "Helvetica Neue", Arial, sans-serif',
 } as const;
