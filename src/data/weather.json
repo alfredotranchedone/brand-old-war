@@ -1,0 +1,9 @@
+{
+  "clear": {
+    "name": "Sereno",
+    "spottingMod": 1.0,
+    "moveCostMod": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "supplyRangeMod": 1.0,
+    "artilleryMod": 1.0
+  }
+}

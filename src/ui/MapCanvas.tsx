@@ -29,7 +29,15 @@ export function MapCanvas() {
     const store = useUiStore;
     const push = () => {
       const s = store.getState();
-      renderer.update({ map: s.map, hovered: s.hovered, showCoords: s.showCoords });
+      renderer.update({
+        map: s.game.map,
+        unitTypes: s.data.unitTypes,
+        units: s.game.units,
+        objectives: s.game.objectives,
+        hovered: s.hovered,
+        selectedUnitId: s.selectedUnitId,
+        showCoords: s.showCoords,
+      });
     };
     push();
     const unsubscribe = store.subscribe(push);
@@ -69,7 +77,7 @@ export function MapCanvas() {
     const updateHover = (p: { x: number; y: number }) => {
       const world = renderer.camera.screenToWorld(p, renderer.currentViewport);
       const h = pixelToHex(world, HEX_SIZE);
-      store.getState().setHovered(isOnMap(store.getState().map, h) ? h : null);
+      store.getState().setHovered(isOnMap(store.getState().game.map, h) ? h : null);
     };
 
     let drag: { id: number; last: { x: number; y: number }; start: { x: number; y: number }; active: boolean } | null =
@@ -101,8 +109,14 @@ export function MapCanvas() {
 
     const endDrag = (e: PointerEvent) => {
       if (!drag || drag.id !== e.pointerId) return;
-      // Dalla Fase 2: se non è stato un trascinamento, qui si gestisce il clic sull'esagono.
+      const wasClick = !drag.active && e.type === 'pointerup' && e.button === 0;
       drag = null;
+      if (wasClick) {
+        const world = renderer.camera.screenToWorld(localPoint(e), renderer.currentViewport);
+        const h = pixelToHex(world, HEX_SIZE);
+        if (isOnMap(store.getState().game.map, h)) store.getState().clickHex(h);
+        else store.getState().deselect();
+      }
       canvas.style.cursor = '';
       if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     };

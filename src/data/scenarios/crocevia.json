@@ -1,0 +1,55 @@
+{
+  "id": "crocevia",
+  "name": "Crocevia",
+  "description": "Anni '80, fazioni fittizie. Il Blu attacca da ovest per conquistare un nodo stradale tenuto dal Rosso, che difende in inferiorità numerica.",
+  "seed": 1980,
+  "map": {
+    "width": 20,
+    "height": 14,
+    "defaultTerrain": "clear",
+    "hexes": [
+      { "col": 5, "row": 3, "label": "Case Rosse" },
+      { "col": 7, "row": 10, "label": "Mulino" },
+      { "col": 16, "row": 9, "label": "San Bernardo" }
+    ],
+    "edges": []
+  },
+  "objectives": [
+    { "id": "ponte_vecchio", "name": "Ponte Vecchio", "col": 9, "row": 7, "points": 2 },
+    { "id": "crocevia", "name": "Crocevia", "col": 12, "row": 6, "points": 3 },
+    { "id": "altura_214", "name": "Altura 214", "col": 14, "row": 4, "points": 1 }
+  ],
+  "defender": "red",
+  "supplySources": {
+    "blue": { "edges": ["west"], "hexes": [] },
+    "red": { "edges": ["east"], "hexes": [] }
+  },
+  "turns": {
+    "max": 5,
+    "firstSide": "blue",
+    "conditions": [
+      { "weather": "clear", "daylight": "day" },
+      { "weather": "clear", "daylight": "day" },
+      { "weather": "clear", "daylight": "day" },
+      { "weather": "clear", "daylight": "day" },
+      { "weather": "clear", "daylight": "day" }
+    ]
+  },
+  "player": "blue",
+  "ai": { "side": "red", "posture": "defend" },
+  "victory": { "decisive": "allObjectives", "marginal": "morePoints" },
+  "units": [
+    { "id": "b-armor-1", "type": "armor", "side": "blue", "col": 3, "row": 6, "strength": 10 },
+    { "id": "b-armor-2", "type": "armor", "side": "blue", "col": 3, "row": 8, "strength": 10 },
+    { "id": "b-mech-1", "type": "mech_inf", "side": "blue", "col": 2, "row": 5, "strength": 10 },
+    { "id": "b-mech-2", "type": "mech_inf", "side": "blue", "col": 2, "row": 8, "strength": 10 },
+    { "id": "b-art-1", "type": "sp_artillery", "side": "blue", "col": 1, "row": 7, "strength": 10 },
+    { "id": "b-recon-1", "type": "recon", "side": "blue", "col": 3, "row": 4, "strength": 10 },
+
+    { "id": "r-mech-1", "type": "mech_inf", "side": "red", "col": 10, "row": 7, "strength": 10, "entrenched": true },
+    { "id": "r-mech-2", "type": "mech_inf", "side": "red", "col": 12, "row": 6, "strength": 10, "entrenched": true },
+    { "id": "r-mot-1", "type": "mot_inf", "side": "red", "col": 11, "row": 4, "strength": 8, "entrenched": true },
+    { "id": "r-armor-1", "type": "armor", "side": "red", "col": 13, "row": 7, "strength": 10, "entrenched": true },
+    { "id": "r-art-1", "type": "sp_artillery", "side": "red", "col": 14, "row": 4, "strength": 10, "entrenched": true }
+  ]
+}

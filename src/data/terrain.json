@@ -1,0 +1,8 @@
+{
+  "clear": {
+    "name": "Aperto",
+    "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.0,
+    "blocksLOS": false
+  }
+}

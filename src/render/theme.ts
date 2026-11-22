@@ -1,7 +1,6 @@
 /** Palette della mappa: colori tenui e piatti. I colori NATO saturi restano alle unità. */
 export const MAP_THEME = {
   background: '#d9dccf',
-  offMap: '#c9ccbf',
   terrain: {
     clear: '#eef0e4',
   } as Record<string, string>,
@@ -10,6 +9,15 @@ export const MAP_THEME = {
   mapBorder: 'rgba(60, 70, 50, 0.7)',
   hoverFill: 'rgba(255, 255, 255, 0.55)',
   hoverStroke: '#2f3a28',
+  selectedStroke: '#e8a400',
   coordText: 'rgba(60, 70, 50, 0.55)',
+  labelText: '#3d4434',
+  labelHalo: 'rgba(238, 240, 228, 0.9)',
+  side: {
+    blue: { solid: '#0068b5', tint: 'rgba(0, 104, 181, 0.13)' },
+    red: { solid: '#d0262b', tint: 'rgba(208, 38, 43, 0.13)' },
+  },
+  strengthBox: { fill: '#ffffff', stroke: '#22261e', text: '#22261e' },
+  warning: { fill: '#f2b705', stroke: '#5a4300', text: '#22261e' },
   font: '"Inter", "Helvetica Neue", Arial, sans-serif',
 } as const;

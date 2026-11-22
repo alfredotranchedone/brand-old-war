@@ -1,0 +1,62 @@
+{
+  "armor": {
+    "name": "Corazzati",
+    "sidc": "SFGPUCA----F---",
+    "move": 6,
+    "attack": { "armored": 10, "unarmored": 7 },
+    "defense": 9,
+    "range": 1,
+    "targetClass": "armored",
+    "mobility": "tracked",
+    "spotting": 2,
+    "tags": []
+  },
+  "mech_inf": {
+    "name": "Fanteria meccanizzata",
+    "sidc": "SFGPUCII---F---",
+    "move": 5,
+    "attack": { "armored": 6, "unarmored": 8 },
+    "defense": 8,
+    "range": 1,
+    "targetClass": "armored",
+    "mobility": "tracked",
+    "spotting": 2,
+    "tags": ["infantry"]
+  },
+  "mot_inf": {
+    "name": "Fanteria motorizzata",
+    "sidc": "SFGPUCIM---F---",
+    "move": 4,
+    "attack": { "armored": 3, "unarmored": 7 },
+    "defense": 7,
+    "range": 1,
+    "targetClass": "unarmored",
+    "mobility": "wheeled",
+    "spotting": 2,
+    "tags": ["infantry"]
+  },
+  "recon": {
+    "name": "Ricognizione",
+    "sidc": "SFGPUCR----F---",
+    "move": 8,
+    "attack": { "armored": 4, "unarmored": 5 },
+    "defense": 4,
+    "range": 1,
+    "targetClass": "armored",
+    "mobility": "wheeled",
+    "spotting": 4,
+    "tags": ["recon"]
+  },
+  "sp_artillery": {
+    "name": "Artiglieria semovente",
+    "sidc": "SFGPUCFHE--F---",
+    "move": 4,
+    "attack": { "armored": 3, "unarmored": 9 },
+    "defense": 3,
+    "range": 3,
+    "targetClass": "unarmored",
+    "mobility": "tracked",
+    "spotting": 1,
+    "tags": ["artillery"]
+  }
+}

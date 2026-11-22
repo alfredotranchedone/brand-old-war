@@ -87,3 +87,80 @@
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
+
+.turn {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+
+.sideBadge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.blue {
+  background: var(--nato-blue);
+}
+
+.red {
+  background: var(--nato-red);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unitHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.unitSymbol {
+  width: 52px;
+  height: auto;
+  flex: none;
+}
+
+.unitName {
+  font-weight: 600;
+}
+
+.strength {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.stepOn,
+.stepOff {
+  flex: 1;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.stepOn {
+  background: var(--text);
+}
+
+.stepOff {
+  background: var(--border);
+}
+
+.subTitle {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.warn {
+  color: #9a6b00;
+  font-weight: 600;
+}

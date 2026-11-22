@@ -1,0 +1,33 @@
+{
+  "maxStrength": 10,
+  "entrenchment": { "defenseMultiplier": 1.2, "appliesToTags": ["infantry"] },
+  "zoc": { "minStrength": 1, "artilleryZocOnlyIfNotFired": false },
+  "combat": {
+    "maxLossesK": 4,
+    "variationMin": 0.85,
+    "variationMax": 1.15,
+    "retreatMinRatio": 2,
+    "retreatMinLosses": 2,
+    "noRetreatExtraLoss": 1
+  },
+  "supply": {
+    "maxPathCost": 8,
+    "outOfSupply1": { "attackMultiplier": 0.5, "moveDelta": -1 },
+    "outOfSupply2": { "attackMultiplier": 0.5, "defenseMultiplier": 0.75, "moveMultiplier": 0.5, "strengthLossPerTurn": 1 }
+  },
+  "victory": { "enemyStepsPerPoint": 5 },
+  "ai": {
+    "turnTimeLimitMs": 1000,
+    "animationMs": 300,
+    "favorableAttackRatio": 1.5,
+    "postures": {
+      "defend": {
+        "objectiveProximity": 1.0,
+        "friendlyAdjacent": 0.5,
+        "outOfSupplyPenalty": 2.0,
+        "exposurePenalty": 0.05,
+        "holdObjectiveBonus": 3.0
+      }
+    }
+  }
+}
