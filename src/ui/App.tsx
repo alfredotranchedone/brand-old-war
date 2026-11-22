@@ -23,10 +23,10 @@ export function App() {
         <MapCanvas />
       </main>
       <aside className={styles.side}>
+        <UnitInspector />
         <UnitCard />
         <AdvanceHint />
         <CombatPanel />
-        <UnitInspector />
         <EventLog />
       </aside>
       <BottomBar />
