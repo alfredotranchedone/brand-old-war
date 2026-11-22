@@ -5,7 +5,9 @@
 .trigger {
   font: inherit;
   font-size: 13px;
-  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--card);

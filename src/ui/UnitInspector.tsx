@@ -8,12 +8,12 @@ import { useUiStore } from './store';
 import { supplyText } from './supplyText';
 import styles from './App.module.css';
 
-/** Ispezione delle unità sotto il cursore (terrestre e aerea): organico stimato e rifornimento. */
+/** Dettaglio delle unità sotto il cursore (terrestre e aerea) */
 export function UnitInspector() {
   const units = useUiStore(useShallow((s) => (s.hovered ? unitsAt(s.game, s.data, s.hovered) : [])));
   return (
     <section className={styles.card}>
-      <h2 className={styles.cardTitle}>Ispezione</h2>
+      <h2 className={styles.cardTitle}>Inspect</h2>
       {units.length === 0 && <p className={styles.muted}>Passa il mouse su un'unità.</p>}
       {units.map((u) => (
         <UnitDetails key={u.id} unit={u} />

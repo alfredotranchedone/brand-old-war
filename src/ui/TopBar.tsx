@@ -1,6 +1,7 @@
 import { SIDES } from '../core/units';
 import { victoryPoints } from '../core/victory';
 import { GameMenu } from './GameMenu';
+import { ManualLink } from './ManualLink';
 import { useUiStore } from './store';
 import styles from './App.module.css';
 
@@ -27,6 +28,7 @@ export function TopBar() {
       </span>
       {aiThinking && <span className={styles.muted}>Turno dell'IA…</span>}
       <span className={styles.spacer} />
+      <ManualLink />
       <GameMenu />
     </header>
   );

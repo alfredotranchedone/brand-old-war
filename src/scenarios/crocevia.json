@@ -18,7 +18,7 @@
       "......f..v.......ff.",
       ".........h..........",
       ".....ff.........cs.s",
-      "....ff.........sswsf",
+      "....ff.v.......sswsf",
       ".........ff.hh.swwff",
       "hh.ddm.m..f.m..swwww",
       "hhhmmmmmm....sswwwww"
@@ -34,9 +34,9 @@
   "defender": "red",
   "supplySources": {"blue":{"edges":["west"],"hexes":[]},"red":{"edges":["east"],"hexes":[]}},
   "turns": {
-    "max": 5,
+    "max": 10,
     "firstSide": "blue",
-    "conditions": [["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"]]
+    "conditions": [["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"],["clear","day"]]
   },
   "player": "blue",
   "ai": {"side":"red","posture":"defend"},

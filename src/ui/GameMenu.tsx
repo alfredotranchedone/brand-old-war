@@ -1,3 +1,4 @@
+import { Menu } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { canUndo } from '../core/history';
@@ -50,8 +51,8 @@ export function GameMenu() {
 
   return (
     <div className={styles.wrap} ref={ref}>
-      <button type="button" className={styles.trigger} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-        Menu ▾
+      <button type="button" className={styles.trigger} aria-label="Menu" title="Menu" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <Menu size={18} />
       </button>
       {open && (
         <div className={styles.menu} role="menu">
