@@ -23,6 +23,15 @@ const scenarioFiles: Record<string, unknown> = Object.fromEntries(
 
 export const DEFAULT_SCENARIO = 'crocevia';
 
+/** Impronta del file dello scenario: cambia se il file viene modificato. */
+export function scenarioFingerprint(id: string): string | undefined {
+  const raw = scenarioFiles[id];
+  if (!raw) return undefined;
+  let h = 0;
+  for (const c of JSON.stringify(raw)) h = (Math.imul(h, 31) + c.charCodeAt(0)) | 0;
+  return (h >>> 0).toString(36);
+}
+
 export function loadScenario(data: GameData, id = DEFAULT_SCENARIO): Scenario {
   const raw = scenarioFiles[id];
   if (!raw) throw new Error(`Scenario sconosciuto: ${id}`);

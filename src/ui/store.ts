@@ -9,7 +9,7 @@ import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
 import { type Reach, computeReach, isReachable } from '../core/movement';
-import { DEFAULT_SCENARIO, type ScenarioEntry, listScenarios, loadGameData, loadScenario } from '../data';
+import { DEFAULT_SCENARIO, type ScenarioEntry, listScenarios, loadGameData, loadScenario, scenarioFingerprint } from '../data';
 import { clearSave, loadSavedGame, saveGame } from './save';
 
 export interface UiState {
@@ -91,7 +91,8 @@ const data = loadGameData();
 const scenarios = listScenarios(data);
 const playable = (id: string) => scenarios.some((s) => s.id === id && !s.error);
 
-const initialGame = loadSavedGame(playable) ?? startGame(loadScenario(data, DEFAULT_SCENARIO), data);
+const savedFingerprint = (id: string) => (playable(id) ? scenarioFingerprint(id) : undefined);
+const initialGame = loadSavedGame(savedFingerprint) ?? startGame(loadScenario(data, DEFAULT_SCENARIO), data);
 
 export const useUiStore = create<UiState>()((set, get) => ({
   data,
@@ -166,7 +167,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
       console.warn(result.error);
       return false;
     }
-    if (action.kind === 'endTurn') saveGame(result.state);
+    if (action.kind === 'endTurn') saveGame(result.state, scenarioFingerprint(result.state.scenarioId));
     set({
       game: result.state,
       undoStack: recordAction(undoStack, game, action),

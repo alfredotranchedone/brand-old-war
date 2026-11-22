@@ -1,6 +1,6 @@
 /**
- * Scenario in modifica: stessa forma del file JSON in src/scenarios,
- * così l'esportazione è una semplice serializzazione.
+ * Scenario in modifica: esagoni come elenco sparso sul terreno di base.
+ * Il file in src/scenarios usa una griglia di codici (vedi fileFormat.ts).
  */
 import { type HexKey, hexKey, offsetToAxial } from '../core/hex';
 import type { HexData, MapData, MapEdgeName } from '../core/map';

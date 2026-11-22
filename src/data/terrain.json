@@ -1,5 +1,6 @@
 {
   "clear": {
+    "code": ".",
     "name": "Aperto",
     "tile": "grass",
     "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
@@ -8,6 +9,7 @@
     "blocksLOS": false
   },
   "dirt": {
+    "code": "d",
     "name": "Terra battuta",
     "tile": "dirt",
     "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
@@ -16,6 +18,7 @@
     "blocksLOS": false
   },
   "water": {
+    "code": "w",
     "name": "Acqua profonda",
     "tile": "deep_water",
     "impassable": true,
@@ -25,6 +28,7 @@
     "blocksLOS": false
   },
   "shallow_water": {
+    "code": "s",
     "name": "Acqua bassa",
     "tile": "water",
     "moveCost": { "tracked": 3, "wheeled": 4, "foot": 2 },
@@ -33,6 +37,7 @@
     "blocksLOS": false
   },
   "forest": {
+    "code": "f",
     "name": "Foresta",
     "tile": "grass",
     "overlay": "forest",
@@ -42,6 +47,7 @@
     "blocksLOS": true
   },
   "hills": {
+    "code": "h",
     "name": "Colline",
     "tile": "grass",
     "overlay": "hills",
@@ -51,6 +57,7 @@
     "blocksLOS": true
   },
   "mountain": {
+    "code": "m",
     "name": "Montagna",
     "tile": "grass",
     "overlay": "mountain",
@@ -60,6 +67,7 @@
     "blocksLOS": true
   },
   "village": {
+    "code": "v",
     "name": "Villaggio",
     "tile": "grass",
     "overlay": "village",
@@ -69,6 +77,7 @@
     "blocksLOS": false
   },
   "city": {
+    "code": "c",
     "name": "Città",
     "tile": "grass",
     "overlay": "city",
@@ -78,6 +87,7 @@
     "blocksLOS": true
   },
   "airport": {
+    "code": "a",
     "name": "Aeroporto",
     "tile": "grass",
     "overlay": "airport",

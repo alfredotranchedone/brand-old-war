@@ -139,7 +139,7 @@
     "supplyEndurance": 3,
     "tags": ["infantry", "infiltrator"],
     "organic": {
-      "personnel": 200,
+      "personnel": 50,
       "mainVehicles": 15,
       "mainVehiclesLabel": "Veicoli leggeri",
       "supportVehicles": 10

@@ -11,6 +11,8 @@ import { DataError, bool, dictionary, num, record, str } from './validate';
 
 export interface TerrainType {
   readonly id: string;
+  /** Carattere che rappresenta il terreno nella griglia degli scenari. */
+  readonly code: string;
   readonly name: string;
   /** Costo in PM per entrare nell'esagono, per tipo di mobilità. */
   readonly moveCost: Readonly<Record<GroundMobility, number>>;
@@ -30,11 +32,17 @@ export interface TerrainType {
 export type TerrainTable = Readonly<Record<string, TerrainType>>;
 
 export function parseTerrain(raw: unknown): TerrainTable {
+  const codes = new Set<string>();
   return dictionary(raw, 'terrain.json', (v, path, id) => {
     const o = record(v, path);
     const mc = record(o.moveCost, `${path}.moveCost`);
+    const code = str(o.code, `${path}.code`);
+    if ([...code].length !== 1) throw new DataError(`${path}.code`, 'serve un solo carattere');
+    if (codes.has(code)) throw new DataError(`${path}.code`, `codice "${code}" già usato`);
+    codes.add(code);
     return {
       id,
+      code,
       name: str(o.name, `${path}.name`),
       moveCost: {
         tracked: num(mc.tracked, `${path}.moveCost.tracked`, 0),

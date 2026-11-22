@@ -119,7 +119,7 @@ export function FilePanel() {
         </p>
       ))}
       <div className={app.actions}>
-        <button type="button" className={`${app.button} ${app.primary}`} disabled={check.errors.length > 0} onClick={() => downloadJson(doc)}>
+        <button type="button" className={`${app.button} ${app.primary}`} disabled={check.errors.length > 0} onClick={() => downloadJson(doc, data)}>
           Esporta {doc.id}.json
         </button>
         <button type="button" className={app.button} onClick={() => fileRef.current?.click()}>

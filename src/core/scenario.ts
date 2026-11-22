@@ -66,8 +66,15 @@ export interface Scenario {
   readonly units: readonly ScenarioUnit[];
 }
 
+/** Posizione come [colonna, riga] in coordinate offset. */
+function readLoc(v: Json | undefined, path: string): Axial {
+  const a = array(v, path);
+  if (a.length !== 2) throw new DataError(path, 'serve [colonna, riga]');
+  return offsetToAxial({ col: int(a[0], `${path}[0]`), row: int(a[1], `${path}[1]`) });
+}
+
 function readPos(o: Record<string, Json>, path: string): Axial {
-  return offsetToAxial({ col: int(o.col, `${path}.col`), row: int(o.row, `${path}.row`) });
+  return readLoc(o.loc, `${path}.loc`);
 }
 
 export const DEFAULT_SIDE_NAMES: Readonly<Record<Side, string>> = { blue: 'Blu', red: 'Rosso' };
@@ -89,29 +96,27 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
   const width = int(m.width, `${p}.map.width`, 1);
   const height = int(m.height, `${p}.map.height`, 1);
   const size = { width, height };
-  const defaultTerrain = str(m.defaultTerrain, `${p}.map.defaultTerrain`);
-  const checkTerrain = (t: string, path: string) => {
-    if (!data.terrain[t]) throw new DataError(path, `terreno "${t}" non definito in terrain.json`);
-    return t;
-  };
-  checkTerrain(defaultTerrain, `${p}.map.defaultTerrain`);
-
+  const byCode = new Map(Object.values(data.terrain).map((t) => [t.code, t.id]));
+  const rows = array(m.terrain, `${p}.map.terrain`);
+  if (rows.length !== height) throw new DataError(`${p}.map.terrain`, `servono ${height} righe; trovate ${rows.length}`);
   const hexes: Record<HexKey, HexData> = {};
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      hexes[hexKey(offsetToAxial({ col, row }))] = { terrain: defaultTerrain };
-    }
-  }
-  array(m.hexes ?? [], `${p}.map.hexes`).forEach((v, i) => {
-    const path = `${p}.map.hexes[${i}]`;
-    const h = record(v, path);
-    const pos = readPos(h, path);
+  rows.forEach((v, row) => {
+    const path = `${p}.map.terrain[${row}]`;
+    const cells = [...str(v, path)];
+    if (cells.length !== width) throw new DataError(path, `servono ${width} caratteri; trovati ${cells.length}`);
+    cells.forEach((c, col) => {
+      const terrain = byCode.get(c);
+      if (!terrain) throw new DataError(path, `colonna ${col}: codice "${c}" non definito in terrain.json`);
+      hexes[hexKey(offsetToAxial({ col, row }))] = { terrain };
+    });
+  });
+  array(m.labels ?? [], `${p}.map.labels`).forEach((v, i) => {
+    const path = `${p}.map.labels[${i}]`;
+    const l = record(v, path);
+    const pos = readPos(l, path);
     assertOnMap(size, pos, path);
     const key = hexKey(pos);
-    const prev = hexes[key] ?? { terrain: defaultTerrain };
-    const terrain = h.terrain === undefined ? prev.terrain : checkTerrain(str(h.terrain, `${path}.terrain`), `${path}.terrain`);
-    const label = h.label === undefined ? prev.label : str(h.label, `${path}.label`);
-    hexes[key] = label === undefined ? { terrain } : { terrain, label };
+    hexes[key] = { ...hexes[key]!, label: str(l.label, `${path}.label`) };
   });
 
   const edges: HexEdge[] = array(m.edges ?? [], `${p}.map.edges`).map((v, i) => {
@@ -155,7 +160,7 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     });
     array(s.hexes ?? [], `${path}.hexes`).forEach((v, i) => {
       const hp = `${path}.hexes[${i}]`;
-      const pos = readPos(record(v, hp), hp);
+      const pos = readLoc(v, hp);
       assertOnMap(size, pos, hp);
       keys.add(hexKey(pos));
     });
@@ -170,10 +175,11 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
   const maxTurns = int(t.max, `${p}.turns.max`, 1);
   const conditions: TurnConditions[] = array(t.conditions, `${p}.turns.conditions`).map((v, i) => {
     const path = `${p}.turns.conditions[${i}]`;
-    const c = record(v, path);
-    const weather = str(c.weather, `${path}.weather`);
-    if (!data.weather[weather]) throw new DataError(`${path}.weather`, `meteo "${weather}" non definito in weather.json`);
-    return { weather, daylight: oneOf(c.daylight, `${path}.daylight`, DAYLIGHTS) };
+    const c = array(v, path);
+    if (c.length !== 2) throw new DataError(path, 'serve [meteo, luce]');
+    const weather = str(c[0], `${path}[0]`);
+    if (!data.weather[weather]) throw new DataError(`${path}[0]`, `meteo "${weather}" non definito in weather.json`);
+    return { weather, daylight: oneOf(c[1], `${path}[1]`, DAYLIGHTS) };
   });
   if (conditions.length !== maxTurns) {
     throw new DataError(`${p}.turns.conditions`, `servono ${maxTurns} voci, una per turno; trovate ${conditions.length}`);
@@ -198,8 +204,9 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
   // --- Unità -----------------------------------------------------------------
   const unitIds = new Set<string>();
   const occupied = new Map<string, string>();
-  const units: ScenarioUnit[] = array(o.units, `${p}.units`).map((v, i) => {
-    const path = `${p}.units[${i}]`;
+  const byside = record(o.units, `${p}.units`);
+  const units: ScenarioUnit[] = SIDES.flatMap((side) => array(byside[side] ?? [], `${p}.units.${side}`).map((v, i) => {
+    const path = `${p}.units.${side}[${i}]`;
     const u = record(v, path);
     const id = str(u.id, `${path}.id`);
     if (unitIds.has(id)) throw new DataError(`${path}.id`, `id unità duplicato "${id}"`);
@@ -218,14 +225,14 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     return {
       id,
       typeId,
-      side: oneOf(u.side, `${path}.side`, SIDES),
+      side,
       pos,
-      strength: int(u.strength, `${path}.strength`, 1, data.rules.maxStrength),
-      entrenched: optional(u.entrenched, false, (x) => bool(x, `${path}.entrenched`)),
+      strength: int(u.str, `${path}.str`, 1, data.rules.maxStrength),
+      entrenched: optional(u.ent, false, (x) => bool(x, `${path}.ent`)),
     };
-  });
+  }));
   for (const side of SIDES) {
-    if (!units.some((u) => u.side === side)) throw new DataError(`${p}.units`, `nessuna unità per la fazione ${side}`);
+    if (!units.some((u) => u.side === side)) throw new DataError(`${p}.units.${side}`, `nessuna unità per la fazione ${side}`);
   }
 
   return {
