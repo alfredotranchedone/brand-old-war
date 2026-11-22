@@ -11,15 +11,14 @@ export function drawReachable(ctx: CanvasRenderingContext2D, hexes: readonly Axi
   ctx.fill(p);
 }
 
-/** Contorno tratteggiato dell'area coperta dalla ZOC (solo i lati verso l'esterno). */
-export function drawZocBorder(ctx: CanvasRenderingContext2D, zoc: ReadonlySet<HexKey>, color: string, scale: number): void {
-  if (zoc.size === 0) return;
+/** Lati verso l'esterno di un'area di esagoni. */
+function areaBorder(area: ReadonlySet<HexKey>): Path2D {
   const p = new Path2D();
-  for (const key of zoc) {
+  for (const key of area) {
     const h = parseHexKey(key);
     const corners = hexCorners(h, HEX_SIZE);
     for (let d = 0; d < 6; d++) {
-      if (zoc.has(hexKey(hexNeighbor(h, d)))) continue;
+      if (area.has(hexKey(hexNeighbor(h, d)))) continue;
       // Il lato verso la direzione d unisce i vertici d e d+1.
       const a = corners[d]!;
       const b = corners[(d + 1) % 6]!;
@@ -27,12 +26,38 @@ export function drawZocBorder(ctx: CanvasRenderingContext2D, zoc: ReadonlySet<He
       p.lineTo(b.x, b.y);
     }
   }
+  return p;
+}
+
+/** Contorno tratteggiato dell'area coperta dalla ZOC. */
+export function drawZocBorder(ctx: CanvasRenderingContext2D, zoc: ReadonlySet<HexKey>, color: string, scale: number): void {
+  if (zoc.size === 0) return;
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = Math.max(1.5, 2 / scale);
   ctx.setLineDash([5, 4]);
   ctx.lineCap = 'round';
-  ctx.stroke(p);
+  ctx.stroke(areaBorder(zoc));
+  ctx.restore();
+}
+
+/** Rete di rifornimento: area velata e bordo continuo nel colore della fazione. */
+export function drawSupplyNetwork(
+  ctx: CanvasRenderingContext2D,
+  hexes: ReadonlySet<HexKey>,
+  colors: { readonly solid: string; readonly tint: string },
+  scale: number,
+): void {
+  if (hexes.size === 0) return;
+  const fill = new Path2D();
+  for (const key of hexes) traceHex(fill, parseHexKey(key));
+  ctx.save();
+  ctx.fillStyle = colors.tint;
+  ctx.fill(fill);
+  ctx.strokeStyle = colors.solid;
+  ctx.globalAlpha = 0.7;
+  ctx.lineWidth = Math.max(1, 1.5 / scale);
+  ctx.stroke(areaBorder(hexes));
   ctx.restore();
 }
 

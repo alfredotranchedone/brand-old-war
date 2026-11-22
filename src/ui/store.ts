@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { type Action, applyAction } from '../core/actions';
 import { type CombatPreview, attackableTargets, previewCombat } from '../core/combat';
 import type { GameData } from '../core/data';
-import { type GameState, createGame, getUnit, unitAt } from '../core/game';
+import { type GameState, getUnit, unitAt } from '../core/game';
+import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
 import { type Reach, computeReach, isReachable } from '../core/movement';
@@ -21,6 +22,7 @@ export interface UiState {
   preview: CombatPreview | null;
   showCoords: boolean;
   showZoc: boolean;
+  showSupply: boolean;
   setHovered: (h: Axial | null) => void;
   clickHex: (h: Axial) => void;
   select: (unitId: string | null) => void;
@@ -31,6 +33,7 @@ export interface UiState {
   undo: () => void;
   toggleCoords: () => void;
   toggleZoc: () => void;
+  toggleSupply: () => void;
 }
 
 const sameHex = (a: Axial | null, b: Axial | null): boolean =>
@@ -56,7 +59,7 @@ const scenario = loadScenario(data, 'crocevia');
 
 export const useUiStore = create<UiState>()((set, get) => ({
   data,
-  game: createGame(scenario, data),
+  game: startGame(scenario, data),
   undoStack: [],
   hovered: null,
   selectedUnitId: null,
@@ -65,6 +68,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   preview: null,
   showCoords: false,
   showZoc: false,
+  showSupply: false,
 
   setHovered: (h) => {
     if (!sameHex(get().hovered, h)) set({ hovered: h });
@@ -129,4 +133,5 @@ export const useUiStore = create<UiState>()((set, get) => ({
 
   toggleCoords: () => set((s) => ({ showCoords: !s.showCoords })),
   toggleZoc: () => set((s) => ({ showZoc: !s.showZoc })),
+  toggleSupply: () => set((s) => ({ showSupply: !s.showSupply })),
 }));

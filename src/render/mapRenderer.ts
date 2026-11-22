@@ -4,11 +4,16 @@ import { type Side, type Unit, type UnitTypeTable, isAlive } from '../core/units
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
-import { drawAdvance, drawPath, drawReachable, drawTargets, drawZocBorder } from './overlays';
+import { drawAdvance, drawPath, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { drawUnit } from './units';
 
 export interface ZocOverlay {
+  readonly side: Side;
+  readonly hexes: ReadonlySet<HexKey>;
+}
+
+export interface SupplyOverlay {
   readonly side: Side;
   readonly hexes: ReadonlySet<HexKey>;
 }
@@ -23,6 +28,7 @@ export interface RenderInput {
   readonly reachable: readonly Axial[];
   readonly path: { readonly hexes: readonly Axial[]; readonly cost: number } | null;
   readonly zoc: readonly ZocOverlay[];
+  readonly supply: readonly SupplyOverlay[];
   readonly targets: readonly Axial[];
   readonly chosenTarget: Axial | null;
   readonly advanceHex: Axial | null;
@@ -154,6 +160,7 @@ export class MapRenderer {
     );
 
     this.drawTerrain(s);
+    for (const n of input.supply) drawSupplyNetwork(ctx, n.hexes, MAP_THEME.side[n.side], s);
     drawObjectives(ctx, input.map, input.objectives);
     drawReachable(ctx, input.reachable);
     for (const z of input.zoc) drawZocBorder(ctx, z.hexes, MAP_THEME.side[z.side].solid, s);

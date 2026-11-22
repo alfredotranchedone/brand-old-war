@@ -1,4 +1,5 @@
 import type { Axial } from './hex';
+import type { Side } from './units';
 
 export type GameEvent =
   | { readonly kind: 'gameStart'; readonly turn: number; readonly scenarioId: string }
@@ -16,4 +17,11 @@ export type GameEvent =
       readonly attackerDestroyed: boolean;
       readonly defenderDestroyed: boolean;
     }
-  | { readonly kind: 'advance'; readonly unitId: string; readonly to: Axial };
+  | { readonly kind: 'advance'; readonly unitId: string; readonly to: Axial }
+  | {
+      readonly kind: 'supply';
+      readonly side: Side;
+      readonly outOfSupply: readonly string[];
+      /** Unità che hanno perso forza per logoramento. */
+      readonly attrition: readonly string[];
+    };

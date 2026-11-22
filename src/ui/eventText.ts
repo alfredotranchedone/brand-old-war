@@ -35,5 +35,10 @@ export function eventText(e: GameEvent, state: GameState, data: GameData): strin
     }
     case 'advance':
       return `${unitName(state, data, e.unitId)} avanza in ${at(e.to)}`;
+    case 'supply': {
+      const names = (ids: readonly string[]) => ids.map((id) => unitName(state, data, id)).join(', ');
+      const text = `Fuori rifornimento: ${names(e.outOfSupply)}`;
+      return e.attrition.length > 0 ? `${text} · logoramento: ${names(e.attrition)}` : text;
+    }
   }
 }

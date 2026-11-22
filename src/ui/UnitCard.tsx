@@ -4,6 +4,7 @@ import { hasTag } from '../core/units';
 import { symbolDataUrl } from '../render/symbols';
 import { MOBILITY_LABEL, SIDE_LABEL, TARGET_CLASS_LABEL } from './labels';
 import { useUiStore } from './store';
+import { supplyText } from './supplyText';
 import styles from './App.module.css';
 
 /** Scheda dell'unità selezionata. */
@@ -53,7 +54,7 @@ export function UnitCard() {
         <dd>{status}</dd>
         <dt>Rifornimento</dt>
         <dd className={unit.outOfSupplyTurns > 0 ? styles.warn : undefined}>
-          {unit.outOfSupplyTurns > 0 ? `Fuori rifornimento (${unit.outOfSupplyTurns}° turno)` : 'Rifornita'}
+          {supplyText(data.rules, unit)}
         </dd>
         <dt>Trincerata</dt>
         <dd>{canEntrench ? (unit.entrenched ? 'Sì' : 'No') : '—'}</dd>

@@ -14,6 +14,8 @@ export function TopBar() {
   const toggleCoords = useUiStore((s) => s.toggleCoords);
   const showZoc = useUiStore((s) => s.showZoc);
   const toggleZoc = useUiStore((s) => s.toggleZoc);
+  const showSupply = useUiStore((s) => s.showSupply);
+  const toggleSupply = useUiStore((s) => s.toggleSupply);
 
   return (
     <header className={styles.topBar}>
@@ -25,6 +27,10 @@ export function TopBar() {
         {SIDE_LABEL[activeSide]}
       </span>
       <span className={styles.spacer} />
+      <label className={styles.toggle}>
+        <input type="checkbox" checked={showSupply} onChange={toggleSupply} />
+        Rifornimenti
+      </label>
       <label className={styles.toggle}>
         <input type="checkbox" checked={showZoc} onChange={toggleZoc} />
         ZOC

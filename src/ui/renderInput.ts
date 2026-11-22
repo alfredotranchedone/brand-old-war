@@ -4,8 +4,9 @@ import { getUnit, liveUnits } from '../core/game';
 import { hexKey } from '../core/hex';
 import { pathTo, reachableHexes } from '../core/movement';
 import { SIDES, type Side, otherSide } from '../core/units';
+import { supplyNetwork } from '../core/supplyNetwork';
 import { exertsZoc, zocOf } from '../core/zoc';
-import type { RenderInput, ZocOverlay } from '../render/mapRenderer';
+import type { RenderInput, SupplyOverlay, ZocOverlay } from '../render/mapRenderer';
 import type { UiState } from './store';
 
 /** Area della ZOC di una fazione, esagoni delle sue unità inclusi (per un contorno senza buchi). */
@@ -24,6 +25,17 @@ function spentFor(s: UiState): Set<string> {
     spentCache.set(s.game, spent);
   }
   return spent;
+}
+
+const supplyCache = new WeakMap<GameState, SupplyOverlay[]>();
+
+function supplyFor(s: UiState): SupplyOverlay[] {
+  let overlays = supplyCache.get(s.game);
+  if (!overlays) {
+    overlays = SIDES.map((side) => ({ side, hexes: new Set(supplyNetwork(s.game, s.data, side).cost.keys()) }));
+    supplyCache.set(s.game, overlays);
+  }
+  return overlays;
 }
 
 /** Traduce lo stato dello store nei dati che il renderer disegna. */
@@ -52,6 +64,7 @@ export function buildRenderInput(s: UiState): RenderInput {
     reachable: reach ? reachableHexes(reach) : [],
     path,
     zoc,
+    supply: s.showSupply ? supplyFor(s) : [],
     targets: s.targets.flatMap((id) => getUnit(game, id)?.pos ?? []),
     chosenTarget: s.preview ? (getUnit(game, s.preview.targetId)?.pos ?? null) : null,
     advanceHex:
