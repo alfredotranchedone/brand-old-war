@@ -8,6 +8,7 @@ import { isOnMap } from '../core/map';
 import { pixelToHex } from '../core/hex';
 import { HEX_SIZE } from '../render/camera';
 import { MapRenderer } from '../render/mapRenderer';
+import { buildRenderInput } from './renderInput';
 import { useUiStore } from './store';
 import styles from './MapCanvas.module.css';
 
@@ -27,18 +28,7 @@ export function MapCanvas() {
 
     const renderer = new MapRenderer(canvas);
     const store = useUiStore;
-    const push = () => {
-      const s = store.getState();
-      renderer.update({
-        map: s.game.map,
-        unitTypes: s.data.unitTypes,
-        units: s.game.units,
-        objectives: s.game.objectives,
-        hovered: s.hovered,
-        selectedUnitId: s.selectedUnitId,
-        showCoords: s.showCoords,
-      });
-    };
+    const push = () => renderer.update(buildRenderInput(store.getState()));
     push();
     const unsubscribe = store.subscribe(push);
 

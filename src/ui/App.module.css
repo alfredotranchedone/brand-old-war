@@ -164,3 +164,23 @@
   color: #9a6b00;
   font-weight: 600;
 }
+
+.button {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

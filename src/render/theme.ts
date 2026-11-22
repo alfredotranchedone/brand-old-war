@@ -10,6 +10,8 @@ export const MAP_THEME = {
   hoverFill: 'rgba(255, 255, 255, 0.55)',
   hoverStroke: '#2f3a28',
   selectedStroke: '#e8a400',
+  reachFill: 'rgba(70, 160, 225, 0.30)',
+  path: '#0d4f85',
   coordText: 'rgba(60, 70, 50, 0.55)',
   labelText: '#3d4434',
   labelHalo: 'rgba(238, 240, 228, 0.9)',

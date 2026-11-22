@@ -1,18 +1,12 @@
-/**
- * Stato di gioco serializzabile. Ogni modifica passerà da applyAction (dalla Fase 3);
- * qui per ora: creazione della partita dallo scenario e query di lettura.
- *
- * I dati statici (GameData) non stanno nello stato: si passano a parte alle funzioni.
- */
+/** Stato di gioco serializzabile. I dati statici (GameData) si passano a parte. */
 import { type GameData, getUnitType } from './data';
+import type { GameEvent } from './events';
 import { type Axial, hexEquals } from './hex';
 import type { MapData } from './map';
 import { seedRng } from './rng';
 import type { AiPosture, Scenario, VictoryRules } from './scenario';
 import { type Side, type Unit, isAlive } from './units';
 import type { TurnConditions } from './weather';
-
-export type GameEvent = { readonly kind: 'gameStart'; readonly turn: number; readonly scenarioId: string };
 
 export interface GameResult {
   readonly winner: Side | null;
