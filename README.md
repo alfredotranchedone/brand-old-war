@@ -1,9 +1,9 @@
 # Brand Old War
 
-A strategic hex-based wargame.
+A old strategic hex-based wargame.
 
 [![Build](https://github.com/alfredotranchedone/brand-old-war/actions/workflows/deploy-web-pages.yml/badge.svg?branch=main)](https://github.com/alfredotranchedone/brand-old-war/actions/workflows/deploy-web-pages.yml)
-[![Latest tag](https://img.shields.io/github/v/tag/alfredotranchedone/brand-old-war?label=latest%20tag)](https://github.com/alfredotranchedone/brand-old-war/tags)
+[![Latest tag](https://img.shields.io/github/v/tag/alfredotranchedone/brand-old-war?label=version)](https://github.com/alfredotranchedone/brand-old-war/tags)
 
 ## License & Copyright
 
