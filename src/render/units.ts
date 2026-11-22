@@ -1,14 +1,20 @@
 import { hexToPixel } from '../core/hex';
-import { type Unit, type UnitType, hasActed } from '../core/units';
+import type { Unit, UnitType } from '../core/units';
 import { HEX_SIZE } from './camera';
 import { getSymbolRaster } from './symbols';
 import { MAP_THEME } from './theme';
 
 /** Pedina: simbolo, forza in basso a destra, avviso di rifornimento in basso a sinistra. */
-export function drawUnit(ctx: CanvasRenderingContext2D, unit: Unit, type: UnitType, pixelsPerUnit: number): void {
+export function drawUnit(
+  ctx: CanvasRenderingContext2D,
+  unit: Unit,
+  type: UnitType,
+  pixelsPerUnit: number,
+  dimmed: boolean,
+): void {
   const c = hexToPixel(unit.pos, HEX_SIZE);
   ctx.save();
-  if (hasActed(unit)) ctx.globalAlpha = 0.45;
+  if (dimmed) ctx.globalAlpha = 0.45;
 
   const raster = getSymbolRaster(type, unit.side, pixelsPerUnit);
   const k = 1 / raster.pixelsPerUnit;

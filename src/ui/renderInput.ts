@@ -1,3 +1,5 @@
+import { spentUnits } from '../core/availability';
+import type { GameState } from '../core/game';
 import { getUnit, liveUnits } from '../core/game';
 import { hexKey } from '../core/hex';
 import { pathTo, reachableHexes } from '../core/movement';
@@ -11,6 +13,17 @@ function zocArea({ game, data }: UiState, side: Side): ZocOverlay {
   const hexes = zocOf(game, data, side);
   for (const u of liveUnits(game, side)) if (exertsZoc(data, u)) hexes.add(hexKey(u.pos));
   return { side, hexes };
+}
+
+const spentCache = new WeakMap<GameState, Set<string>>();
+
+function spentFor(s: UiState): Set<string> {
+  let spent = spentCache.get(s.game);
+  if (!spent) {
+    spent = spentUnits(s.game, s.data);
+    spentCache.set(s.game, spent);
+  }
+  return spent;
 }
 
 /** Traduce lo stato dello store nei dati che il renderer disegna. */
@@ -39,6 +52,11 @@ export function buildRenderInput(s: UiState): RenderInput {
     reachable: reach ? reachableHexes(reach) : [],
     path,
     zoc,
+    targets: s.targets.flatMap((id) => getUnit(game, id)?.pos ?? []),
+    chosenTarget: s.preview ? (getUnit(game, s.preview.targetId)?.pos ?? null) : null,
+    advanceHex:
+      game.pendingAdvance && game.pendingAdvance.unitId === s.selectedUnitId ? game.pendingAdvance.to : null,
+    spent: spentFor(s),
     showCoords: s.showCoords,
   };
 }

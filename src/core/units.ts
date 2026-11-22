@@ -65,11 +65,6 @@ export function isAlive(unit: Unit): boolean {
   return unit.strength > 0;
 }
 
-/** Ha già agito nel turno: ha attaccato, oppure ha mosso e non ha più punti movimento. */
-export function hasActed(unit: Unit): boolean {
-  return unit.hasAttacked || (unit.hasMoved && unit.movesLeft <= 0);
-}
-
 /** SIDC del tipo con l'affiliazione della fazione: F (amico) per il Blu, H (ostile) per il Rosso. */
 export function sidcForSide(type: UnitType, side: Side): string {
   return type.sidc.slice(0, 1) + (side === 'blue' ? 'F' : 'H') + type.sidc.slice(2);

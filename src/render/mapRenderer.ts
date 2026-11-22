@@ -4,7 +4,7 @@ import { type Side, type Unit, type UnitTypeTable, isAlive } from '../core/units
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
-import { drawPath, drawReachable, drawZocBorder } from './overlays';
+import { drawAdvance, drawPath, drawReachable, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { drawUnit } from './units';
 
@@ -23,6 +23,11 @@ export interface RenderInput {
   readonly reachable: readonly Axial[];
   readonly path: { readonly hexes: readonly Axial[]; readonly cost: number } | null;
   readonly zoc: readonly ZocOverlay[];
+  readonly targets: readonly Axial[];
+  readonly chosenTarget: Axial | null;
+  readonly advanceHex: Axial | null;
+  /** Unità della fazione attiva che non hanno più azioni disponibili. */
+  readonly spent: ReadonlySet<string>;
   readonly showCoords: boolean;
 }
 
@@ -154,12 +159,14 @@ export class MapRenderer {
     for (const z of input.zoc) drawZocBorder(ctx, z.hexes, MAP_THEME.side[z.side].solid, s);
     if (input.showCoords) drawCoords(ctx, input.map);
     this.drawHover(input, s);
+    drawTargets(ctx, input.targets, input.chosenTarget);
+    if (input.advanceHex) drawAdvance(ctx, input.advanceHex);
     this.drawSelection(input);
     drawLabels(ctx, input.map);
 
     for (const u of input.units) {
       const type = input.unitTypes[u.typeId];
-      if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr);
+      if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr, input.spent.has(u.id));
     }
     if (input.path) drawPath(ctx, input.path.hexes, input.path.cost);
   }

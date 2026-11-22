@@ -38,6 +38,8 @@ export interface GameState {
   readonly objectives: Readonly<Record<string, Side>>;
   readonly rngState: number;
   readonly log: readonly GameEvent[];
+  /** Esagono liberato dopo un combattimento che l'attaccante può occupare. */
+  readonly pendingAdvance?: { readonly unitId: string; readonly to: Axial };
   readonly result?: GameResult;
 }
 

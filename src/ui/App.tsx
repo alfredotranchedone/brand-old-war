@@ -1,3 +1,6 @@
+import { AdvanceHint } from './AdvanceHint';
+import { CombatPanel } from './CombatPanel';
+import { EventLog } from './EventLog';
 import { HexInfo } from './HexInfo';
 import { MapCanvas } from './MapCanvas';
 import { TopBar } from './TopBar';
@@ -15,7 +18,10 @@ export function App() {
       </main>
       <aside className={styles.side}>
         <UnitCard />
+        <AdvanceHint />
+        <CombatPanel />
         <HexInfo />
+        <EventLog />
       </aside>
     </div>
   );

@@ -184,3 +184,68 @@
   opacity: 0.45;
   cursor: default;
 }
+
+.primary {
+  background: var(--nato-blue);
+  border-color: var(--nato-blue);
+  color: #fff;
+}
+
+.primary:hover:not(:disabled) {
+  border-color: #004f8a;
+  background: #004f8a;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.combatLine {
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.notice {
+  font-size: 13px;
+  border-color: #1f7a3a;
+  background: #eef7f0;
+}
+
+.log {
+  flex: 1;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.logList li {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.logList li:last-child {
+  border-bottom: none;
+}
+
+.logCombat {
+  font-weight: 600;
+}

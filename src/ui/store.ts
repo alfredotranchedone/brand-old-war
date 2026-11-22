@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { type Action, applyAction } from '../core/actions';
+import { type CombatPreview, attackableTargets, previewCombat } from '../core/combat';
 import type { GameData } from '../core/data';
 import { type GameState, createGame, getUnit, unitAt } from '../core/game';
 import { type Axial, hexEquals } from '../core/hex';
@@ -13,14 +14,19 @@ export interface UiState {
   undoStack: UndoStack;
   hovered: Axial | null;
   selectedUnitId: string | null;
-  /** Esagoni raggiungibili dall'unità selezionata, se può muovere. */
   reach: Reach | null;
+  /** Nemici attaccabili dall'unità selezionata. */
+  targets: readonly string[];
+  /** Bersaglio scelto, in attesa di conferma. */
+  preview: CombatPreview | null;
   showCoords: boolean;
   showZoc: boolean;
   setHovered: (h: Axial | null) => void;
   clickHex: (h: Axial) => void;
   select: (unitId: string | null) => void;
   deselect: () => void;
+  confirmAttack: () => void;
+  cancelTarget: () => void;
   dispatch: (action: Action) => boolean;
   undo: () => void;
   toggleCoords: () => void;
@@ -30,14 +36,19 @@ export interface UiState {
 const sameHex = (a: Axial | null, b: Axial | null): boolean =>
   a === b || (a !== null && b !== null && hexEquals(a, b));
 
-/** L'unità può ricevere ordini dal giocatore in questo momento. */
 export function isCommandable(game: GameState, unitId: string | null): boolean {
   const u = unitId ? getUnit(game, unitId) : undefined;
   return !!u && u.side === game.activeSide && u.side === game.setup.player;
 }
 
-function reachFor(game: GameState, data: GameData, unitId: string | null): Reach | null {
-  return unitId && isCommandable(game, unitId) ? computeReach(game, data, unitId) : null;
+function selectionFor(game: GameState, data: GameData, unitId: string | null) {
+  const commandable = isCommandable(game, unitId);
+  return {
+    selectedUnitId: unitId,
+    reach: commandable && unitId ? computeReach(game, data, unitId) : null,
+    targets: commandable && unitId ? attackableTargets(game, data, unitId).map((u) => u.id) : [],
+    preview: null,
+  };
 }
 
 const data = loadGameData();
@@ -50,6 +61,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   hovered: null,
   selectedUnitId: null,
   reach: null,
+  targets: [],
+  preview: null,
   showCoords: false,
   showZoc: false,
 
@@ -58,21 +71,39 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
 
   clickHex: (h) => {
-    const { game, reach, selectedUnitId } = get();
+    const { game, data, reach, targets, preview, selectedUnitId } = get();
+    const pending = game.pendingAdvance;
+    if (pending && pending.unitId === selectedUnitId && hexEquals(pending.to, h)) {
+      get().dispatch({ kind: 'advance', unitId: pending.unitId, to: h });
+      return;
+    }
+    const clicked = unitAt(game, h);
+    if (clicked && selectedUnitId && targets.includes(clicked.id)) {
+      if (preview?.targetId === clicked.id) get().confirmAttack();
+      else set({ preview: previewCombat(game, data, selectedUnitId, clicked.id) });
+      return;
+    }
     if (reach && selectedUnitId && isReachable(reach, h)) {
       get().dispatch({ kind: 'move', unitId: selectedUnitId, to: h });
       return;
     }
-    const clicked = unitAt(game, h)?.id ?? null;
-    get().select(clicked === selectedUnitId ? null : clicked);
+    const id = clicked?.id ?? null;
+    get().select(id === selectedUnitId ? null : id);
   },
 
   select: (unitId) => {
     const { game, data } = get();
-    set({ selectedUnitId: unitId, reach: reachFor(game, data, unitId) });
+    set(selectionFor(game, data, unitId));
   },
 
-  deselect: () => set({ selectedUnitId: null, reach: null }),
+  deselect: () => set({ selectedUnitId: null, reach: null, targets: [], preview: null }),
+
+  confirmAttack: () => {
+    const { preview } = get();
+    if (preview) get().dispatch({ kind: 'attack', unitId: preview.attackerId, targetId: preview.targetId });
+  },
+
+  cancelTarget: () => set({ preview: null }),
 
   dispatch: (action) => {
     const { game, data, undoStack, selectedUnitId } = get();
@@ -84,7 +115,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set({
       game: result.state,
       undoStack: recordAction(undoStack, game, action),
-      reach: reachFor(result.state, data, selectedUnitId),
+      ...selectionFor(result.state, data, selectedUnitId),
     });
     return true;
   },
@@ -93,7 +124,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
     const { undoStack, data, selectedUnitId } = get();
     const popped = popUndo(undoStack);
     if (!popped) return;
-    set({ game: popped.state, undoStack: popped.stack, reach: reachFor(popped.state, data, selectedUnitId) });
+    set({ game: popped.state, undoStack: popped.stack, ...selectionFor(popped.state, data, selectedUnitId) });
   },
 
   toggleCoords: () => set((s) => ({ showCoords: !s.showCoords })),

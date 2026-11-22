@@ -1,6 +1,6 @@
 import { type Axial, type HexKey, hexCorners, hexKey, hexNeighbor, hexToPixel, parseHexKey } from '../core/hex';
 import { HEX_SIZE } from './camera';
-import { traceHex } from './geometry';
+import { hexPath, traceHex } from './geometry';
 import { MAP_THEME } from './theme';
 
 export function drawReachable(ctx: CanvasRenderingContext2D, hexes: readonly Axial[]): void {
@@ -67,5 +67,29 @@ export function drawPath(ctx: CanvasRenderingContext2D, path: readonly Axial[], 
     ctx.strokeText(label, end.x, end.y + 8);
     ctx.fillText(label, end.x, end.y + 8);
   }
+  ctx.restore();
+}
+
+export function drawTargets(ctx: CanvasRenderingContext2D, targets: readonly Axial[], chosen: Axial | null): void {
+  for (const h of targets) {
+    const p = hexPath(h, 0.92);
+    ctx.fillStyle = MAP_THEME.targetFill;
+    ctx.fill(p);
+    const isChosen = chosen !== null && chosen.q === h.q && chosen.r === h.r;
+    ctx.strokeStyle = MAP_THEME.targetStroke;
+    ctx.lineWidth = isChosen ? 4 : 2;
+    ctx.stroke(p);
+  }
+}
+
+export function drawAdvance(ctx: CanvasRenderingContext2D, h: Axial): void {
+  const p = hexPath(h, 0.88);
+  ctx.save();
+  ctx.fillStyle = 'rgba(31, 122, 58, 0.15)';
+  ctx.fill(p);
+  ctx.strokeStyle = MAP_THEME.advanceStroke;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([6, 4]);
+  ctx.stroke(p);
   ctx.restore();
 }
