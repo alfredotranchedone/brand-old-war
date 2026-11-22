@@ -33,7 +33,7 @@
     "aaShots": 2,
     "aaHitPerAttack": 0.04,
     "aaMaxHitChance": 0.9,
-    "helicopterCoverTerrains": ["forest"],
+    "helicopterCoverTerrains": ["forest", "city"],
     "helicopterCoverMultiplier": 0.75
   },
   "victory": { "enemyStepsPerPoint": 5 },

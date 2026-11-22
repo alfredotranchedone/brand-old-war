@@ -58,5 +58,32 @@
     "defenseMod": 1.5,
     "entrenchmentMod": 1.3,
     "blocksLOS": true
+  },
+  "village": {
+    "name": "Villaggio",
+    "tile": "grass",
+    "overlay": "village",
+    "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.2,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": false
+  },
+  "city": {
+    "name": "Città",
+    "tile": "grass",
+    "overlay": "city",
+    "moveCost": { "tracked": 2, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.5,
+    "entrenchmentMod": 1.2,
+    "blocksLOS": true
+  },
+  "airport": {
+    "name": "Aeroporto",
+    "tile": "grass",
+    "overlay": "airport",
+    "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
+    "defenseMod": 1.0,
+    "entrenchmentMod": 1.1,
+    "blocksLOS": false
   }
 }
