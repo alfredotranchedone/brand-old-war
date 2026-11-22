@@ -2,16 +2,22 @@
 
 A strategic hex-based wargame that runs entirely in your browser, with a separate scenario editor. Both are under active development, and contributions from everyone are welcome.
 
+[Play the demo](https://alfredotranchedone.github.io/brand-old-war/) · [Open the scenario editor](https://alfredotranchedone.github.io/brand-old-war/editor.html) · [Read the player manual](docs/manual.md)
+
 [![Build](https://github.com/alfredotranchedone/brand-old-war/actions/workflows/deploy-web-pages.yml/badge.svg?branch=main)](https://github.com/alfredotranchedone/brand-old-war/actions/workflows/deploy-web-pages.yml)
 [![Latest tag](https://img.shields.io/github/v/tag/alfredotranchedone/brand-old-war?label=version)](https://github.com/alfredotranchedone/brand-old-war/tags)
 
 ## The Game
 
-Brand Old War is a turn-based hex wargame. Command ground and air units, use terrain and support fire to your advantage, manage supply, and fight for objectives. The Red side is controlled by the AI.
+Brand Old War is a turn-based hex wargame. Command ground and air units, use terrain and support fire to your advantage, manage supply, and fight for objectives. The Red side is controlled by the AI.  
+ 
+[Play the demo](https://alfredotranchedone.github.io/brand-old-war/) or [Read the player manual](docs/manual.md) 
 
 ## Scenarios
 
-Scenarios define the map, forces, and objectives, and can be selected when starting a new game. The standalone scenario editor lets you create or edit scenarios in the browser and export them as JSON for the game.
+Scenarios define the map, forces, and objectives, and can be selected when starting a new game. The standalone scenario editor lets you create or edit scenarios in the browser and export them as JSON for the game.  
+ 
+[Open the scenario editor](https://alfredotranchedone.github.io/brand-old-war/editor.html) 
 
 ## Run Locally
 
