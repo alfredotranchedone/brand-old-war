@@ -56,9 +56,10 @@ function freeId(prefix: string, taken: readonly { id: string }[]): string {
   return `${prefix}-${n}`;
 }
 
-/** Mette un'unità nell'esagono, sostituendo quella che c'era. */
-export function placeUnit(doc: ScenarioJson, col: number, row: number, d: UnitDraft): ScenarioJson {
-  const others = doc.units.filter(notAt(col, row));
+/** Mette un'unità nell'esagono, sostituendo quella dello stesso posto (terrestre o aereo). */
+export function placeUnit(doc: ScenarioJson, col: number, row: number, d: UnitDraft, isAir: (type: string) => boolean): ScenarioJson {
+  const elsewhere = notAt(col, row);
+  const others = doc.units.filter((u) => elsewhere(u) || isAir(u.type) !== isAir(d.type));
   const id = freeId(`${d.side === 'blue' ? 'b' : 'r'}-${d.type}`, others);
   const unit = { id, type: d.type, side: d.side, col, row, strength: d.strength, ...(d.entrenched ? { entrenched: true } : {}) };
   return { ...doc, units: [...others, unit] };

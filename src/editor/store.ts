@@ -72,11 +72,13 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
       return;
     }
     const terrain = s.data.terrain[toMapData(s.doc).hexes[hexKey(h)]?.terrain ?? ''];
-    if (terrain?.impassable) {
+    const isAir = (type: string) => s.data.unitTypes[type]?.mobility === 'air';
+    const flying = s.tool === 'unit' && isAir(s.unitDraft.type);
+    if (terrain?.impassable && !flying) {
       set({ notice: `${terrain.name}: esagono invalicabile` });
       return;
     }
-    if (s.tool === 'unit') set({ doc: placeUnit(s.doc, col, row, s.unitDraft), notice: null });
+    if (s.tool === 'unit') set({ doc: placeUnit(s.doc, col, row, s.unitDraft, isAir), notice: null });
     else if (!s.objectiveDraft.name.trim()) set({ notice: "Dai un nome all'obiettivo" });
     else set({ doc: placeObjective(s.doc, col, row, s.objectiveDraft.name.trim(), s.objectiveDraft.points), notice: null });
   },

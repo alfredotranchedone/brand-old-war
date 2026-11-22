@@ -1,8 +1,9 @@
 import { spentUnits } from '../core/availability';
 import type { GameState } from '../core/game';
-import { getUnit, liveUnits } from '../core/game';
-import { hexKey } from '../core/hex';
-import { pathTo, reachableHexes } from '../core/movement';
+import { getUnit, liveUnits, unitsAt } from '../core/game';
+import { hexKey, hexesInRange } from '../core/hex';
+import { isOnMap } from '../core/map';
+import { ignoresZoc, pathTo, reachableHexes } from '../core/movement';
 import { SIDES, type Side, otherSide } from '../core/units';
 import { supplyNetwork } from '../core/supplyNetwork';
 import { exertsZoc, zocOf } from '../core/zoc';
@@ -45,6 +46,22 @@ function supportHexesFor({ game, preview }: UiState): RenderInput['supportHexes'
   return { attacker: pos([...sup.offensive, ...sup.artilleryCover]), defender: pos([...sup.defensive, ...sup.barrage]) };
 }
 
+/** Bolle AA ed EW dell'unità selezionata e di quelle sotto il cursore. */
+function bubblesFor({ game, data, hovered, selectedUnitId }: UiState): NonNullable<RenderInput['bubbles']> {
+  const units = [...(hovered ? unitsAt(game, data, hovered) : [])];
+  const selected = selectedUnitId ? getUnit(game, selectedUnitId) : undefined;
+  if (selected && !units.includes(selected)) units.push(selected);
+  const out: { kind: 'aa' | 'ew'; hexes: Set<string> }[] = [];
+  for (const u of units) {
+    const t = data.unitTypes[u.typeId];
+    if (!t) continue;
+    for (const [kind, r] of [['aa', t.aaRadius], ['ew', t.ewRadius]] as const) {
+      if (r > 0) out.push({ kind, hexes: new Set(hexesInRange(u.pos, r).filter((h) => isOnMap(game.map, h)).map(hexKey)) });
+    }
+  }
+  return out;
+}
+
 /** Traduce lo stato dello store nei dati che il renderer disegna. */
 export function buildRenderInput(s: UiState): RenderInput {
   const { game, data, reach, hovered } = s;
@@ -52,7 +69,7 @@ export function buildRenderInput(s: UiState): RenderInput {
 
   let zoc: ZocOverlay[] = [];
   if (s.showZoc) zoc = SIDES.map((side) => zocArea(s, side));
-  else if (reach && selected) zoc = [zocArea(s, otherSide(selected.side))];
+  else if (reach && selected && !ignoresZoc(data.unitTypes[selected.typeId]!)) zoc = [zocArea(s, otherSide(selected.side))];
 
   let path: RenderInput['path'] = null;
   if (reach && hovered) {
@@ -80,5 +97,6 @@ export function buildRenderInput(s: UiState): RenderInput {
       game.pendingAdvance && game.pendingAdvance.unitId === s.selectedUnitId ? game.pendingAdvance.to : null,
     spent: spentFor(s),
     showCoords: s.showCoords,
+    bubbles: bubblesFor(s),
   };
 }

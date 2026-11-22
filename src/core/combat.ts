@@ -1,7 +1,8 @@
+import { type AaThreat, aaFire, aaThreat } from './air';
 import { defenderResponds } from './combatPower';
 import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
-import { type GameState, addLosses, getUnit, liveUnits } from './game';
+import { type GameState, addLosses, airUnitAt, getUnit, isAirUnit, liveUnits } from './game';
 import { type Axial, hexDistance } from './hex';
 import { type LossRange, lossRange, probAtLeast, rollLosses } from './losses';
 import { findRetreatHex } from './retreat';
@@ -22,8 +23,11 @@ export function canAttack(state: GameState, data: GameData, attackerId: string, 
   if (isWeak(data.rules, a)) return { ok: false, reason: "Forza troppo bassa per attaccare" };
   const type = getUnitType(data, a.typeId);
   if (hasTag(type, 'artillery') && a.hasMoved) return { ok: false, reason: "L'artiglieria ha già mosso" };
+  if (type.attack[getUnitType(data, d.typeId).targetClass] <= 0) return { ok: false, reason: 'Non può colpire questo bersaglio' };
+  // Distanza 0: un'unità aerea e una terrestre nello stesso esagono.
+  const minDist = isAirUnit(data, a) !== isAirUnit(data, d) ? 0 : 1;
   const dist = hexDistance(a.pos, d.pos);
-  if (dist < 1 || dist > type.range) return { ok: false, reason: 'Bersaglio fuori portata' };
+  if (dist < minDist || dist > type.range) return { ok: false, reason: 'Bersaglio fuori portata' };
   return { ok: true };
 }
 
@@ -49,6 +53,8 @@ export interface CombatPreview {
   readonly retreatHex: Axial | null;
   readonly support: Readonly<Record<keyof SupportSet, readonly string[]>>;
   readonly modifiers: SupportedPowers;
+  /** Contraerea che sparerà sull'attaccante aereo prima dello scontro. */
+  readonly aaThreat: AaThreat | null;
 }
 
 interface CombatSetup {
@@ -85,7 +91,7 @@ function setupCombat(state: GameState, data: GameData, attackerId: string, targe
     baseDef: Number.isFinite(ratio) ? (k * ratio) / (1 + ratio) : k,
     baseAtt: responds && Number.isFinite(ratio) ? k / (1 + ratio) : 0,
     responds,
-    retreatHex: findRetreatHex(state, data, defender, attacker),
+    retreatHex: isAirUnit(data, defender) ? null : findRetreatHex(state, data, defender, attacker),
     support,
     modifiers,
   };
@@ -103,7 +109,7 @@ export function previewCombat(state: GameState, data: GameData, attackerId: stri
   let def = lossRange(s.baseDef, c.variationMin, c.variationMax);
 
   const retreatChance =
-    s.ratio >= c.retreatMinRatio ? probAtLeast(s.baseDef, c.variationMin, c.variationMax, c.retreatMinLosses) : 0;
+    s.ratio >= c.retreatMinRatio && !isAirUnit(data, s.defender) ? probAtLeast(s.baseDef, c.variationMin, c.variationMax, c.retreatMinLosses) : 0;
   if (!s.retreatHex && retreatChance > 0) {
     const extra = c.noRetreatExtraLoss;
     def = {
@@ -126,6 +132,7 @@ export function previewCombat(state: GameState, data: GameData, attackerId: stri
     retreatHex: s.retreatHex,
     support: supportIds(s.support),
     modifiers: s.modifiers,
+    aaThreat: aaThreat(state, data, s.attacker),
   };
 }
 
@@ -134,9 +141,17 @@ export interface CombatOutcome {
   readonly events: readonly GameEvent[];
 }
 
-export function resolveAttack(state: GameState, data: GameData, attackerId: string, targetId: string): CombatOutcome | string {
-  const check = canAttack(state, data, attackerId, targetId);
+export function resolveAttack(before: GameState, data: GameData, attackerId: string, targetId: string): CombatOutcome | string {
+  const check = canAttack(before, data, attackerId, targetId);
   if (!check.ok) return check.reason;
+  // Fuoco preventivo dell'AA sull'attaccante aereo: se lo distrugge o lo logora, niente attacco.
+  const fire = aaFire(before, data, attackerId);
+  const state = fire?.state ?? before;
+  const pre = fire ? [fire.event] : [];
+  if (!canAttack(state, data, attackerId, targetId).ok) {
+    const units = state.units.map((u) => (u.id === attackerId ? { ...u, hasAttacked: true, movesLeft: 0 } : u));
+    return { state: { ...state, units }, events: pre };
+  }
   const s = setupCombat(state, data, attackerId, targetId)!;
   const c = data.rules.combat;
 
@@ -146,7 +161,7 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
   let defLoss = Math.min(d.losses, s.defender.strength);
   const attLoss = Math.min(a.losses, s.attacker.strength);
   const defSurvives = defLoss < s.defender.strength;
-  const retreatTriggered = defSurvives && s.ratio >= c.retreatMinRatio && defLoss >= c.retreatMinLosses;
+  const retreatTriggered = defSurvives && !isAirUnit(data, s.defender) && s.ratio >= c.retreatMinRatio && defLoss >= c.retreatMinLosses;
   let retreatTo: Axial | null = null;
   let extraLoss = 0;
   if (retreatTriggered) {
@@ -161,8 +176,15 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
   const attStrength = s.attacker.strength - attLoss;
   const attackerType = getUnitType(data, s.attacker.typeId);
   const vacated = defStrength === 0 || retreatTo !== null;
+  const enemyAbove = airUnitAt(state, data, s.defender.pos);
   const canAdvance =
-    vacated && attStrength > 0 && s.responds && !hasTag(attackerType, 'artillery');
+    vacated &&
+    attStrength > 0 &&
+    s.responds &&
+    !hasTag(attackerType, 'artillery') &&
+    !isAirUnit(data, s.attacker) &&
+    !isAirUnit(data, s.defender) &&
+    !(enemyAbove && enemyAbove.side === s.defender.side);
 
   const supportedAttack = new Set([...s.support.offensive, ...s.support.artilleryCover].map((u) => u.id));
   const reacted = new Set([...s.support.defensive, ...s.support.barrage].map((u) => u.id));
@@ -200,7 +222,7 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
       log: [...state.log, event],
       pendingAdvance: canAdvance ? { unitId: attackerId, to: s.defender.pos } : undefined,
     },
-    events: [event],
+    events: [...pre, event],
   };
 }
 

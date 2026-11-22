@@ -3,7 +3,7 @@
  * ma movimento, rifornimenti e artiglieria li leggono già da qui.
  * In futuro il meteo sarà estratto a caso per scenario, sempre tramite rng.ts.
  */
-import type { Mobility } from './units';
+import type { GroundMobility } from './units';
 import { dictionary, num, record, str } from './validate';
 
 export type Daylight = 'day' | 'night';
@@ -13,7 +13,7 @@ export interface WeatherType {
   readonly id: string;
   readonly name: string;
   readonly spottingMod: number;
-  readonly moveCostMod: Readonly<Record<Mobility, number>>;
+  readonly moveCostMod: Readonly<Record<GroundMobility, number>>;
   readonly supplyRangeMod: number;
   readonly artilleryMod: number;
 }

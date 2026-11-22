@@ -5,7 +5,7 @@ import { type Axial, hexEquals } from './hex';
 import type { MapData } from './map';
 import { seedRng } from './rng';
 import type { AiPosture, Scenario, VictoryRules } from './scenario';
-import { type Side, type Unit, isAlive } from './units';
+import { type Side, type Unit, isAirType, isAlive } from './units';
 import type { TurnConditions } from './weather';
 
 export interface GameResult {
@@ -96,9 +96,23 @@ export function getUnit(state: GameState, id: string): Unit | undefined {
   return state.units.find((u) => u.id === id);
 }
 
-/** Unità viva nell'esagono, se presente (al massimo una per esagono). */
-export function unitAt(state: GameState, h: Axial): Unit | undefined {
-  return state.units.find((u) => isAlive(u) && hexEquals(u.pos, h));
+export function isAirUnit(data: GameData, unit: Unit): boolean {
+  return isAirType(getUnitType(data, unit.typeId));
+}
+
+/** Unità vive nell'esagono: al massimo una terrestre e una aerea, la terrestre per prima. */
+export function unitsAt(state: GameState, data: GameData, h: Axial): Unit[] {
+  return state.units
+    .filter((u) => isAlive(u) && hexEquals(u.pos, h))
+    .sort((a, b) => Number(isAirUnit(data, a)) - Number(isAirUnit(data, b)));
+}
+
+export function groundUnitAt(state: GameState, data: GameData, h: Axial): Unit | undefined {
+  return state.units.find((u) => isAlive(u) && hexEquals(u.pos, h) && !isAirUnit(data, u));
+}
+
+export function airUnitAt(state: GameState, data: GameData, h: Axial): Unit | undefined {
+  return state.units.find((u) => isAlive(u) && hexEquals(u.pos, h) && isAirUnit(data, u));
 }
 
 export function liveUnits(state: GameState, side?: Side): Unit[] {

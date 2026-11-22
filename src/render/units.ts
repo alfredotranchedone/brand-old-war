@@ -4,6 +4,10 @@ import { HEX_SIZE } from './camera';
 import { getSymbolRaster } from './symbols';
 import { MAP_THEME } from './theme';
 
+/** Unità aerea sopra una terrestre: scala e spostamento (in raggi d'esagono) verso l'alto a destra. */
+const AIR_SCALE = 0.7;
+const AIR_SHIFT = 0.32;
+
 /** Pedina: simbolo, forza in basso a destra, avviso di rifornimento in basso a sinistra. */
 export function drawUnit(
   ctx: CanvasRenderingContext2D,
@@ -12,13 +16,24 @@ export function drawUnit(
   pixelsPerUnit: number,
   dimmed: boolean,
   at?: Point | null,
+  layer: { readonly airborne: boolean; readonly stacked: boolean } = { airborne: false, stacked: false },
 ): void {
-  const c = at ?? hexToPixel(unit.pos, HEX_SIZE);
+  const base = at ?? hexToPixel(unit.pos, HEX_SIZE);
+  const shift = layer.stacked ? HEX_SIZE * AIR_SHIFT : 0;
+  const c = { x: base.x + shift, y: base.y - shift };
+  const size = layer.stacked ? AIR_SCALE : 1;
   ctx.save();
   if (dimmed) ctx.globalAlpha = 0.45;
+  // Le unità aeree proiettano un'ombra: sono sopra la mappa.
+  if (layer.airborne) {
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 4;
+  }
 
-  const raster = getSymbolRaster(type, unit.side, pixelsPerUnit);
-  const k = 1 / raster.pixelsPerUnit;
+  const raster = getSymbolRaster(type, unit.side, pixelsPerUnit * size);
+  const k = size / raster.pixelsPerUnit;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(
     raster.canvas,
@@ -28,7 +43,8 @@ export function drawUnit(
     raster.canvas.height * k,
   );
 
-  drawStrength(ctx, unit.strength, c.x + HEX_SIZE * 0.3, c.y + HEX_SIZE * 0.38);
+  ctx.shadowColor = 'transparent';
+  drawStrength(ctx, unit.strength, c.x + HEX_SIZE * 0.3 * size, c.y + HEX_SIZE * 0.38 * size);
   if (unit.outOfSupplyTurns > 0) drawSupplyWarning(ctx, c.x - HEX_SIZE * 0.5, c.y + HEX_SIZE * 0.38);
   ctx.restore();
 }

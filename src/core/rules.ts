@@ -2,7 +2,7 @@
  * Parametri di bilanciamento (rules.json). Tutti i numeri delle regole stanno qui.
  */
 import { UNIT_TAGS, type UnitTag } from './units';
-import { DataError, array, bool, int, num, oneOf, record } from './validate';
+import { DataError, array, bool, int, num, oneOf, record, str } from './validate';
 
 export interface AiWeights {
   readonly objectiveProximity: number;
@@ -56,6 +56,23 @@ export interface Rules {
     readonly maxArtilleryDefensive: number;
     readonly artilleryBarrageAttackPenalty: number;
   };
+  /** Dominio aereo (docs/specifiche_dominio_aereo_ew_e_aeroporti.md, punto 1). */
+  readonly air: {
+    /** Bonus d'attacco con un drone amico sopra il bersaglio. */
+    readonly uavSpotterBonus: number;
+    /** Attacco dei droni dentro una bolla EW nemica. */
+    readonly jammedUavAttackMultiplier: number;
+    /** Malus all'artiglieria che spara su un bersaglio dentro una bolla EW nemica. */
+    readonly ewArtilleryPenalty: number;
+    /** Tiri della contraerea contro un'unità aerea che agisce nella sua bolla. */
+    readonly aaShots: number;
+    /** Probabilità di colpire per punto di attacco aereo, a forza piena. */
+    readonly aaHitPerAttack: number;
+    readonly aaMaxHitChance: number;
+    /** Terreni in cui gli elicotteri attaccano con malus. */
+    readonly helicopterCoverTerrains: readonly string[];
+    readonly helicopterCoverMultiplier: number;
+  };
   readonly victory: { readonly enemyStepsPerPoint: number };
   readonly ai: {
     readonly turnTimeLimitMs: number;
@@ -79,6 +96,8 @@ export function parseRules(raw: unknown): Rules {
   const sp = record(o.support, `${p}.support`);
   const spNum = (k: string, max = Infinity) => num(sp[k], `${p}.support.${k}`, 0, max);
   const spInt = (k: string) => int(sp[k], `${p}.support.${k}`, 0);
+  const air = record(o.air, `${p}.air`);
+  const airNum = (k: string, max = Infinity) => num(air[k], `${p}.air.${k}`, 0, max);
   const ai = record(o.ai, `${p}.ai`);
   const postures = record(ai.postures, `${p}.ai.postures`);
 
@@ -147,6 +166,18 @@ export function parseRules(raw: unknown): Rules {
       artilleryDefenseReduction: spNum('artilleryDefenseReduction', 1),
       maxArtilleryDefensive: spInt('maxArtilleryDefensive'),
       artilleryBarrageAttackPenalty: spNum('artilleryBarrageAttackPenalty', 1),
+    },
+    air: {
+      uavSpotterBonus: airNum('uavSpotterBonus'),
+      jammedUavAttackMultiplier: airNum('jammedUavAttackMultiplier'),
+      ewArtilleryPenalty: airNum('ewArtilleryPenalty', 1),
+      aaShots: int(air.aaShots, `${p}.air.aaShots`, 0),
+      aaHitPerAttack: airNum('aaHitPerAttack'),
+      aaMaxHitChance: airNum('aaMaxHitChance', 1),
+      helicopterCoverTerrains: array(air.helicopterCoverTerrains, `${p}.air.helicopterCoverTerrains`).map((t, i) =>
+        str(t, `${p}.air.helicopterCoverTerrains[${i}]`),
+      ),
+      helicopterCoverMultiplier: airNum('helicopterCoverMultiplier'),
     },
     victory: { enemyStepsPerPoint: num(v.enemyStepsPerPoint, `${p}.victory.enemyStepsPerPoint`, 1) },
     ai: {

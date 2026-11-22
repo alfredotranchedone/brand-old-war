@@ -39,6 +39,14 @@ export type GameEvent =
     }
   | { readonly kind: 'advance'; readonly unitId: string; readonly to: Axial }
   | {
+      /** Fuoco preventivo della contraerea su un'unità aerea nella sua bolla. */
+      readonly kind: 'aaFire';
+      readonly aaId: string;
+      readonly targetId: string;
+      readonly losses: number;
+      readonly destroyed: boolean;
+    }
+  | {
       readonly kind: 'supply';
       readonly side: Side;
       readonly outOfSupply: readonly string[];

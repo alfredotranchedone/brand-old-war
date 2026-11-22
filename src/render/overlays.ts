@@ -117,6 +117,19 @@ export function drawSupport(ctx: CanvasRenderingContext2D, hexes: readonly Axial
   ctx.restore();
 }
 
+/** Bolla AA o EW: contorno tratteggiato dell'area coperta. */
+export function drawBubble(ctx: CanvasRenderingContext2D, hexes: ReadonlySet<HexKey>, color: string, scale: number): void {
+  ctx.save();
+  ctx.fillStyle = `${color}1f`;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5 / Math.max(scale, 0.6);
+  ctx.setLineDash([8, 5]);
+  const border = areaBorder(hexes);
+  for (const key of hexes) ctx.fill(hexPath(parseHexKey(key), 1));
+  ctx.stroke(border);
+  ctx.restore();
+}
+
 export function drawAdvance(ctx: CanvasRenderingContext2D, h: Axial): void {
   const p = hexPath(h, 0.88);
   ctx.save();

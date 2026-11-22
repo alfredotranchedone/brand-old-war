@@ -47,6 +47,10 @@ export function eventText(e: GameEvent, state: GameState, data: GameData): strin
       if (e.attackerDestroyed) parts.push('attaccante distrutto');
       return parts.join(' · ');
     }
+    case 'aaFire': {
+      const what = e.destroyed ? 'abbattuta' : e.losses > 0 ? `perde ${e.losses} step` : 'illesa';
+      return `Contraerea: ${unitName(state, data, e.aaId)} spara su ${unitName(state, data, e.targetId)} · ${what}`;
+    }
     case 'advance':
       return `${unitName(state, data, e.unitId)} avanza in ${at(e.to)}`;
     case 'supply': {

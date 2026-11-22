@@ -1,5 +1,5 @@
 import type { GameData } from './data';
-import { type GameState, currentConditions, unitAt } from './game';
+import { type GameState, currentConditions, groundUnitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors, parseHexKey } from './hex';
 import { isPassable, terrainAt } from './map';
 import type { Side, Unit } from './units';
@@ -26,7 +26,7 @@ export function supplyNetwork(state: GameState, data: GameData, side: Side): Sup
   const zoc = enemyZocOf(state, data, side);
   const passable = (h: Axial) => {
     if (!isPassable(state.map, data.terrain, h)) return false;
-    const occupant = unitAt(state, h);
+    const occupant = groundUnitAt(state, data, h);
     if (occupant) return occupant.side === side;
     return !zoc.has(hexKey(h));
   };

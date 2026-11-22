@@ -12,15 +12,18 @@ export function otherSide(side: Side): Side {
 }
 
 /** Classe di bersaglio: decide quale valore di attacco usa chi spara. */
-export type TargetClass = 'armored' | 'unarmored';
-export const TARGET_CLASSES: readonly TargetClass[] = ['armored', 'unarmored'];
+export type TargetClass = 'armored' | 'unarmored' | 'air';
+export const TARGET_CLASSES: readonly TargetClass[] = ['armored', 'unarmored', 'air'];
 
-export type Mobility = 'tracked' | 'wheeled' | 'foot';
-export const MOBILITIES: readonly Mobility[] = ['tracked', 'wheeled', 'foot'];
+/** `air`: elicotteri e droni (layer aereo), ignorano terreno e ZOC terrestre. */
+export type Mobility = 'tracked' | 'wheeled' | 'foot' | 'air';
+export const MOBILITIES: readonly Mobility[] = ['tracked', 'wheeled', 'foot', 'air'];
+/** Mobilità terrestri: hanno un costo di movimento nel terreno. */
+export type GroundMobility = Exclude<Mobility, 'air'>;
 
 /** Etichette di comportamento: le regole speciali si agganciano qui, non al nome del tipo. */
-export type UnitTag = 'infantry' | 'recon' | 'artillery' | 'infiltrator' | 'engineer';
-export const UNIT_TAGS: readonly UnitTag[] = ['infantry', 'recon', 'artillery', 'infiltrator', 'engineer'];
+export type UnitTag = 'infantry' | 'recon' | 'artillery' | 'infiltrator' | 'engineer' | 'helicopter' | 'uav';
+export const UNIT_TAGS: readonly UnitTag[] = ['infantry', 'recon', 'artillery', 'infiltrator', 'engineer', 'helicopter', 'uav'];
 
 export interface UnitType {
   readonly id: string;
@@ -37,6 +40,10 @@ export interface UnitType {
   /** Portata di avvistamento: usata solo con la futura nebbia di guerra. */
   readonly spotting: number;
   readonly tags: readonly UnitTag[];
+  /** Raggio della bolla contraerea in esagoni (0 = nessuna). */
+  readonly aaRadius: number;
+  /** Raggio della bolla di guerra elettronica in esagoni (0 = nessuna). */
+  readonly ewRadius: number;
   /** Organico nominale a forza piena: solo informativo, non entra nelle regole. */
   readonly organic: Organic;
 }
@@ -73,6 +80,11 @@ export function hasTag(type: UnitType, tag: UnitTag): boolean {
   return type.tags.includes(tag);
 }
 
+/** Elicotteri e droni: occupano il posto aereo dell'esagono. */
+export function isAirType(type: UnitType): boolean {
+  return type.mobility === 'air';
+}
+
 export function isAlive(unit: Unit): boolean {
   return unit.strength > 0;
 }
@@ -98,6 +110,7 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       attack: {
         armored: num(attack.armored, `${path}.attack.armored`, 0),
         unarmored: num(attack.unarmored, `${path}.attack.unarmored`, 0),
+        air: num(attack.air, `${path}.attack.air`, 0),
       },
       defense: num(o.defense, `${path}.defense`, 0),
       range,
@@ -105,6 +118,8 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       mobility: oneOf(o.mobility, `${path}.mobility`, MOBILITIES),
       spotting: int(o.spotting, `${path}.spotting`, 1),
       tags: array(o.tags ?? [], `${path}.tags`).map((t, i) => oneOf(t, `${path}.tags[${i}]`, UNIT_TAGS)),
+      aaRadius: int(o.aaRadius ?? 0, `${path}.aaRadius`, 0),
+      ewRadius: int(o.ewRadius ?? 0, `${path}.ewRadius`, 0),
       organic: {
         personnel: int(organic.personnel, `${path}.organic.personnel`, 0),
         mainVehicles: int(organic.mainVehicles, `${path}.organic.mainVehicles`, 0),

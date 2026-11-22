@@ -2,7 +2,7 @@ import { type GameData, getUnitType } from './data';
 import { type GameState, addLosses } from './game';
 import type { Rules } from './rules';
 import { isInSupply, supplyNetwork } from './supplyNetwork';
-import { type Side, type Unit, isAlive } from './units';
+import { type Side, type Unit, isAirType, isAlive } from './units';
 import { isWeak } from './weakness';
 
 export interface SupplyEffects {
@@ -38,7 +38,9 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
 
   const units = state.units.map((u) => {
     if (u.side !== side || !isAlive(u)) return u;
-    const turns = isInSupply(network, u) ? 0 : u.outOfSupplyTurns + 1;
+    // Le unità aeree per ora sono sempre rifornite (gli aeroporti sono rimandati).
+    const type = getUnitType(data, u.typeId);
+    const turns = isAirType(type) || isInSupply(network, u) ? 0 : u.outOfSupplyTurns + 1;
     let strength = u.strength;
     if (turns > 0) outOfSupply.push(u.id);
     if (turns >= 2 && strength > 1 && loss > 0) {
@@ -46,7 +48,7 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
       lost += u.strength - strength;
       attrition.push(u.id);
     }
-    const movesLeft = startingMoves(data.rules, getUnitType(data, u.typeId).move, turns, strength);
+    const movesLeft = startingMoves(data.rules, type.move, turns, strength);
     return { ...u, outOfSupplyTurns: turns, strength, movesLeft };
   });
 

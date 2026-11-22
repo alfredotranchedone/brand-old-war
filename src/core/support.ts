@@ -1,6 +1,7 @@
 /**
  * Fuoco di supporto: scelta automatica delle unità che intervengono in un combattimento.
  */
+import { type AirAttackMods, airAttackMods } from './air';
 import { attackPower, defensePower, terrainDefenseMod } from './combatPower';
 import { type GameData, getUnitType } from './data';
 import { type GameState, liveUnits } from './game';
@@ -83,6 +84,8 @@ export interface SupportedPowers {
   readonly terrainMod: { readonly before: number; readonly after: number };
   /** Moltiplicatore dello sbarramento sull'attacco (1 = nessuno). */
   readonly barrageMod: number;
+  /** Drone osservatore, guerra elettronica, elicotteri al coperto. */
+  readonly air: AirAttackMods;
 }
 
 /** Potenze di attacco e difesa con i supporti applicati. */
@@ -93,13 +96,15 @@ export function supportedPowers(state: GameState, data: GameData, attacker: Unit
   const barrageMod = set.barrage.length > 0 ? 1 - cfg.artilleryBarrageAttackPenalty : 1;
   const before = terrainDefenseMod(state, data, defender);
   const after = set.artilleryCover.length > 0 && before > 1 ? 1 + (before - 1) * (1 - cfg.artilleryDefenseReduction) : before;
+  const air = airAttackMods(state, data, attacker, defender);
   return {
-    attack: attackPower(state, data, attacker, defender) * (1 + offensiveBonus) * barrageMod,
+    attack: attackPower(state, data, attacker, defender) * (1 + offensiveBonus) * barrageMod * (1 + air.spotter) * air.ew * air.cover,
     defense: defensePower(state, data, defender, after) * (1 + defensiveBonus),
     offensiveBonus,
     defensiveBonus,
     terrainMod: { before, after },
     barrageMod,
+    air,
   };
 }
 

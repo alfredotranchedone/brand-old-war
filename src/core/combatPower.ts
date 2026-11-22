@@ -1,5 +1,5 @@
 import { type GameData, getUnitType } from './data';
-import { type GameState, currentConditions, unitAt } from './game';
+import { type GameState, currentConditions, groundUnitAt, isAirUnit } from './game';
 import { hexDistance, hexNeighbors } from './hex';
 import { terrainAt } from './map';
 import { supplyEffects } from './supply';
@@ -14,7 +14,7 @@ export function isEntrenchedEffective(data: GameData, unit: Unit): boolean {
 /** Genieri nemici adiacenti al difensore: la sua trincea non conta. */
 export function entrenchmentNegated(state: GameState, data: GameData, defender: Unit): boolean {
   return hexNeighbors(defender.pos).some((h) => {
-    const u = unitAt(state, h);
+    const u = groundUnitAt(state, data, h);
     return !!u && isAlive(u) && u.side !== defender.side && hasTag(getUnitType(data, u.typeId), 'engineer');
   });
 }
@@ -30,6 +30,7 @@ export function attackPower(state: GameState, data: GameData, attacker: Unit, de
 
 /** Moltiplicatore difensivo del terreno, trincea compresa. */
 export function terrainDefenseMod(state: GameState, data: GameData, defender: Unit): number {
+  if (isAirUnit(data, defender)) return 1;
   const terrain = terrainAt(state.map, data.terrain, defender.pos);
   const entrenched = isEntrenchedEffective(data, defender) && !entrenchmentNegated(state, data, defender);
   return terrain.defenseMod * (entrenched ? terrain.entrenchmentMod : 1);

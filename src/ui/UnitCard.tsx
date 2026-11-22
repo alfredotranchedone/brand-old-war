@@ -73,6 +73,8 @@ export function UnitCard() {
         <dd>{type.attack.armored}</dd>
         <dt>Attacco vs non blindati</dt>
         <dd>{type.attack.unarmored}</dd>
+        <dt>Attacco vs aerei</dt>
+        <dd>{type.attack.air}</dd>
         <dt>Difesa</dt>
         <dd>{type.defense}</dd>
         <dt>Portata</dt>
@@ -81,6 +83,18 @@ export function UnitCard() {
         <dd>{TARGET_CLASS_LABEL[type.targetClass]}</dd>
         <dt>Mobilità</dt>
         <dd>{MOBILITY_LABEL[type.mobility]}</dd>
+        {type.aaRadius > 0 && (
+          <>
+            <dt>Bolla contraerea</dt>
+            <dd>{type.aaRadius} esagoni</dd>
+          </>
+        )}
+        {type.ewRadius > 0 && (
+          <>
+            <dt>Bolla EW</dt>
+            <dd>{type.ewRadius} esagoni</dd>
+          </>
+        )}
       </dl>
     </section>
   );

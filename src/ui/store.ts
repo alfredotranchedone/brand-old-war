@@ -4,7 +4,7 @@ import { type CombatPreview, attackableTargets, previewCombat } from '../core/co
 import type { GameData } from '../core/data';
 import type { GameEvent } from '../core/events';
 import { spentUnits } from '../core/availability';
-import { type GameState, getUnit, liveUnits, unitAt } from '../core/game';
+import { type GameState, getUnit, liveUnits, unitsAt } from '../core/game';
 import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
@@ -35,6 +35,8 @@ export interface UiState {
   deselect: () => void;
   confirmAttack: () => void;
   cancelTarget: () => void;
+  /** Nell'anteprima, passa all'altro bersaglio nemico dello stesso esagono (terrestre o aereo). */
+  switchTarget: () => void;
   dispatch: (action: Action) => boolean;
   undo: () => void;
   toggleCoords: () => void;
@@ -119,18 +121,28 @@ export const useUiStore = create<UiState>()((set, get) => ({
       get().dispatch({ kind: 'advance', unitId: pending.unitId, to: h });
       return;
     }
-    const clicked = unitAt(game, h);
-    if (clicked && selectedUnitId && targets.includes(clicked.id)) {
-      if (preview?.targetId === clicked.id) get().confirmAttack();
-      else set({ preview: previewCombat(game, data, selectedUnitId, clicked.id) });
+    const here = unitsAt(game, data, h);
+    const targetable = selectedUnitId ? here.filter((u) => targets.includes(u.id)) : [];
+    if (selectedUnitId && targetable.length > 0) {
+      if (targetable.some((u) => u.id === preview?.targetId)) get().confirmAttack();
+      else set({ preview: previewCombat(game, data, selectedUnitId, targetable[0]!.id) });
       return;
     }
     if (reach && selectedUnitId && isReachable(reach, h)) {
       get().dispatch({ kind: 'move', unitId: selectedUnitId, to: h });
       return;
     }
-    const id = clicked?.id ?? null;
-    get().select(id === selectedUnitId ? null : id);
+    // Con un'unità terrestre e una aerea nello stesso esagono, i clic le alternano.
+    const idx = here.findIndex((u) => u.id === selectedUnitId);
+    get().select((idx >= 0 ? here[idx + 1] : here[0])?.id ?? null);
+  },
+
+  switchTarget: () => {
+    const { game, data, preview, targets } = get();
+    const target = preview && getUnit(game, preview.targetId);
+    if (!target) return;
+    const other = unitsAt(game, data, target.pos).find((u) => u.id !== target.id && targets.includes(u.id));
+    if (other) set({ preview: previewCombat(game, data, preview.attackerId, other.id) });
   },
 
   select: (unitId) => {

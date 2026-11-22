@@ -13,7 +13,7 @@ import {
   assertOnMap,
   edgeHexes,
 } from './map';
-import { SIDES, type Side } from './units';
+import { SIDES, type Side, isAirType } from './units';
 import {
   DataError,
   array,
@@ -197,7 +197,7 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
 
   // --- Unità -----------------------------------------------------------------
   const unitIds = new Set<string>();
-  const occupied = new Map<HexKey, string>();
+  const occupied = new Map<string, string>();
   const units: ScenarioUnit[] = array(o.units, `${p}.units`).map((v, i) => {
     const path = `${p}.units[${i}]`;
     const u = record(v, path);
@@ -208,10 +208,13 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     if (!data.unitTypes[typeId]) throw new DataError(`${path}.type`, `tipo "${typeId}" non definito in units.json`);
     const pos = readPos(u, path);
     assertOnMap(size, pos, path);
-    assertPassable(pos, path);
-    const other = occupied.get(hexKey(pos));
-    if (other) throw new DataError(path, `esagono già occupato da "${other}" (una sola unità per esagono)`);
-    occupied.set(hexKey(pos), id);
+    const air = isAirType(data.unitTypes[typeId]!);
+    if (!air) assertPassable(pos, path);
+    // Per esagono: un posto terrestre e uno aereo.
+    const slot = `${hexKey(pos)}|${air ? 'air' : 'ground'}`;
+    const other = occupied.get(slot);
+    if (other) throw new DataError(path, `esagono già occupato da "${other}" (una unità terrestre e una aerea per esagono)`);
+    occupied.set(slot, id);
     return {
       id,
       typeId,

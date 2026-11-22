@@ -26,6 +26,16 @@
     "maxArtilleryDefensive": 1,
     "artilleryBarrageAttackPenalty": 0.2
   },
+  "air": {
+    "uavSpotterBonus": 0.15,
+    "jammedUavAttackMultiplier": 0.5,
+    "ewArtilleryPenalty": 0.2,
+    "aaShots": 2,
+    "aaHitPerAttack": 0.04,
+    "aaMaxHitChance": 0.9,
+    "helicopterCoverTerrains": ["forest"],
+    "helicopterCoverMultiplier": 0.75
+  },
   "victory": { "enemyStepsPerPoint": 5 },
   "ai": {
     "turnTimeLimitMs": 1000,

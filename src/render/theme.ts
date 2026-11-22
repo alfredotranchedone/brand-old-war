@@ -17,6 +17,8 @@ export const MAP_THEME = {
   advanceStroke: '#1f7a3a',
   supportFriendly: '#5cf08a',
   supportEnemy: '#ff6a5c',
+  /** Bolle di contraerea e guerra elettronica. */
+  bubble: { aa: '#ff9f1c', ew: '#c77dff' },
   coordText: 'rgba(60, 70, 50, 0.55)',
   labelText: '#3d4434',
   labelHalo: 'rgba(238, 240, 228, 0.9)',

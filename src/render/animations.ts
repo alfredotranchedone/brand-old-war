@@ -54,6 +54,11 @@ export class Animations {
         tracer(s.barrage, unitPos(e.attackerId), MAP_THEME.supportEnemy);
         flash(e.attackerId, e.attackerLosses);
         flash(e.targetId, e.defenderLosses, e.retreatTo ?? undefined);
+      } else if (e.kind === 'aaFire') {
+        const from = unitPos(e.aaId);
+        const to = unitPos(e.targetId);
+        if (from && to) this.tracers.push({ from: hexToPixel(from, HEX_SIZE), to: hexToPixel(to, HEX_SIZE), color: MAP_THEME.bubble.aa, start: now });
+        if (to && e.losses > 0) this.losses.push({ at: hexToPixel(to, HEX_SIZE), text: `−${e.losses}`, start: now });
       }
     }
   }

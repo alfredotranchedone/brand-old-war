@@ -3,11 +3,12 @@ import { getUnitType } from './data';
 import type { GameState } from './game';
 import { type HexKey, hexKey, hexNeighbors } from './hex';
 import { isOnMap } from './map';
-import { type Side, type Unit, hasTag, isAlive, otherSide } from './units';
+import { type Side, type Unit, hasTag, isAirType, isAlive, otherSide } from './units';
 
 export function exertsZoc(data: GameData, unit: Unit): boolean {
   if (!isAlive(unit) || unit.strength < data.rules.zoc.minStrength) return false;
   const type = getUnitType(data, unit.typeId);
+  if (isAirType(type)) return false;
   if (data.rules.zoc.artilleryZocOnlyIfNotFired && hasTag(type, 'artillery') && unit.hasAttacked) return false;
   return true;
 }

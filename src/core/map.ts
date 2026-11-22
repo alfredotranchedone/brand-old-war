@@ -2,7 +2,7 @@
  * Mappa, terreno, obiettivi e sorgenti di rifornimento.
  */
 import { type Axial, type HexKey, axialToOffset, hexKey, offsetToAxial } from './hex';
-import type { Mobility, Side } from './units';
+import type { GroundMobility, Side } from './units';
 import { DataError, bool, dictionary, num, record, str } from './validate';
 
 // ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ export interface TerrainType {
   readonly id: string;
   readonly name: string;
   /** Costo in PM per entrare nell'esagono, per tipo di mobilità. */
-  readonly moveCost: Readonly<Record<Mobility, number>>;
+  readonly moveCost: Readonly<Record<GroundMobility, number>>;
   /** Moltiplicatore della difesa per chi sta nell'esagono. */
   readonly defenseMod: number;
   /** Moltiplicatore della difesa per chi è trincerato nell'esagono. */

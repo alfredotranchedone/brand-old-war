@@ -1,12 +1,12 @@
 import type { GameEvent } from '../core/events';
 import { type Axial, type HexKey, hexCorners, hexKey, hexToPixel } from '../core/hex';
 import { type MapData, type TerrainTable, mapHexes } from '../core/map';
-import { type Side, type Unit, type UnitTypeTable, isAlive } from '../core/units';
+import { type Side, type Unit, type UnitTypeTable, isAirType, isAlive } from '../core/units';
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { Animations } from './animations';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
-import { areaBorder, drawAdvance, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
+import { areaBorder, drawAdvance, drawBubble, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { TileImages } from './tiles';
 import { drawUnit } from './units';
@@ -43,6 +43,8 @@ export interface RenderInput {
   /** Unità della fazione attiva che non hanno più azioni disponibili. */
   readonly spent: ReadonlySet<string>;
   readonly showCoords: boolean;
+  /** Bolle AA ed EW da mostrare (unità selezionata o sotto il cursore). */
+  readonly bubbles?: readonly { readonly kind: 'aa' | 'ew'; readonly hexes: ReadonlySet<HexKey> }[];
 }
 
 export function mapBounds(map: MapData): Bounds {
@@ -197,6 +199,7 @@ export class MapRenderer {
     drawObjectives(ctx, input.map, input.objectives);
     drawReachable(ctx, input.reachable);
     for (const z of input.zoc) drawZocBorder(ctx, z.hexes, MAP_THEME.side[z.side].solid, s);
+    for (const b of input.bubbles ?? []) drawBubble(ctx, b.hexes, MAP_THEME.bubble[b.kind], s);
     if (input.showCoords) drawCoords(ctx, input.map);
     this.drawHover(input, s);
     drawTargets(ctx, input.targets, input.chosenTarget);
@@ -206,10 +209,7 @@ export class MapRenderer {
     this.drawSelection(input);
     drawLabels(ctx, input.map);
 
-    for (const u of input.units) {
-      const type = input.unitTypes[u.typeId];
-      if (type && isAlive(u)) drawUnit(ctx, u, type, s * dpr, input.spent.has(u.id), this.animations.unitPoint(u.id, now));
-    }
+    this.drawUnits(input, s * dpr, now);
     this.animations.drawTracers(ctx, now);
     this.animations.drawLosses(ctx, now);
     if (this.animations.isActive(now)) this.requestDraw();
@@ -249,6 +249,23 @@ export class MapRenderer {
     this.ctx.lineWidth = 2 / scale;
     this.ctx.lineJoin = 'round';
     this.ctx.stroke(area ? areaBorder(new Set(area.map(hexKey))) : fill);
+  }
+
+  /** Prima le terrestri, poi le aeree; un'aerea sopra una terrestre è rimpicciolita e spostata in alto a destra. */
+  private drawUnits(input: RenderInput, pixelsPerUnit: number, now: number): void {
+    const live = input.units.filter((u) => isAlive(u) && input.unitTypes[u.typeId]);
+    const isAir = (u: Unit) => isAirType(input.unitTypes[u.typeId]!);
+    const groundHexes = new Set(live.filter((u) => !isAir(u)).map((u) => hexKey(u.pos)));
+    for (const air of [false, true]) {
+      for (const u of live) {
+        if (isAir(u) !== air) continue;
+        const stacked = air && groundHexes.has(hexKey(u.pos));
+        drawUnit(this.ctx, u, input.unitTypes[u.typeId]!, pixelsPerUnit, input.spent.has(u.id), this.animations.unitPoint(u.id, now), {
+          airborne: air,
+          stacked,
+        });
+      }
+    }
   }
 
   private drawSelection(input: RenderInput): void {

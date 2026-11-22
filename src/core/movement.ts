@@ -1,9 +1,10 @@
 import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
-import { type GameState, currentConditions, getUnit, unitAt } from './game';
+import { aaFire } from './air';
+import { type GameState, airUnitAt, currentConditions, getUnit, groundUnitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors } from './hex';
-import { isPassable, terrainAt } from './map';
-import { type Unit, type UnitType, hasTag, isAlive } from './units';
+import { isOnMap, isPassable, terrainAt } from './map';
+import { type Unit, type UnitType, hasTag, isAirType, isAlive } from './units';
 import { enemyZocOf } from './zoc';
 
 const EPS = 1e-9;
@@ -23,13 +24,14 @@ export interface Reach {
 }
 
 export function enterCost(state: GameState, data: GameData, type: UnitType, h: Axial): number {
+  if (type.mobility === 'air') return 1;
   const terrain = terrainAt(state.map, data.terrain, h);
   const weather = data.weather[currentConditions(state).weather];
   return terrain.moveCost[type.mobility] * (weather?.moveCostMod[type.mobility] ?? 1);
 }
 
 export function ignoresZoc(type: UnitType): boolean {
-  return hasTag(type, 'recon') || hasTag(type, 'infiltrator');
+  return isAirType(type) || hasTag(type, 'recon') || hasTag(type, 'infiltrator');
 }
 
 export type MoveCheck = { readonly ok: true } | { readonly ok: false; readonly reason: string };
@@ -49,6 +51,7 @@ export function computeReach(state: GameState, data: GameData, unitId: string): 
   if (!unit || !canUnitMove(state, unit).ok) return null;
   const type = getUnitType(data, unit.typeId);
   const zoc = ignoresZoc(type) ? new Set<HexKey>() : enemyZocOf(state, data, unit.side);
+  const air = isAirType(type);
   const originKey = hexKey(unit.pos);
   const startsInZoc = zoc.has(originKey);
 
@@ -70,11 +73,15 @@ export function computeReach(state: GameState, data: GameData, unitId: string): 
     if (!isOrigin && zoc.has(key)) continue;
 
     for (const n of hexNeighbors(node.pos)) {
-      if (!isPassable(state.map, data.terrain, n)) continue;
+      if (air ? !isOnMap(state.map, n) : !isPassable(state.map, data.terrain, n)) continue;
       const nKey = hexKey(n);
       if (done.has(nKey)) continue;
-      const occupant = unitAt(state, n);
-      if (occupant && occupant.side !== unit.side) continue;
+      const ground = groundUnitAt(state, data, n);
+      const above = airUnitAt(state, data, n);
+      if (above && above.side !== unit.side) continue;
+      // Elicotteri solo sopra amici; i droni possono sorvolare il nemico.
+      if (ground && ground.side !== unit.side && !(air && hasTag(type, 'uav'))) continue;
+      const occupant = air ? above : ground;
       if (isOrigin && startsInZoc && zoc.has(nKey)) continue;
       if (occupant && zoc.has(nKey)) continue;
       const cost = node.cost + enterCost(state, data, type, n);
@@ -134,8 +141,8 @@ export function applyMove(state: GameState, data: GameData, unitId: string, to: 
     entrenched: false,
   };
   const event: GameEvent = { kind: 'move', unitId, path, cost };
-  return {
-    state: { ...state, units: state.units.map((u) => (u.id === unitId ? moved : u)), log: [...state.log, event] },
-    events: [event],
-  };
+  const after: GameState = { ...state, units: state.units.map((u) => (u.id === unitId ? moved : u)), log: [...state.log, event] };
+  // Un'unità aerea che si ferma in una bolla AA nemica subisce il fuoco preventivo.
+  const fire = isAirType(type) ? aaFire(after, data, unitId) : null;
+  return fire ? { state: fire.state, events: [event, fire.event] } : { state: after, events: [event] };
 }

@@ -1,27 +1,33 @@
 import { useMemo } from 'react';
-import { unitAt } from '../core/game';
+import { useShallow } from 'zustand/react/shallow';
+import { unitsAt } from '../core/game';
+import type { Unit } from '../core/units';
 import { symbolDataUrl } from '../render/symbols';
 import { effective } from './organic';
 import { useUiStore } from './store';
 import { supplyText } from './supplyText';
 import styles from './App.module.css';
 
-/** Ispezione dell'unità sotto il cursore: organico stimato e rifornimento. */
+/** Ispezione delle unità sotto il cursore (terrestre e aerea): organico stimato e rifornimento. */
 export function UnitInspector() {
-  const unit = useUiStore((s) => (s.hovered ? unitAt(s.game, s.hovered) : undefined));
+  const units = useUiStore(useShallow((s) => (s.hovered ? unitsAt(s.game, s.data, s.hovered) : [])));
+  return (
+    <section className={styles.card}>
+      <h2 className={styles.cardTitle}>Ispezione</h2>
+      {units.length === 0 && <p className={styles.muted}>Passa il mouse su un'unità.</p>}
+      {units.map((u) => (
+        <UnitDetails key={u.id} unit={u} />
+      ))}
+    </section>
+  );
+}
+
+function UnitDetails({ unit }: { unit: Unit }) {
   const data = useUiStore((s) => s.data);
   const sideNames = useUiStore((s) => s.game.setup.sideNames);
-  const type = unit ? data.unitTypes[unit.typeId] : undefined;
-  const symbol = useMemo(() => (type && unit ? symbolDataUrl(type, unit.side, 34) : ''), [type, unit?.side]);
-
-  if (!unit || !type) {
-    return (
-      <section className={styles.card}>
-        <h2 className={styles.cardTitle}>Ispezione</h2>
-        <p className={styles.muted}>Passa il mouse su un'unità.</p>
-      </section>
-    );
-  }
+  const type = data.unitTypes[unit.typeId];
+  const symbol = useMemo(() => (type ? symbolDataUrl(type, unit.side, 34) : ''), [type, unit.side]);
+  if (!type) return null;
 
   const max = data.rules.maxStrength;
   const { personnel, mainVehicles, mainVehiclesLabel, supportVehicles } = type.organic;
@@ -32,8 +38,7 @@ export function UnitInspector() {
   ];
 
   return (
-    <section className={styles.card}>
-      <h2 className={styles.cardTitle}>Ispezione</h2>
+    <div className={styles.inspected}>
       <div className={styles.unitHead}>
         <img src={symbol} alt="" className={styles.unitSymbol} />
         <div>
@@ -56,6 +61,6 @@ export function UnitInspector() {
           ))}
       </dl>
       {unit.outOfSupplyTurns > 0 && <p className={styles.badge}>{supplyText(data.rules, unit)}</p>}
-    </section>
+    </div>
   );
 }

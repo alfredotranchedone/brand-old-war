@@ -1,5 +1,5 @@
 import { entrenchmentNegated, isEntrenchedEffective } from '../core/combatPower';
-import { getUnit } from '../core/game';
+import { getUnit, unitsAt } from '../core/game';
 import type { LossRange } from '../core/losses';
 import { useUiStore } from './store';
 import app from './App.module.css';
@@ -20,6 +20,8 @@ export function AttackWindow() {
   const unitTypes = data.unitTypes;
   const confirm = useUiStore((s) => s.confirmAttack);
   const cancel = useUiStore((s) => s.cancelTarget);
+  const switchTarget = useUiStore((s) => s.switchTarget);
+  const targets = useUiStore((s) => s.targets);
   if (!preview) return null;
 
   const a = getUnit(game, preview.attackerId);
@@ -31,7 +33,9 @@ export function AttackWindow() {
   };
   const m = preview.modifiers;
   const sup = preview.support;
-  const baseAtt = m.attack / ((1 + m.offensiveBonus) * m.barrageMod);
+  const baseAtt = m.attack / ((1 + m.offensiveBonus) * m.barrageMod * (1 + m.air.spotter) * m.air.ew * m.air.cover);
+  const otherTarget = unitsAt(game, data, d.pos).some((u) => u.id !== d.id && targets.includes(u.id));
+  const aa = preview.aaThreat;
   const baseDef = m.defense / (1 + m.defensiveBonus);
   const retreatPct = Math.round(preview.retreatChance * 100);
 
@@ -55,6 +59,24 @@ export function AttackWindow() {
           <>
             <dt>Sbarramento nemico</dt>
             <dd className={styles.bad}>{pct(m.barrageMod - 1)}</dd>
+          </>
+        )}
+        {m.air.spotter > 0 && (
+          <>
+            <dt>Drone osservatore</dt>
+            <dd className={styles.good}>{pct(m.air.spotter)}</dd>
+          </>
+        )}
+        {m.air.ew !== 1 && (
+          <>
+            <dt>Guerra elettronica</dt>
+            <dd className={styles.bad}>{pct(m.air.ew - 1)}</dd>
+          </>
+        )}
+        {m.air.cover !== 1 && (
+          <>
+            <dt>Bersaglio al coperto</dt>
+            <dd className={styles.bad}>{pct(m.air.cover - 1)}</dd>
           </>
         )}
         <dt className={styles.total}>Attacco totale</dt>
@@ -95,6 +117,14 @@ export function AttackWindow() {
         <dd>{preview.defenderResponds ? range(preview.attackerLosses) : 'nessuna'}</dd>
         <dt>Perdite difensore</dt>
         <dd>{range(preview.defenderLosses)}</dd>
+        {aa && (
+          <>
+            <dt title={name(aa.aaId)}>Fuoco contraereo prima</dt>
+            <dd className={styles.bad}>
+              {aa.shots} tiri · {Math.round(aa.hitChance * 100)}%
+            </dd>
+          </>
+        )}
         <dt>Ritirata</dt>
         <dd>{retreatPct === 0 ? 'no' : preview.retreatHex ? `${retreatPct}%` : `${retreatPct}% · bloccata`}</dd>
       </dl>
@@ -103,6 +133,11 @@ export function AttackWindow() {
         <button type="button" className={`${app.button} ${app.primary}`} onClick={confirm} autoFocus>
           Attacca
         </button>
+        {otherTarget && (
+          <button type="button" className={app.button} onClick={switchTarget}>
+            Cambia bersaglio
+          </button>
+        )}
         <button type="button" className={app.button} onClick={cancel}>
           Annulla
         </button>

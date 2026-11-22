@@ -25,7 +25,7 @@ function toResult(r: Outcome): ActionResult {
 
 export function applyAction(state: GameState, data: GameData, action: Action): ActionResult {
   const result = dispatchAction(state, data, action);
-  return result.ok ? { ...result, state: claimObjectives(result.state) } : result;
+  return result.ok ? { ...result, state: claimObjectives(result.state, data) } : result;
 }
 
 function dispatchAction(state: GameState, data: GameData, action: Action): ActionResult {

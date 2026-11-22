@@ -54,7 +54,8 @@ export function chooseAttack(state: GameState, data: GameData, side: Side): Acti
       const p = previewCombat(state, data, u.id, t.id);
       if (!p) continue;
       const inflicted = p.defenderLosses.expected;
-      const taken = p.defenderResponds ? p.attackerLosses.expected : 0;
+      const aaLoss = p.aaThreat ? p.aaThreat.shots * p.aaThreat.hitChance : 0;
+      const taken = (p.defenderResponds ? p.attackerLosses.expected : 0) + aaLoss;
       const objective = objectiveAt(state.map, t.pos);
       const retakes = !!objective && state.objectives[objective.id] !== side;
       if (inflicted < ratio * taken && !retakes) continue;
