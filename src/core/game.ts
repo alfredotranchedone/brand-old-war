@@ -36,6 +36,8 @@ export interface GameState {
   readonly units: readonly Unit[];
   /** Controllo attuale di ogni obiettivo, per id. */
   readonly objectives: Readonly<Record<string, Side>>;
+  /** Step di forza persi in totale da ogni fazione. */
+  readonly stepsLost: Readonly<Record<Side, number>>;
   readonly rngState: number;
   readonly log: readonly GameEvent[];
   /** Esagono liberato dopo un combattimento che l'attaccante può occupare. */
@@ -78,6 +80,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
     map: scenario.map,
     units,
     objectives,
+    stepsLost: { blue: 0, red: 0 },
     rngState: seedRng(seed),
     log: [{ kind: 'gameStart', turn: 1, scenarioId: scenario.id }],
   };
@@ -94,6 +97,11 @@ export function unitAt(state: GameState, h: Axial): Unit | undefined {
 
 export function liveUnits(state: GameState, side?: Side): Unit[] {
   return state.units.filter((u) => isAlive(u) && (side === undefined || u.side === side));
+}
+
+export function addLosses(state: GameState, side: Side, steps: number): GameState {
+  if (steps <= 0) return state;
+  return { ...state, stepsLost: { ...state.stepsLost, [side]: state.stepsLost[side] + steps } };
 }
 
 export function currentConditions(state: GameState): TurnConditions {

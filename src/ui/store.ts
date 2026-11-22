@@ -8,6 +8,7 @@ import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
 import { type Reach, computeReach, isReachable } from '../core/movement';
 import { loadGameData, loadScenario } from '../data';
+import { clearSave, loadSavedGame, saveGame } from './save';
 
 export interface UiState {
   data: GameData;
@@ -34,6 +35,8 @@ export interface UiState {
   toggleCoords: () => void;
   toggleZoc: () => void;
   toggleSupply: () => void;
+  endTurn: () => void;
+  restart: () => void;
 }
 
 const sameHex = (a: Axial | null, b: Axial | null): boolean =>
@@ -41,7 +44,8 @@ const sameHex = (a: Axial | null, b: Axial | null): boolean =>
 
 export function isCommandable(game: GameState, unitId: string | null): boolean {
   const u = unitId ? getUnit(game, unitId) : undefined;
-  return !!u && u.side === game.activeSide && u.side === game.setup.player;
+  // Finché non c'è l'IA si giocano a mano entrambe le fazioni.
+  return !!u && u.side === game.activeSide;
 }
 
 function selectionFor(game: GameState, data: GameData, unitId: string | null) {
@@ -59,7 +63,7 @@ const scenario = loadScenario(data, 'crocevia');
 
 export const useUiStore = create<UiState>()((set, get) => ({
   data,
-  game: startGame(scenario, data),
+  game: loadSavedGame(scenario.id) ?? startGame(scenario, data),
   undoStack: [],
   hovered: null,
   selectedUnitId: null,
@@ -134,4 +138,14 @@ export const useUiStore = create<UiState>()((set, get) => ({
   toggleCoords: () => set((s) => ({ showCoords: !s.showCoords })),
   toggleZoc: () => set((s) => ({ showZoc: !s.showZoc })),
   toggleSupply: () => set((s) => ({ showSupply: !s.showSupply })),
+  restart: () => {
+    clearSave();
+    const game = startGame(scenario, data);
+    set({ game, undoStack: [], ...selectionFor(game, data, null) });
+  },
+  endTurn: () => {
+    if (!get().dispatch({ kind: 'endTurn' })) return;
+    saveGame(get().game);
+    get().deselect();
+  },
 }));

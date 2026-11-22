@@ -1,0 +1,43 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(34, 38, 30, 0.45);
+  z-index: 10;
+}
+
+.dialog {
+  width: min(360px, 100%);
+  padding: 20px 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.outcome {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.table tbody th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-muted);
+}

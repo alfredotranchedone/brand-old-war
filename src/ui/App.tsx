@@ -1,5 +1,6 @@
 import { AdvanceHint } from './AdvanceHint';
 import { CombatPanel } from './CombatPanel';
+import { EndScreen } from './EndScreen';
 import { EventLog } from './EventLog';
 import { HexInfo } from './HexInfo';
 import { MapCanvas } from './MapCanvas';
@@ -23,6 +24,7 @@ export function App() {
         <HexInfo />
         <EventLog />
       </aside>
+      <EndScreen />
     </div>
   );
 }

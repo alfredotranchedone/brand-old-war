@@ -1,5 +1,5 @@
 import { type GameData, getUnitType } from './data';
-import type { GameState } from './game';
+import { type GameState, addLosses } from './game';
 import type { Rules } from './rules';
 import { isInSupply, supplyNetwork } from './supplyNetwork';
 import { type Side, type Unit, isAlive } from './units';
@@ -30,6 +30,7 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
   const network = supplyNetwork(state, data, side);
   const outOfSupply: string[] = [];
   const attrition: string[] = [];
+  let lost = 0;
   const loss = data.rules.supply.outOfSupply2.strengthLossPerTurn;
 
   const units = state.units.map((u) => {
@@ -39,6 +40,7 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
     if (turns > 0) outOfSupply.push(u.id);
     if (turns >= 2 && strength > 1 && loss > 0) {
       strength = Math.max(1, strength - loss);
+      lost += u.strength - strength;
       attrition.push(u.id);
     }
     const movesLeft = supplyMoves(data.rules, getUnitType(data, u.typeId).move, turns);
@@ -46,5 +48,5 @@ export function startOfTurnSupply(state: GameState, data: GameData, side: Side):
   });
 
   const log = outOfSupply.length > 0 ? [...state.log, { kind: 'supply', side, outOfSupply, attrition } as const] : state.log;
-  return { ...state, units, log };
+  return addLosses({ ...state, units, log }, side, lost);
 }

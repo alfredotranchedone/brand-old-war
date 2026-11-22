@@ -1,8 +1,11 @@
+import type { GameResult } from './game';
 import type { Axial } from './hex';
 import type { Side } from './units';
 
 export type GameEvent =
   | { readonly kind: 'gameStart'; readonly turn: number; readonly scenarioId: string }
+  | { readonly kind: 'gameEnd'; readonly result: GameResult }
+  | { readonly kind: 'turnStart'; readonly turn: number; readonly side: Side }
   | { readonly kind: 'move'; readonly unitId: string; readonly path: readonly Axial[]; readonly cost: number }
   | {
       readonly kind: 'combat';

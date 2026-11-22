@@ -249,3 +249,8 @@
 .logCombat {
   font-weight: 600;
 }
+
+.logTurn {
+  font-weight: 600;
+  color: var(--text-muted);
+}

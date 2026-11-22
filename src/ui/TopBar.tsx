@@ -1,6 +1,7 @@
 import { canUndo } from '../core/history';
 import { SIDE_LABEL } from './labels';
 import { useUiStore } from './store';
+import { requestEndTurn } from './requestEndTurn';
 import styles from './App.module.css';
 
 export function TopBar() {
@@ -16,6 +17,10 @@ export function TopBar() {
   const toggleZoc = useUiStore((s) => s.toggleZoc);
   const showSupply = useUiStore((s) => s.showSupply);
   const toggleSupply = useUiStore((s) => s.toggleSupply);
+  const restart = useUiStore((s) => s.restart);
+  const newGame = () => {
+    if (window.confirm('Ricominciare da capo? La partita in corso andrà persa.')) restart();
+  };
 
   return (
     <header className={styles.topBar}>
@@ -39,8 +44,14 @@ export function TopBar() {
         <input type="checkbox" checked={showCoords} onChange={toggleCoords} />
         Coordinate
       </label>
+      <button type="button" className={styles.button} onClick={newGame}>
+        Nuova partita
+      </button>
       <button type="button" className={styles.button} onClick={undo} disabled={!undoable} title="Annulla (Ctrl+Z)">
         Annulla
+      </button>
+      <button type="button" className={`${styles.button} ${styles.primary}`} onClick={requestEndTurn} title="Fine turno (Invio)">
+        Fine turno
       </button>
     </header>
   );

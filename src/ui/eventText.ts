@@ -19,6 +19,13 @@ export function eventText(e: GameEvent, state: GameState, data: GameData): strin
   switch (e.kind) {
     case 'gameStart':
       return `Inizio partita: ${state.setup.scenarioName}`;
+    case 'gameEnd': {
+      const r = e.result;
+      const what = r.outcome === 'decisive' ? 'vittoria decisiva' : r.outcome === 'marginal' ? 'vittoria marginale' : 'sconfitta';
+      return `Fine partita: ${what} del ${SIDE_LABEL[state.setup.player]}`;
+    }
+    case 'turnStart':
+      return `Turno ${e.turn} · ${SIDE_LABEL[e.side]}`;
     case 'move':
       return `${unitName(state, data, e.unitId)} muove in ${at(e.path[e.path.length - 1]!)} (${e.cost} PM)`;
     case 'combat': {

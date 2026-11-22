@@ -4,6 +4,8 @@ import type { GameEvent } from './events';
 import type { GameState } from './game';
 import type { Axial } from './hex';
 import { applyMove } from './movement';
+import { claimObjectives } from './objectives';
+import { endTurn } from './turn';
 
 export type Action =
   | { readonly kind: 'move'; readonly unitId: string; readonly to: Axial }
@@ -22,6 +24,11 @@ function toResult(r: Outcome): ActionResult {
 }
 
 export function applyAction(state: GameState, data: GameData, action: Action): ActionResult {
+  const result = dispatchAction(state, data, action);
+  return result.ok ? { ...result, state: claimObjectives(result.state) } : result;
+}
+
+function dispatchAction(state: GameState, data: GameData, action: Action): ActionResult {
   if (action.kind === 'advance') return toResult(resolveAdvance(state, action.unitId, action.to));
   // Qualsiasi altra azione rinuncia all'avanzata in sospeso.
   const base: GameState = state.pendingAdvance ? { ...state, pendingAdvance: undefined } : state;
@@ -31,6 +38,6 @@ export function applyAction(state: GameState, data: GameData, action: Action): A
     case 'attack':
       return toResult(resolveAttack(base, data, action.unitId, action.targetId));
     case 'endTurn':
-      return { ok: false, error: 'Fine turno non ancora disponibile' };
+      return toResult(endTurn(base, data));
   }
 }

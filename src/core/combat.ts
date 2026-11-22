@@ -1,7 +1,7 @@
 import { attackPower, defenderResponds, defensePower } from './combatPower';
 import { type GameData, getUnitType } from './data';
 import type { GameEvent } from './events';
-import { type GameState, getUnit, liveUnits } from './game';
+import { type GameState, addLosses, getUnit, liveUnits } from './game';
 import { type Axial, hexDistance } from './hex';
 import { type LossRange, lossRange, probAtLeast, rollLosses } from './losses';
 import { findRetreatHex } from './retreat';
@@ -172,9 +172,10 @@ export function resolveAttack(state: GameState, data: GameData, attackerId: stri
     defenderDestroyed: defStrength === 0,
   };
 
+  const withLosses = addLosses(addLosses(state, s.attacker.side, attLoss), s.defender.side, defLoss);
   return {
     state: {
-      ...state,
+      ...withLosses,
       units,
       rngState: a.rng,
       log: [...state.log, event],

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { requestEndTurn } from './requestEndTurn';
 import { useUiStore } from './store';
 
 export function useShortcuts(): void {
@@ -12,6 +13,9 @@ export function useShortcuts(): void {
       } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         s.undo();
+      } else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        requestEndTurn();
       }
     };
     window.addEventListener('keydown', onKey);
