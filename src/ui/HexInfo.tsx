@@ -1,6 +1,5 @@
 import { unitAt } from '../core/game';
-import { axialToOffset } from '../core/hex';
-import { getHex, objectiveAt } from '../core/map';
+import { objectiveAt } from '../core/map';
 import { SIDE_LABEL } from './labels';
 import { useUiStore } from './store';
 import styles from './App.module.css';
@@ -20,29 +19,23 @@ export function HexInfo() {
     );
   }
 
-  const { col, row } = axialToOffset(hovered);
-  const hexData = getHex(game.map, hovered);
-  const terrain = hexData ? data.terrain[hexData.terrain] : undefined;
   const objective = objectiveAt(game.map, hovered);
   const unit = unitAt(game, hovered);
   const unitType = unit ? data.unitTypes[unit.typeId] : undefined;
+
+  if (!objective && !unit) {
+    return (
+      <section className={styles.card}>
+        <h2 className={styles.cardTitle}>Esagono</h2>
+        <p className={styles.muted}>Nessun obiettivo o unità.</p>
+      </section>
+    );
+  }
 
   return (
     <section className={styles.card}>
       <h2 className={styles.cardTitle}>Esagono</h2>
       <dl className={styles.facts}>
-        <dt>Colonna, riga</dt>
-        <dd>
-          {col}, {row}
-        </dd>
-        <dt>Terreno</dt>
-        <dd>{terrain?.name ?? '—'}</dd>
-        {hexData?.label && (
-          <>
-            <dt>Località</dt>
-            <dd>{hexData.label}</dd>
-          </>
-        )}
         {objective && (
           <>
             <dt>Obiettivo</dt>

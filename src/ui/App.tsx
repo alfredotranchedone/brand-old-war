@@ -1,5 +1,7 @@
 import { AdvanceHint } from './AdvanceHint';
+import { BottomBar } from './BottomBar';
 import { CombatPanel } from './CombatPanel';
+import { ConfirmDialog } from './ConfirmDialog';
 import { EndScreen } from './EndScreen';
 import { EventLog } from './EventLog';
 import { HexInfo } from './HexInfo';
@@ -27,8 +29,10 @@ export function App() {
         <HexInfo />
         <EventLog />
       </aside>
+      <BottomBar />
       <TurnSummary />
       <EndScreen />
+      <ConfirmDialog />
     </div>
   );
 }

@@ -29,7 +29,7 @@ function spentFor(s: UiState): Set<string> {
 
 const supplyCache = new WeakMap<GameState, SupplyOverlay[]>();
 
-function supplyFor(s: UiState): SupplyOverlay[] {
+export function supplyFor(s: UiState): SupplyOverlay[] {
   let overlays = supplyCache.get(s.game);
   if (!overlays) {
     overlays = SIDES.map((side) => ({ side, hexes: new Set(supplyNetwork(s.game, s.data, side).cost.keys()) }));

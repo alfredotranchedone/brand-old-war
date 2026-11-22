@@ -1,9 +1,8 @@
-import { canUndo } from '../core/history';
 import { SIDES } from '../core/units';
 import { victoryPoints } from '../core/victory';
+import { GameMenu } from './GameMenu';
 import { SIDE_LABEL } from './labels';
-import { isPlayerTurn, useUiStore } from './store';
-import { requestEndTurn } from './requestEndTurn';
+import { useUiStore } from './store';
 import styles from './App.module.css';
 
 export function TopBar() {
@@ -12,22 +11,7 @@ export function TopBar() {
   const activeSide = useUiStore((s) => s.game.activeSide);
   const scenarioName = useUiStore((s) => s.game.setup.scenarioName);
   const points = useUiStore((s) => SIDES.map((side) => `${SIDE_LABEL[side]} ${victoryPoints(s.game, s.data, side)}`).join(' · '));
-  const playerTurn = useUiStore((s) => isPlayerTurn(s.game));
   const aiThinking = useUiStore((s) => !s.game.result && s.game.activeSide === s.game.setup.aiSide);
-  const undoable = useUiStore((s) => canUndo(s.undoStack) && isPlayerTurn(s.game));
-  const undo = useUiStore((s) => s.undo);
-  const showCoords = useUiStore((s) => s.showCoords);
-  const toggleCoords = useUiStore((s) => s.toggleCoords);
-  const showZoc = useUiStore((s) => s.showZoc);
-  const toggleZoc = useUiStore((s) => s.toggleZoc);
-  const showSupply = useUiStore((s) => s.showSupply);
-  const toggleSupply = useUiStore((s) => s.toggleSupply);
-  const restart = useUiStore((s) => s.restart);
-  const showAnimations = useUiStore((s) => s.showAnimations);
-  const toggleAnimations = useUiStore((s) => s.toggleAnimations);
-  const newGame = () => {
-    if (window.confirm('Ricominciare da capo? La partita in corso andrà persa.')) restart();
-  };
 
   return (
     <header className={styles.topBar}>
@@ -43,31 +27,7 @@ export function TopBar() {
       </span>
       {aiThinking && <span className={styles.muted}>Turno dell'IA…</span>}
       <span className={styles.spacer} />
-      <label className={styles.toggle}>
-        <input type="checkbox" checked={showAnimations} onChange={toggleAnimations} />
-        Animazioni
-      </label>
-      <label className={styles.toggle}>
-        <input type="checkbox" checked={showSupply} onChange={toggleSupply} />
-        Rifornimenti
-      </label>
-      <label className={styles.toggle}>
-        <input type="checkbox" checked={showZoc} onChange={toggleZoc} />
-        ZOC
-      </label>
-      <label className={styles.toggle}>
-        <input type="checkbox" checked={showCoords} onChange={toggleCoords} />
-        Coordinate
-      </label>
-      <button type="button" className={styles.button} onClick={newGame}>
-        Nuova partita
-      </button>
-      <button type="button" className={styles.button} onClick={undo} disabled={!undoable} title="Annulla (Ctrl+Z)">
-        Annulla
-      </button>
-      <button type="button" className={`${styles.button} ${styles.primary}`} onClick={requestEndTurn} disabled={!playerTurn} title="Fine turno (Invio)">
-        Fine turno
-      </button>
+      <GameMenu />
     </header>
   );
 }
