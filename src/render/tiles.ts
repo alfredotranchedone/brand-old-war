@@ -2,6 +2,10 @@ const urls = import.meta.glob<string>('../assets/tiles/*.png', { eager: true, qu
 
 const byName = new Map(Object.entries(urls).map(([path, url]) => [path.replace(/^.*\/(.+)\.png$/, '$1'), url]));
 
+export function tileUrl(name: string): string | undefined {
+  return byName.get(name);
+}
+
 /** Immagini delle tile di terreno, caricate una volta; `onLoad` ridisegna quando arrivano. */
 export class TileImages {
   private readonly images = new Map<string, HTMLImageElement>();

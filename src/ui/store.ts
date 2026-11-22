@@ -9,7 +9,7 @@ import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
 import { type UndoStack, popUndo, recordAction } from '../core/history';
 import { type Reach, computeReach, isReachable } from '../core/movement';
-import { loadGameData, loadScenario } from '../data';
+import { DEFAULT_SCENARIO, type ScenarioEntry, listScenarios, loadGameData, loadScenario } from '../data';
 import { clearSave, loadSavedGame, saveGame } from './save';
 
 export interface UiState {
@@ -42,7 +42,9 @@ export interface UiState {
   toggleSupply: () => void;
   toggleAnimations: () => void;
   endTurn: () => void;
-  restart: () => void;
+  readonly scenarios: readonly ScenarioEntry[];
+  /** Nuova partita sullo scenario dato (di default quello in corso). */
+  restart: (scenarioId?: string) => void;
   selectNextUnit: () => void;
   closeSummary: () => void;
 }
@@ -84,12 +86,14 @@ function selectionFor(game: GameState, data: GameData, unitId: string | null) {
 }
 
 const data = loadGameData();
-const scenario = loadScenario(data, 'crocevia');
+const scenarios = listScenarios(data);
+const playable = (id: string) => scenarios.some((s) => s.id === id && !s.error);
 
-const initialGame = loadSavedGame(scenario.id) ?? startGame(scenario, data);
+const initialGame = loadSavedGame(playable) ?? startGame(loadScenario(data, DEFAULT_SCENARIO), data);
 
 export const useUiStore = create<UiState>()((set, get) => ({
   data,
+  scenarios,
   game: initialGame,
   undoStack: [],
   hovered: null,
@@ -183,9 +187,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
     const next = ready.find((id) => selectedUnitId !== null && id > selectedUnitId) ?? ready[0]!;
     get().select(next);
   },
-  restart: () => {
+  restart: (scenarioId) => {
     clearSave();
-    const game = startGame(scenario, data);
+    const game = startGame(loadScenario(data, scenarioId ?? get().game.scenarioId), data);
     set({ game, undoStack: [], summarySeen: 0, ...selectionFor(game, data, null) });
   },
   endTurn: () => {

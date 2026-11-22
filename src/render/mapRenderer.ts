@@ -6,7 +6,7 @@ import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { Animations } from './animations';
 import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
-import { drawAdvance, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
+import { areaBorder, drawAdvance, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { TileImages } from './tiles';
 import { drawUnit } from './units';
@@ -28,6 +28,8 @@ export interface RenderInput {
   readonly units: readonly Unit[];
   readonly objectives: Readonly<Record<string, Side>>;
   readonly hovered: Axial | null;
+  /** Area evidenziata sotto il cursore al posto del solo esagono (pennello dell'editor). */
+  readonly hoverArea?: readonly Axial[];
   readonly selectedUnitId: string | null;
   readonly reachable: readonly Axial[];
   readonly path: { readonly hexes: readonly Axial[]; readonly cost: number } | null;
@@ -95,7 +97,12 @@ export class MapRenderer {
   }
 
   update(input: RenderInput): void {
-    if (input.map !== this.cachedMap) this.rebuildGeometry(input.map);
+    if (input.map !== this.cachedMap) {
+      const prev = this.cachedMap;
+      this.rebuildGeometry(input.map);
+      // Mappa di dimensioni diverse (nuovo scenario): si rimette tutta in vista.
+      if (prev && (prev.width !== input.map.width || prev.height !== input.map.height)) this.camera.fit(this.bounds, this.viewport);
+    }
     this.input = input;
     this.requestDraw();
   }
@@ -233,12 +240,15 @@ export class MapRenderer {
 
   private drawHover(input: RenderInput, scale: number): void {
     if (!input.hovered || !input.map.hexes[hexKey(input.hovered)]) return;
-    const p = hexPath(input.hovered);
+    const area = input.hoverArea && input.hoverArea.length > 1 ? input.hoverArea : null;
+    const fill = new Path2D();
+    for (const h of area ?? [input.hovered]) traceHex(fill, h);
     this.ctx.fillStyle = MAP_THEME.hoverFill;
-    this.ctx.fill(p);
+    this.ctx.fill(fill);
     this.ctx.strokeStyle = MAP_THEME.hoverStroke;
     this.ctx.lineWidth = 2 / scale;
-    this.ctx.stroke(p);
+    this.ctx.lineJoin = 'round';
+    this.ctx.stroke(area ? areaBorder(new Set(area.map(hexKey))) : fill);
   }
 
   private drawSelection(input: RenderInput): void {

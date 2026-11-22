@@ -1,7 +1,6 @@
 import { SIDES } from '../core/units';
 import { victoryPoints } from '../core/victory';
 import { GameMenu } from './GameMenu';
-import { SIDE_LABEL } from './labels';
 import { useUiStore } from './store';
 import styles from './App.module.css';
 
@@ -9,8 +8,9 @@ export function TopBar() {
   const turn = useUiStore((s) => s.game.turn);
   const maxTurns = useUiStore((s) => s.game.maxTurns);
   const activeSide = useUiStore((s) => s.game.activeSide);
+  const sideNames = useUiStore((s) => s.game.setup.sideNames);
   const scenarioName = useUiStore((s) => s.game.setup.scenarioName);
-  const points = useUiStore((s) => SIDES.map((side) => `${SIDE_LABEL[side]} ${victoryPoints(s.game, s.data, side)}`).join(' · '));
+  const points = useUiStore((s) => SIDES.map((side) => `${s.game.setup.sideNames[side]} ${victoryPoints(s.game, s.data, side)}`).join(' · '));
   const aiThinking = useUiStore((s) => !s.game.result && s.game.activeSide === s.game.setup.aiSide);
 
   return (
@@ -20,7 +20,7 @@ export function TopBar() {
         Turno {turn} / {maxTurns}
       </span>
       <span className={`${styles.sideBadge} ${activeSide === 'blue' ? styles.blue : styles.red}`}>
-        {SIDE_LABEL[activeSide]}
+        {sideNames[activeSide]}
       </span>
       <span className={styles.muted} title="Punti vittoria: obiettivi + 1 ogni 5 step nemici distrutti">
         Punti: {points}

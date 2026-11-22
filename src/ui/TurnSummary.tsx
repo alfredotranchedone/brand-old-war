@@ -1,5 +1,4 @@
 import { SIDES, otherSide } from '../core/units';
-import { SIDE_LABEL } from './labels';
 import { isPlayerTurn, lastSummary, useUiStore } from './store';
 import app from './App.module.css';
 import styles from './EndScreen.module.css';
@@ -24,7 +23,7 @@ export function TurnSummary() {
             <tr>
               <th />
               {SIDES.map((side) => (
-                <th key={side}>{SIDE_LABEL[side]}</th>
+                <th key={side}>{game.setup.sideNames[side]}</th>
               ))}
             </tr>
           </thead>
@@ -46,7 +45,7 @@ export function TurnSummary() {
         <dl className={app.facts}>
           {SIDES.map((side) => (
             <div key={side} className={styles.objectiveRow}>
-              <dt>Obiettivi {SIDE_LABEL[side]}</dt>
+              <dt>Obiettivi {game.setup.sideNames[side]}</dt>
               <dd>{names(summary.objectives[side])}</dd>
             </div>
           ))}

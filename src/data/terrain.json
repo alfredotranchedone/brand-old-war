@@ -16,8 +16,8 @@
     "blocksLOS": false
   },
   "water": {
-    "name": "Acqua",
-    "tile": "water",
+    "name": "Acqua profonda",
+    "tile": "deep_water",
     "impassable": true,
     "moveCost": { "tracked": 1, "wheeled": 1, "foot": 1 },
     "defenseMod": 1.0,

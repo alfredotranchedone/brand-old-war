@@ -49,6 +49,8 @@ export interface Scenario {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  /** Nomi delle fazioni mostrati al giocatore; i colori restano blu e rosso. */
+  readonly sideNames: Readonly<Record<Side, string>>;
   readonly seed: number;
   readonly map: MapData;
   /** Fazione che possiede gli obiettivi a inizio partita. */
@@ -66,6 +68,16 @@ export interface Scenario {
 
 function readPos(o: Record<string, Json>, path: string): Axial {
   return offsetToAxial({ col: int(o.col, `${path}.col`), row: int(o.row, `${path}.row`) });
+}
+
+export const DEFAULT_SIDE_NAMES: Readonly<Record<Side, string>> = { blue: 'Blu', red: 'Rosso' };
+
+function readSideNames(v: Json, path: string): Record<Side, string> {
+  if (v === undefined) return { ...DEFAULT_SIDE_NAMES };
+  const o = record(v, path);
+  const names = {} as Record<Side, string>;
+  for (const side of SIDES) names[side] = optional(o[side], DEFAULT_SIDE_NAMES[side], (x) => str(x, `${path}.${side}`));
+  return names;
 }
 
 export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario'): Scenario {
@@ -217,6 +229,7 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     id: str(o.id, `${p}.id`),
     name: str(o.name, `${p}.name`),
     description: optional(o.description, '', (x) => str(x, `${p}.description`)),
+    sideNames: readSideNames(o.sideNames, `${p}.sideNames`),
     seed: int(o.seed ?? 1, `${p}.seed`),
     map,
     defender: oneOf(o.defender, `${p}.defender`, SIDES),

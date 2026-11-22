@@ -16,6 +16,7 @@ export interface GameResult {
 /** Impostazioni dello scenario che servono durante la partita. Non cambiano. */
 export interface GameSetup {
   readonly scenarioName: string;
+  readonly sideNames: Readonly<Record<Side, string>>;
   readonly player: Side;
   readonly aiSide: Side;
   readonly aiPosture: AiPosture;
@@ -69,6 +70,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
     scenarioId: scenario.id,
     setup: {
       scenarioName: scenario.name,
+      sideNames: scenario.sideNames,
       player: scenario.player,
       aiSide: scenario.ai.side,
       aiPosture: scenario.ai.posture,

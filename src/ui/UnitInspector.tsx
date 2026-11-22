@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { unitAt } from '../core/game';
 import { symbolDataUrl } from '../render/symbols';
-import { SIDE_LABEL } from './labels';
 import { effective } from './organic';
 import { useUiStore } from './store';
 import { supplyText } from './supplyText';
@@ -11,6 +10,7 @@ import styles from './App.module.css';
 export function UnitInspector() {
   const unit = useUiStore((s) => (s.hovered ? unitAt(s.game, s.hovered) : undefined));
   const data = useUiStore((s) => s.data);
+  const sideNames = useUiStore((s) => s.game.setup.sideNames);
   const type = unit ? data.unitTypes[unit.typeId] : undefined;
   const symbol = useMemo(() => (type && unit ? symbolDataUrl(type, unit.side, 34) : ''), [type, unit?.side]);
 
@@ -39,7 +39,7 @@ export function UnitInspector() {
         <div>
           <div className={styles.unitName}>{type.name}</div>
           <div className={styles.muted}>
-            {SIDE_LABEL[unit.side]} · forza {unit.strength} / {max}
+            {sideNames[unit.side]} · forza {unit.strength} / {max}
           </div>
         </div>
       </div>

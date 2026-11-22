@@ -7,6 +7,8 @@ export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      // Con una finestra modale aperta le scorciatoie del gioco non valgono.
+      if (document.querySelector('[aria-modal="true"]')) return;
       if (useConfirm.getState().message) {
         if (e.key === 'Escape') answerConfirm(false);
         return;

@@ -3,7 +3,7 @@ import { getUnit } from '../core/game';
 import { hasTag } from '../core/units';
 import { isWeak } from '../core/weakness';
 import { symbolDataUrl } from '../render/symbols';
-import { MOBILITY_LABEL, SIDE_LABEL, TARGET_CLASS_LABEL } from './labels';
+import { MOBILITY_LABEL, TARGET_CLASS_LABEL } from './labels';
 import { useUiStore } from './store';
 import { supplyText } from './supplyText';
 import styles from './App.module.css';
@@ -37,7 +37,7 @@ export function UnitCard() {
         <div>
           <div className={styles.unitName}>{type.name}</div>
           <div className={styles.muted}>
-            {SIDE_LABEL[unit.side]} ({role}) · battaglione
+            {setup.sideNames[unit.side]} ({role}) · battaglione
           </div>
         </div>
       </div>

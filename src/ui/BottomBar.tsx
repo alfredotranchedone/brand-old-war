@@ -1,7 +1,6 @@
 import { useShallow } from 'zustand/react/shallow';
 import { axialToOffset, hexKey } from '../core/hex';
 import { type Objective, getHex, objectiveAt } from '../core/map';
-import { SIDE_LABEL } from './labels';
 import { supplyFor } from './renderInput';
 import { type UiState, isPlayerTurn, useUiStore } from './store';
 import { requestEndTurn } from './requestEndTurn';
@@ -9,7 +8,7 @@ import styles from './App.module.css';
 
 function placeText(s: UiState, label: string | undefined, objective: Objective | undefined): string {
   if (!objective) return label ?? '';
-  const owner = SIDE_LABEL[s.game.objectives[objective.id] ?? s.game.setup.defender];
+  const owner = s.game.setup.sideNames[s.game.objectives[objective.id] ?? s.game.setup.defender];
   const points = `${objective.points} ${objective.points === 1 ? 'punto' : 'punti'}`;
   return [label, objective.name, points, owner].filter(Boolean).join(' · ');
 }
@@ -21,7 +20,7 @@ function useHexFacts() {
     const { col, row } = axialToOffset(h);
     const hexData = getHex(s.game.map, h);
     const key = hexKey(h);
-    const supplied = supplyFor(s).filter((o) => o.hexes.has(key)).map((o) => SIDE_LABEL[o.side]);
+    const supplied = supplyFor(s).filter((o) => o.hexes.has(key)).map((o) => s.game.setup.sideNames[o.side]);
     return {
       coords: `${col}, ${row}`,
       terrain: hexData ? (s.data.terrain[hexData.terrain]?.name ?? '—') : '—',

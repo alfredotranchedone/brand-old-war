@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { canUndo } from '../core/history';
-import { askConfirm } from './confirm';
+import { NewGameDialog } from './NewGameDialog';
 import { isPlayerTurn, useUiStore } from './store';
 import styles from './GameMenu.module.css';
 
 export function GameMenu() {
   const [open, setOpen] = useState(false);
+  const [newGame, setNewGame] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const s = useUiStore(
     useShallow((st) => ({
       undoable: canUndo(st.undoStack) && isPlayerTurn(st.game),
       undo: st.undo,
-      restart: st.restart,
       showAnimations: st.showAnimations,
       toggleAnimations: st.toggleAnimations,
       showSupply: st.showSupply,
@@ -41,9 +41,6 @@ export function GameMenu() {
     setOpen(false);
     fn();
   };
-  const newGame = () => {
-    askConfirm('Ricominciare da capo? La partita in corso andrà persa.', s.restart);
-  };
   const toggles = [
     ['Animazioni', s.showAnimations, s.toggleAnimations],
     ['Rifornimenti', s.showSupply, s.toggleSupply],
@@ -69,11 +66,12 @@ export function GameMenu() {
             </label>
           ))}
           <hr />
-          <button type="button" role="menuitem" className={styles.item} onClick={run(newGame)}>
+          <button type="button" role="menuitem" className={styles.item} onClick={run(() => setNewGame(true))}>
             Nuova partita…
           </button>
         </div>
       )}
+      {newGame && <NewGameDialog onClose={() => setNewGame(false)} />}
     </div>
   );
 }

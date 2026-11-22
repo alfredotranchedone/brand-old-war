@@ -1,6 +1,4 @@
-import type { Mobility, Side, TargetClass } from '../core/units';
-
-export const SIDE_LABEL: Record<Side, string> = { blue: 'Blu', red: 'Rosso' };
+import type { Mobility, TargetClass } from '../core/units';
 
 export const TARGET_CLASS_LABEL: Record<TargetClass, string> = {
   armored: 'Blindato',

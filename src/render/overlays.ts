@@ -12,7 +12,7 @@ export function drawReachable(ctx: CanvasRenderingContext2D, hexes: readonly Axi
 }
 
 /** Lati verso l'esterno di un'area di esagoni. */
-function areaBorder(area: ReadonlySet<HexKey>): Path2D {
+export function areaBorder(area: ReadonlySet<HexKey>): Path2D {
   const p = new Path2D();
   for (const key of area) {
     const h = parseHexKey(key);

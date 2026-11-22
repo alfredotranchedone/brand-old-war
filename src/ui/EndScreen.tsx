@@ -1,7 +1,6 @@
 import { objectivesHeld } from '../core/objectives';
 import { SIDES, otherSide } from '../core/units';
 import { victoryPoints } from '../core/victory';
-import { SIDE_LABEL } from './labels';
 import { useUiStore } from './store';
 import app from './App.module.css';
 import styles from './EndScreen.module.css';
@@ -20,14 +19,14 @@ export function EndScreen() {
       <section className={styles.dialog} role="dialog" aria-label="Fine partita">
         <h2 className={styles.outcome}>{OUTCOME[result.outcome]}</h2>
         <p className={app.muted}>
-          Esito per il {SIDE_LABEL[game.setup.player]} · {game.setup.scenarioName}
+          Esito per {game.setup.sideNames[game.setup.player]} · {game.setup.scenarioName}
         </p>
         <table className={styles.table}>
           <thead>
             <tr>
               <th />
               {SIDES.map((side) => (
-                <th key={side}>{SIDE_LABEL[side]}</th>
+                <th key={side}>{game.setup.sideNames[side]}</th>
               ))}
             </tr>
           </thead>
@@ -59,7 +58,7 @@ export function EndScreen() {
           </tbody>
         </table>
         <div className={app.actions}>
-          <button type="button" className={`${app.button} ${app.primary}`} onClick={restart}>
+          <button type="button" className={`${app.button} ${app.primary}`} onClick={() => restart()}>
             Rigioca
           </button>
         </div>
