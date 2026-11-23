@@ -7,7 +7,7 @@ import { spentUnits } from '../core/availability';
 import { type GameState, getUnit, liveUnits, unitsAt } from '../core/game';
 import { startGame } from '../core/turn';
 import { type Axial, hexEquals } from '../core/hex';
-import { type UndoStack, popUndo, recordAction } from '../core/history';
+import { type UndoStack, popState, recordAction } from '../core/history';
 import { type Reach, computeReach, isReachable } from '../core/movement';
 import { DEFAULT_SCENARIO, type ScenarioEntry, listScenarios, loadGameData, loadScenario, scenarioFingerprint } from '../data';
 import { clearSave, loadSavedGame, saveGame } from './save';
@@ -16,6 +16,7 @@ export interface UiState {
   data: GameData;
   game: GameState;
   undoStack: UndoStack;
+  redoStack: UndoStack;
   hovered: Axial | null;
   selectedUnitId: string | null;
   reach: Reach | null;
@@ -39,6 +40,7 @@ export interface UiState {
   switchTarget: () => void;
   dispatch: (action: Action) => boolean;
   undo: () => void;
+  redo: () => void;
   toggleCoords: () => void;
   toggleZoc: () => void;
   toggleSupply: () => void;
@@ -99,6 +101,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   scenarios,
   game: initialGame,
   undoStack: [],
+  redoStack: [],
   hovered: null,
   selectedUnitId: null,
   reach: null,
@@ -171,17 +174,26 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set({
       game: result.state,
       undoStack: recordAction(undoStack, game, action),
+      redoStack: [],
       ...selectionFor(result.state, data, selectedUnitId),
     });
     return true;
   },
 
   undo: () => {
-    const { undoStack, data, selectedUnitId } = get();
-    if (!isPlayerTurn(get().game)) return;
-    const popped = popUndo(undoStack);
+    const { game, undoStack, redoStack, data, selectedUnitId } = get();
+    if (!isPlayerTurn(game)) return;
+    const popped = popState(undoStack);
     if (!popped) return;
-    set({ game: popped.state, undoStack: popped.stack, ...selectionFor(popped.state, data, selectedUnitId) });
+    set({ game: popped.state, undoStack: popped.stack, redoStack: [...redoStack, game], ...selectionFor(popped.state, data, selectedUnitId) });
+  },
+
+  redo: () => {
+    const { game, undoStack, redoStack, data, selectedUnitId } = get();
+    if (!isPlayerTurn(game)) return;
+    const popped = popState(redoStack);
+    if (!popped) return;
+    set({ game: popped.state, redoStack: popped.stack, undoStack: [...undoStack, game], ...selectionFor(popped.state, data, selectedUnitId) });
   },
 
   toggleCoords: () => set((s) => ({ showCoords: !s.showCoords })),
@@ -203,7 +215,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   restart: (scenarioId) => {
     clearSave();
     const game = startGame(loadScenario(data, scenarioId ?? get().game.scenarioId), data);
-    set({ game, undoStack: [], summarySeen: 0, ...selectionFor(game, data, null) });
+    set({ game, undoStack: [], redoStack: [], summarySeen: 0, ...selectionFor(game, data, null) });
   },
   endTurn: () => {
     if (isPlayerTurn(get().game) && get().dispatch({ kind: 'endTurn' })) get().deselect();

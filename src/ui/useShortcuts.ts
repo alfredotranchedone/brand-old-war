@@ -20,6 +20,9 @@ export function useShortcuts(): void {
       } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         s.undo();
+      } else if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && e.key.toLowerCase() === 'z') || e.key.toLowerCase() === 'y')) {
+        e.preventDefault();
+        s.redo();
       } else if (e.key === ' ' && !(e.target instanceof HTMLButtonElement)) {
         e.preventDefault();
         s.selectNextUnit();

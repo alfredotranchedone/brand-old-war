@@ -25,12 +25,13 @@ An objective belongs to the side whose ground unit last entered it. At the start
 | Attack | Click an enemy in range, check the preview, then confirm (click again or Enter) |
 | Next unit | Space |
 | End turn | "Fine turno" button or Enter |
-| Undo moves (back to the last attack) | Ctrl+Z (or menu ☰ → "Annulla") |
+| Undo moves (back to the last attack) | Ctrl+Z, the ↶ button or menu ☰ → "Annulla" |
+| Redo an undone move | Ctrl+Y or Ctrl+Shift+Z, the ↷ button or menu ☰ → "Ripeti" |
 | Cancel / deselect | Esc |
 | Pan the map | Drag, or middle mouse button |
 | Zoom | Mouse wheel or the +/− buttons |
 
-The menu (☰, top right) also toggles ZOC (*zone of control*), supply and coordinate overlays, animations, and starts a new game ("Nuova partita…").
+The eye button (top right) toggles animations and the supply, ZOC (*zone of control*) and coordinate overlays. The menu (☰) starts a new game ("Nuova partita…").
 
 Hover a hex to inspect its units in the "Inspect" panel. The game saves automatically at the end of each turn.
 
@@ -124,7 +125,7 @@ Out of supply:
 1. **First turn:** attack halved, −1 MP.
 2. **From the second turn:** attack halved, defence reduced, MP halved, and the unit loses 1 strength per turn (never below 1).
 
-Use the "Rifornimenti" overlay to see the network.
+Use the eye button → "Rifornimenti" to see the network.
 
 ## Air domain *(work in progress)*
 
