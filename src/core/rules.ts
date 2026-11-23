@@ -12,6 +12,12 @@ export interface AiWeights {
   readonly holdObjectiveBonus: number;
   /** Bonus per restare fermi in trincea (fanteria). */
   readonly holdEntrenchedBonus: number;
+  /** Bonus per presidiare la propria dorsale minacciata dal nemico. */
+  readonly guardTrunkBonus: number;
+  /** Bonus per ogni esagono di dorsale nemica occupato o messo in ZOC. */
+  readonly cutTrunkBonus: number;
+  /** Malus per ogni alleato che resterebbe isolato lasciando l'esagono. */
+  readonly leaveGapPenalty: number;
 }
 
 export interface Rules {
@@ -35,7 +41,10 @@ export interface Rules {
     readonly noRetreatExtraLoss: number;
   };
   readonly supply: {
-    readonly maxPathCost: number;
+    /** Portata della dorsale in esagoni di strada (le ferrovie non hanno limite). */
+    readonly roadRange: number;
+    /** Ultimo miglio dalla dorsale, in costo di movimento su ruote. */
+    readonly offRoadRange: number;
     readonly outOfSupply1: { readonly attackMultiplier: number; readonly moveDelta: number };
     readonly outOfSupply2: {
       readonly attackMultiplier: number;
@@ -118,6 +127,9 @@ export function parseRules(raw: unknown): Rules {
       exposurePenalty: num(wo.exposurePenalty, `${wp}.exposurePenalty`),
       holdObjectiveBonus: num(wo.holdObjectiveBonus, `${wp}.holdObjectiveBonus`),
       holdEntrenchedBonus: num(wo.holdEntrenchedBonus, `${wp}.holdEntrenchedBonus`),
+      guardTrunkBonus: num(wo.guardTrunkBonus, `${wp}.guardTrunkBonus`),
+      cutTrunkBonus: num(wo.cutTrunkBonus, `${wp}.cutTrunkBonus`),
+      leaveGapPenalty: num(wo.leaveGapPenalty, `${wp}.leaveGapPenalty`),
     };
   }
 
@@ -145,7 +157,8 @@ export function parseRules(raw: unknown): Rules {
       noRetreatExtraLoss: int(c.noRetreatExtraLoss, `${p}.combat.noRetreatExtraLoss`, 0),
     },
     supply: {
-      maxPathCost: num(s.maxPathCost, `${p}.supply.maxPathCost`, 0),
+      roadRange: num(s.roadRange, `${p}.supply.roadRange`, 0),
+      offRoadRange: num(s.offRoadRange, `${p}.supply.offRoadRange`, 0),
       outOfSupply1: {
         attackMultiplier: num(s1.attackMultiplier, `${p}.supply.outOfSupply1.attackMultiplier`, 0),
         moveDelta: int(s1.moveDelta, `${p}.supply.outOfSupply1.moveDelta`),

@@ -3,7 +3,8 @@ import type { GameEvent } from './events';
 import { aaFire } from './air';
 import { type GameState, airUnitAt, currentConditions, getUnit, groundUnitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors } from './hex';
-import { isOnMap, isPassable, terrainAt } from './map';
+import { isOnMap, terrainAt } from './map';
+import { canStep } from './routes';
 import { type Unit, type UnitType, hasTag, isAirType, isAlive } from './units';
 import { enemyZocOf } from './zoc';
 
@@ -73,7 +74,7 @@ export function computeReach(state: GameState, data: GameData, unitId: string): 
     if (!isOrigin && zoc.has(key)) continue;
 
     for (const n of hexNeighbors(node.pos)) {
-      if (air ? !isOnMap(state.map, n) : !isPassable(state.map, data.terrain, n)) continue;
+      if (air ? !isOnMap(state.map, n) : !canStep(state.map, data.terrain, node.pos, n)) continue;
       const nKey = hexKey(n);
       if (done.has(nKey)) continue;
       const ground = groundUnitAt(state, data, n);

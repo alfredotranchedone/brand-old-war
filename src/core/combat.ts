@@ -6,6 +6,7 @@ import { type GameState, addLosses, airUnitAt, getUnit, isAirUnit, liveUnits } f
 import { type Axial, hexDistance } from './hex';
 import { type LossRange, lossRange, probAtLeast, rollLosses } from './losses';
 import { findRetreatHex } from './retreat';
+import { canStep } from './routes';
 import { type SupportSet, type SupportedPowers, findSupport, supportIds, supportedPowers } from './support';
 import { isWeak } from './weakness';
 import { type Unit, hasTag, isAlive } from './units';
@@ -182,6 +183,7 @@ export function resolveAttack(before: GameState, data: GameData, attackerId: str
     attStrength > 0 &&
     s.responds &&
     !hasTag(attackerType, 'artillery') &&
+    canStep(state.map, data.terrain, s.attacker.pos, s.defender.pos) &&
     !isAirUnit(data, s.attacker) &&
     !isAirUnit(data, s.defender) &&
     !(enemyAbove && enemyAbove.side === s.defender.side);

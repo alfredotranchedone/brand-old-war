@@ -1,5 +1,7 @@
 /** Funzioni di modifica dello scenario (ognuna crea un nuovo documento immutabile). */
+import type { Side } from '../core/units';
 import type { HexJson, ScenarioJson } from './model';
+import { clipRoutes } from './routesEdit';
 
 export const LIMITS = { minSize: 4, maxSize: 60, minTurns: 1, maxTurns: 30 } as const;
 
@@ -24,8 +26,16 @@ export function resize(doc: ScenarioJson, width: number, height: number): Scenar
   const inside = (o: { col: number; row: number }) => o.col < w && o.row < h;
   return {
     ...doc,
-    map: { ...doc.map, width: w, height: h, hexes: doc.map.hexes.filter(inside) },
+    map: {
+      ...doc.map,
+      width: w,
+      height: h,
+      hexes: doc.map.hexes.filter(inside),
+      roads: clipRoutes(doc.map.roads, inside),
+      rails: clipRoutes(doc.map.rails, inside),
+    },
     objectives: doc.objectives.filter(inside),
+    depots: doc.depots.filter(inside),
     units: doc.units.filter(inside),
   };
 }
@@ -65,20 +75,28 @@ export function placeUnit(doc: ScenarioJson, col: number, row: number, d: UnitDr
   return { ...doc, units: [...others, unit] };
 }
 
-const slug = (s: string) =>
+const slug = (s: string, fallback: string) =>
   s
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_|_$/g, '') || 'obiettivo';
+    .replace(/^_|_$/g, '') || fallback;
 
 /** Mette un obiettivo nell'esagono, sostituendo quello che c'era. */
 export function placeObjective(doc: ScenarioJson, col: number, row: number, name: string, points: number): ScenarioJson {
   const others = doc.objectives.filter(notAt(col, row));
-  const base = slug(name);
+  const base = slug(name, 'obiettivo');
   const id = others.some((o) => o.id === base) ? freeId(base, others) : base;
   return { ...doc, objectives: [...others, { id, name, col, row, points }] };
+}
+
+/** Mette un deposito nell'esagono, sostituendo quello che c'era. */
+export function placeDepot(doc: ScenarioJson, col: number, row: number, name: string, side: Side): ScenarioJson {
+  const others = doc.depots.filter(notAt(col, row));
+  const base = slug(name, 'deposito');
+  const id = others.some((o) => o.id === base) ? freeId(base, others) : base;
+  return { ...doc, depots: [...others, { id, name, col, row, side }] };
 }
 
 /** Nome di località dell'esagono; vuoto lo toglie. */
@@ -93,13 +111,14 @@ export function setLabel(doc: ScenarioJson, col: number, row: number, label: str
   return { ...doc, map: { ...doc.map, hexes } };
 }
 
-/** Toglie unità, obiettivo e nome di località dall'esagono (il terreno resta). */
+/** Toglie unità, obiettivo, deposito e nome di località dall'esagono (terreno e vie restano). */
 export function eraseAt(doc: ScenarioJson, col: number, row: number): ScenarioJson {
   const at = (o: At) => o.col === col && o.row === row;
   const hasLabel = doc.map.hexes.some((h) => at(h) && h.label !== undefined);
-  if (!hasLabel && !doc.units.some(at) && !doc.objectives.some(at)) return doc;
+  if (!hasLabel && !doc.units.some(at) && !doc.objectives.some(at) && !doc.depots.some(at)) return doc;
   const cleared = setLabel(doc, col, row, '');
-  return { ...cleared, units: doc.units.filter(notAt(col, row)), objectives: doc.objectives.filter(notAt(col, row)) };
+  const keep = notAt(col, row);
+  return { ...cleared, units: doc.units.filter(keep), objectives: doc.objectives.filter(keep), depots: doc.depots.filter(keep) };
 }
 
 /** Esagoni coperti dal pennello: blocco di lato `size` centrato su (col, row), entro la mappa. */

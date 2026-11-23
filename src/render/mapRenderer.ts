@@ -5,7 +5,8 @@ import { type Side, type Unit, type UnitTypeTable, isAirType, isAlive } from '..
 import { type Bounds, Camera, HEX_SIZE, type Viewport } from './camera';
 import { hexPath, traceHex } from './geometry';
 import { Animations } from './animations';
-import { drawCoords, drawLabels, drawObjectives } from './mapLayers';
+import { drawCoords, drawDepots, drawLabels, drawObjectives } from './mapLayers';
+import { type RouteGeometry, buildRouteGeometry, drawRoutes } from './routes';
 import { areaBorder, drawAdvance, drawBubble, drawPath, drawSupport, drawReachable, drawSupplyNetwork, drawTargets, drawZocBorder } from './overlays';
 import { MAP_THEME } from './theme';
 import { TileImages } from './tiles';
@@ -27,6 +28,7 @@ export interface RenderInput {
   readonly terrain: TerrainTable;
   readonly units: readonly Unit[];
   readonly objectives: Readonly<Record<string, Side>>;
+  readonly depots: Readonly<Record<string, Side>>;
   readonly hovered: Axial | null;
   /** Area del pennello sotto il cursore (usata nell'editor). */
   readonly hoverArea?: readonly Axial[];
@@ -77,6 +79,7 @@ export class MapRenderer {
   private terrainPaths = new Map<string, Path2D>();
   private terrainHexes = new Map<string, Axial[]>();
   private gridPath = new Path2D();
+  private routes: RouteGeometry | null = null;
   private bounds: Bounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -101,7 +104,7 @@ export class MapRenderer {
   update(input: RenderInput): void {
     if (input.map !== this.cachedMap) {
       const prev = this.cachedMap;
-      this.rebuildGeometry(input.map);
+      this.rebuildGeometry(input.map, input.terrain);
       // Mappa di dimensioni diverse (nuovo scenario): si rimette tutta in vista.
       if (prev && (prev.width !== input.map.width || prev.height !== input.map.height)) this.camera.fit(this.bounds, this.viewport);
     }
@@ -153,8 +156,9 @@ export class MapRenderer {
     this.frame = 0;
   }
 
-  private rebuildGeometry(map: MapData): void {
+  private rebuildGeometry(map: MapData, terrain: TerrainTable): void {
     this.cachedMap = map;
+    this.routes = buildRouteGeometry(map, terrain);
     this.terrainPaths = new Map();
     this.terrainHexes = new Map();
     this.gridPath = new Path2D();
@@ -195,8 +199,10 @@ export class MapRenderer {
     );
 
     this.drawTerrain(input.terrain, s);
+    if (this.routes) drawRoutes(ctx, this.routes);
     for (const n of input.supply) drawSupplyNetwork(ctx, n.hexes, MAP_THEME.side[n.side], s);
     drawObjectives(ctx, input.map, input.objectives);
+    drawDepots(ctx, input.map, input.depots);
     drawReachable(ctx, input.reachable);
     for (const z of input.zoc) drawZocBorder(ctx, z.hexes, MAP_THEME.side[z.side].solid, s);
     for (const b of input.bubbles ?? []) drawBubble(ctx, b.hexes, MAP_THEME.bubble[b.kind], s);

@@ -33,7 +33,7 @@ const supplyCache = new WeakMap<GameState, SupplyOverlay[]>();
 export function supplyFor(s: UiState): SupplyOverlay[] {
   let overlays = supplyCache.get(s.game);
   if (!overlays) {
-    overlays = SIDES.map((side) => ({ side, hexes: new Set(supplyNetwork(s.game, s.data, side).cost.keys()) }));
+    overlays = SIDES.map((side) => ({ side, hexes: supplyNetwork(s.game, s.data, side).hexes }));
     supplyCache.set(s.game, overlays);
   }
   return overlays;
@@ -84,6 +84,7 @@ export function buildRenderInput(s: UiState): RenderInput {
     terrain: data.terrain,
     units: game.units,
     objectives: game.objectives,
+    depots: game.depots,
     hovered,
     selectedUnitId: s.selectedUnitId,
     reachable: reach ? reachableHexes(reach) : [],

@@ -1,11 +1,10 @@
 /** Conversione tra il documento dell'editor e il file JSON compatto dello scenario. */
 import type { GameData } from '../core/data';
 import { SIDES, type Side } from '../core/units';
-import { type HexJson, type ScenarioJson, blankScenario } from './model';
+import { type HexJson, type Placed, type ScenarioJson, blankScenario } from './model';
 
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 type Loc = [number, number];
-type Placed = { col: number; row: number };
 
 /** {col, row, …} → {…, loc: [col, row]}, con loc al posto di col. */
 function toLoc<T extends Placed>(o: T): Record<string, unknown> {
@@ -30,7 +29,8 @@ function unitFromFile({ str, ent, ...u }: Record<string, unknown>, side: Side): 
   return { ...fromLoc<Omit<ScenarioJson['units'][number], 'side' | 'strength'>>(u), side, strength: str as number, ...(ent ? { entrenched: true } : {}) };
 }
 
-const mapSides = <A, B>(r: Record<Side, A>, f: (a: A) => B): Record<Side, B> => ({ blue: f(r.blue), red: f(r.red) });
+const routeToFile = (r: Placed[]): Loc[] => r.map((h) => [h.col, h.row]);
+const routeFromFile = (r: Loc[]): Placed[] => r.map(([col, row]) => ({ col, row }));
 
 /** Il documento come va scritto nel file: griglia dei terreni, posizioni [col, riga], condizioni [meteo, luce]. */
 export function toFile(doc: ScenarioJson, data: GameData): Record<string, unknown> {
@@ -43,9 +43,9 @@ export function toFile(doc: ScenarioJson, data: GameData): Record<string, unknow
   const labels = map.hexes.filter((h) => h.label !== undefined).map((h) => ({ loc: [h.col, h.row], label: h.label }));
   const out: Record<string, unknown> = {
     ...doc,
-    map: { width: map.width, height: map.height, terrain, labels, edges: [] },
+    map: { width: map.width, height: map.height, terrain, labels, roads: map.roads.map(routeToFile), rails: map.rails.map(routeToFile), edges: [] },
     objectives: doc.objectives.map(toLoc),
-    supplySources: mapSides(doc.supplySources, (s) => ({ ...s, hexes: s.hexes.map((h) => [h.col, h.row]) })),
+    depots: doc.depots.map(toLoc),
     turns: { ...turns, conditions: turns.conditions.map((c) => [c.weather, c.daylight]) },
     units: Object.fromEntries(SIDES.map((side) => [side, doc.units.filter((u) => u.side === side).map(unitToFile)])),
   };
@@ -54,9 +54,9 @@ export function toFile(doc: ScenarioJson, data: GameData): Record<string, unknow
 }
 
 interface FileShape {
-  map: { width: number; height: number; terrain: string[]; labels?: { loc: Loc; label: string }[] };
+  map: { width: number; height: number; terrain: string[]; labels?: { loc: Loc; label: string }[]; roads?: Loc[][]; rails?: Loc[][] };
   objectives?: Record<string, unknown>[];
-  supplySources: Record<Side, { edges: ScenarioJson['supplySources'][Side]['edges']; hexes?: Loc[] }>;
+  depots?: Record<string, unknown>[];
   turns: { max: number; firstSide: Side; conditions: [string, string][] };
   units: Partial<Record<Side, Record<string, unknown>[]>>;
 }
@@ -82,9 +82,16 @@ export function fromFile(raw: unknown, data: GameData): ScenarioJson {
     ...o,
     description: o.description ?? '',
     sideNames: { ...base.sideNames, ...o.sideNames },
-    map: { width: o.map.width, height: o.map.height, defaultTerrain: base.map.defaultTerrain, hexes: [...hexes.values()], edges: [] },
+    map: {
+      width: o.map.width,
+      height: o.map.height,
+      defaultTerrain: base.map.defaultTerrain,
+      hexes: [...hexes.values()],
+      roads: (o.map.roads ?? []).map(routeFromFile),
+      rails: (o.map.rails ?? []).map(routeFromFile),
+    },
     objectives: (o.objectives ?? []).map((x) => fromLoc<ScenarioJson['objectives'][number]>(x)),
-    supplySources: mapSides(o.supplySources, (s) => ({ edges: s.edges, hexes: (s.hexes ?? []).map(([col, row]) => ({ col, row })) })),
+    depots: (o.depots ?? []).map((x) => fromLoc<ScenarioJson['depots'][number]>(x)),
     turns: { ...o.turns, conditions: o.turns.conditions.map(([weather, daylight]) => ({ weather, daylight })) },
     units: SIDES.flatMap((side) => (o.units[side] ?? []).map((x) => unitFromFile(x, side))),
   };

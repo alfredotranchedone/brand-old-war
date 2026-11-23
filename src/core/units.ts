@@ -44,6 +44,8 @@ export interface UnitType {
   readonly tags: readonly UnitTag[];
   /** Turni fuori rifornimento che valgono come uno (1 = normale, 3 = resiste il triplo). */
   readonly supplyEndurance: number;
+  /** Raggio di distribuzione dei rifornimenti se collegato alla rete, in costo di movimento (0 = non distribuisce). */
+  readonly supplyRange: number;
   /** Raggio della bolla contraerea in esagoni (0 = nessuna). */
   readonly aaRadius: number;
   /** Raggio della bolla di guerra elettronica in esagoni (0 = nessuna). */
@@ -124,6 +126,7 @@ export function parseUnitTypes(raw: unknown): UnitTypeTable {
       spotting: int(o.spotting, `${path}.spotting`, 1),
       tags: array(o.tags ?? [], `${path}.tags`).map((t, i) => oneOf(t, `${path}.tags[${i}]`, UNIT_TAGS)),
       supplyEndurance: int(o.supplyEndurance ?? 1, `${path}.supplyEndurance`, 1),
+      supplyRange: num(o.supplyRange ?? 0, `${path}.supplyRange`, 0),
       aaRadius: int(o.aaRadius ?? 0, `${path}.aaRadius`, 0),
       ewRadius: int(o.ewRadius ?? 0, `${path}.ewRadius`, 0),
       organic: {

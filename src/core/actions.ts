@@ -4,7 +4,7 @@ import type { GameEvent } from './events';
 import type { GameState } from './game';
 import type { Axial } from './hex';
 import { applyMove } from './movement';
-import { claimObjectives } from './objectives';
+import { claimControl } from './control';
 import { endTurn } from './turn';
 
 export type Action =
@@ -25,7 +25,7 @@ function toResult(r: Outcome): ActionResult {
 
 export function applyAction(state: GameState, data: GameData, action: Action): ActionResult {
   const result = dispatchAction(state, data, action);
-  return result.ok ? { ...result, state: claimObjectives(result.state, data) } : result;
+  return result.ok ? { ...result, state: claimControl(result.state, data) } : result;
 }
 
 function dispatchAction(state: GameState, data: GameData, action: Action): ActionResult {

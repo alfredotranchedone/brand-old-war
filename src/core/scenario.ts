@@ -3,15 +3,17 @@
  * Nei file le posizioni sono in offset odd-q (col, row); qui diventano assiali.
  */
 import type { GameData } from './data';
-import { type Axial, type HexKey, hexKey, offsetToAxial } from './hex';
+import { type Axial, type HexKey, hexDistance, hexKey, offsetToAxial } from './hex';
 import {
+  type Depot,
   type HexData,
   type HexEdge,
-  MAP_EDGE_NAMES,
   type MapData,
   type Objective,
+  ROUTE_KINDS,
+  type Route,
+  type RouteKind,
   assertOnMap,
-  edgeHexes,
 } from './map';
 import { SIDES, type Side, isAirType } from './units';
 import {
@@ -127,8 +129,27 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     return { hex: pos, direction: int(e.direction, `${path}.direction`, 0, 5), type: str(e.type, `${path}.type`) };
   });
 
+  const routes = {} as Record<RouteKind, Route[]>;
+  for (const kind of ROUTE_KINDS) {
+    const key = `${kind}s`;
+    routes[kind] = array(m[key] ?? [], `${p}.map.${key}`).map((v, i) => {
+      const path = `${p}.map.${key}[${i}]`;
+      const hexes = array(v, path).map((x, j) => readLoc(x, `${path}[${j}]`));
+      if (hexes.length < 2) throw new DataError(path, 'servono almeno due esagoni');
+      hexes.forEach((h, j) => {
+        assertOnMap(size, h, `${path}[${j}]`);
+        if (j > 0 && hexDistance(hexes[j - 1]!, h) !== 1) throw new DataError(`${path}[${j}]`, 'esagono non adiacente al precedente');
+      });
+      return hexes;
+    });
+  }
+
+  // Un esagono invalicabile attraversato da una via è un ponte: ci si può stare.
+  const routeHexes = new Set(ROUTE_KINDS.flatMap((k) => routes[k].flat().map(hexKey)));
   const assertPassable = (pos: Axial, path: string) => {
-    if (data.terrain[hexes[hexKey(pos)]!.terrain]!.impassable) throw new DataError(path, 'esagono su terreno invalicabile');
+    if (data.terrain[hexes[hexKey(pos)]!.terrain]!.impassable && !routeHexes.has(hexKey(pos))) {
+      throw new DataError(path, 'esagono su terreno invalicabile');
+    }
   };
 
   // --- Obiettivi -------------------------------------------------------------
@@ -148,27 +169,27 @@ export function parseScenario(raw: unknown, data: GameData, fileName = 'scenario
     return { id, name: str(ob.name, `${path}.name`), pos, points: int(ob.points, `${path}.points`, 0) };
   });
 
-  // --- Sorgenti di rifornimento ---------------------------------------------
-  const ss = record(o.supplySources, `${p}.supplySources`);
-  const supplySources = {} as Record<Side, HexKey[]>;
+  // --- Depositi -------------------------------------------------------------
+  const depotIds = new Set<string>();
+  const depotHexes = new Set<HexKey>();
+  const depots: Depot[] = array(o.depots, `${p}.depots`).map((v, i) => {
+    const path = `${p}.depots[${i}]`;
+    const d = record(v, path);
+    const id = str(d.id, `${path}.id`);
+    if (depotIds.has(id)) throw new DataError(`${path}.id`, `id deposito duplicato "${id}"`);
+    depotIds.add(id);
+    const pos = readPos(d, path);
+    assertOnMap(size, pos, path);
+    if (depotHexes.has(hexKey(pos))) throw new DataError(path, 'due depositi sullo stesso esagono');
+    depotHexes.add(hexKey(pos));
+    assertPassable(pos, path);
+    return { id, name: str(d.name, `${path}.name`), pos, owner: oneOf(d.side, `${path}.side`, SIDES) };
+  });
   for (const side of SIDES) {
-    const path = `${p}.supplySources.${side}`;
-    const s = record(ss[side], path);
-    const keys = new Set<HexKey>();
-    array(s.edges ?? [], `${path}.edges`).forEach((e, i) => {
-      for (const h of edgeHexes(width, height, oneOf(e, `${path}.edges[${i}]`, MAP_EDGE_NAMES))) keys.add(hexKey(h));
-    });
-    array(s.hexes ?? [], `${path}.hexes`).forEach((v, i) => {
-      const hp = `${path}.hexes[${i}]`;
-      const pos = readLoc(v, hp);
-      assertOnMap(size, pos, hp);
-      keys.add(hexKey(pos));
-    });
-    if (keys.size === 0) throw new DataError(path, 'nessuna sorgente di rifornimento');
-    supplySources[side] = [...keys];
+    if (!depots.some((d) => d.owner === side)) throw new DataError(`${p}.depots`, `nessun deposito per la fazione ${side}`);
   }
 
-  const map: MapData = { width, height, hexes, edges, objectives, supplySources };
+  const map: MapData = { width, height, hexes, edges, routes, objectives, depots };
 
   // --- Turni -----------------------------------------------------------------
   const t = record(o.turns, `${p}.turns`);

@@ -3,7 +3,7 @@
  * Il file in src/scenarios usa una griglia di codici (vedi fileFormat.ts).
  */
 import { type HexKey, hexKey, offsetToAxial } from '../core/hex';
-import type { HexData, MapData, MapEdgeName } from '../core/map';
+import type { HexData, MapData } from '../core/map';
 import type { Side, Unit } from '../core/units';
 
 export interface HexJson {
@@ -13,16 +13,18 @@ export interface HexJson {
   label?: string;
 }
 
+export type Placed = { col: number; row: number };
+
 export interface ScenarioJson {
   id: string;
   name: string;
   description: string;
   sideNames: Record<Side, string>;
   seed: number;
-  map: { width: number; height: number; defaultTerrain: string; hexes: HexJson[]; edges: [] };
+  map: { width: number; height: number; defaultTerrain: string; hexes: HexJson[]; roads: Placed[][]; rails: Placed[][] };
   objectives: { id: string; name: string; col: number; row: number; points: number }[];
   defender: Side;
-  supplySources: Record<Side, { edges: MapEdgeName[]; hexes: { col: number; row: number }[] }>;
+  depots: { id: string; name: string; col: number; row: number; side: Side }[];
   turns: { max: number; firstSide: Side; conditions: { weather: string; daylight: string }[] };
   player: Side;
   ai: { side: Side; posture: string };
@@ -38,10 +40,10 @@ export function blankScenario(width = 20, height = 14): ScenarioJson {
     description: '',
     sideNames: { blue: 'Blu', red: 'Rosso' },
     seed: 1,
-    map: { width, height, defaultTerrain: 'clear', hexes: [], edges: [] },
+    map: { width, height, defaultTerrain: 'clear', hexes: [], roads: [], rails: [] },
     objectives: [],
     defender: 'red',
-    supplySources: { blue: { edges: ['west'], hexes: [] }, red: { edges: ['east'], hexes: [] } },
+    depots: [],
     turns: { max: turns, firstSide: 'blue', conditions: Array.from({ length: turns }, () => ({ weather: 'clear', daylight: 'day' })) },
     player: 'blue',
     ai: { side: 'red', posture: 'defend' },
@@ -50,7 +52,7 @@ export function blankScenario(width = 20, height = 14): ScenarioJson {
   };
 }
 
-const pos = (o: { col: number; row: number }) => offsetToAxial({ col: o.col, row: o.row });
+const pos = (o: Placed) => offsetToAxial({ col: o.col, row: o.row });
 
 /** Mappa da disegnare, senza validazione: lo scenario può essere incompleto mentre lo si modifica. */
 export function toMapData(doc: ScenarioJson): MapData {
@@ -70,8 +72,9 @@ export function toMapData(doc: ScenarioJson): MapData {
     height,
     hexes,
     edges: [],
+    routes: { road: doc.map.roads.map((r) => r.map(pos)), rail: doc.map.rails.map((r) => r.map(pos)) },
     objectives: doc.objectives.map((o) => ({ id: o.id, name: o.name, pos: pos(o), points: o.points })),
-    supplySources: { blue: [], red: [] },
+    depots: doc.depots.map((d) => ({ id: d.id, name: d.name, pos: pos(d), owner: d.side })),
   };
 }
 

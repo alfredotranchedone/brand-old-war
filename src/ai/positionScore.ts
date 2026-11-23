@@ -1,18 +1,18 @@
 import { attackPower, isEntrenchedEffective } from '../core/combatPower';
 import { type GameData, getUnitType } from '../core/data';
 import { type GameState, liveUnits } from '../core/game';
-import { type Axial, hexDistance, hexEquals, hexKey } from '../core/hex';
+import { type Axial, hexDistance, hexEquals } from '../core/hex';
 import { objectiveAt } from '../core/map';
 import type { AiWeights } from '../core/rules';
-import { type SupplyNetwork, supplyNetwork } from '../core/supplyNetwork';
 import { type Unit, otherSide } from '../core/units';
+import { type SupplyView, supplyScore, supplyView } from './supplyScore';
 
 export interface ScoreContext {
   readonly state: GameState;
   readonly data: GameData;
   readonly unit: Unit;
   readonly weights: AiWeights;
-  readonly supply: SupplyNetwork;
+  readonly supply: SupplyView;
 }
 
 export function aiWeights(state: GameState, data: GameData): AiWeights {
@@ -22,7 +22,7 @@ export function aiWeights(state: GameState, data: GameData): AiWeights {
 }
 
 export function scoreContext(state: GameState, data: GameData, unit: Unit): ScoreContext {
-  return { state, data, unit, weights: aiWeights(state, data), supply: supplyNetwork(state, data, unit.side) };
+  return { state, data, unit, weights: aiWeights(state, data), supply: supplyView(state, data, unit) };
 }
 
 /** Stima della potenza nemica che potrebbe colpire qui, basata su distanza. */
@@ -37,14 +37,14 @@ function exposure(ctx: ScoreContext, h: Axial): number {
   return sum;
 }
 
-/** Calcola il punteggio di una posizione per l'IA: vicinanza agli obiettivi, supporto di alleati, esposizione al fuoco nemico. */
+/** Calcola il punteggio di una posizione per l'IA: vicinanza agli obiettivi, supporto di alleati, rifornimenti, esposizione al fuoco nemico. */
 export function positionScore(ctx: ScoreContext, h: Axial): number {
   const { state, unit, weights: w } = ctx;
   let score = 0;
   for (const o of state.map.objectives) score += (w.objectiveProximity * o.points) / (1 + hexDistance(h, o.pos));
   const friends = liveUnits(state, unit.side).filter((u) => u.id !== unit.id && hexDistance(u.pos, h) === 1);
   score += w.friendlyAdjacent * friends.length;
-  if (!ctx.supply.cost.has(hexKey(h))) score -= w.outOfSupplyPenalty;
+  score += supplyScore(state, ctx.data, unit, w, ctx.supply, h);
   score -= w.exposurePenalty * exposure(ctx, h);
   if (hexEquals(h, unit.pos)) {
     if (unit.entrenched && objectiveAt(state.map, h)) score += w.holdObjectiveBonus;

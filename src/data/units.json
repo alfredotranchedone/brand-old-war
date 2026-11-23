@@ -112,6 +112,7 @@
     "sidc": "SFGPU------N---",
     "symbolText": "HQ",
     "move": 5,
+    "supplyRange": 4,
     "attack": { "armored": 2, "unarmored": 3, "air": 1 },
     "defense": 4,
     "range": 1,

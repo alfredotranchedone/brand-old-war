@@ -37,6 +37,8 @@ export interface GameState {
   readonly units: readonly Unit[];
   /** Quale fazione controlla ogni obiettivo. */
   readonly objectives: Readonly<Record<string, Side>>;
+  /** Quale fazione controlla ogni deposito. */
+  readonly depots: Readonly<Record<string, Side>>;
   /** Perdite totali in punti forza per ogni fazione. */
   readonly stepsLost: Readonly<Record<Side, number>>;
   /** Perdite all'inizio del turno (usate nel riepilogo). */
@@ -65,6 +67,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
 
   const objectives: Record<string, Side> = {};
   for (const o of scenario.map.objectives) objectives[o.id] = scenario.defender;
+  const depots = Object.fromEntries(scenario.map.depots.map((d) => [d.id, d.owner]));
 
   return {
     scenarioId: scenario.id,
@@ -85,6 +88,7 @@ export function createGame(scenario: Scenario, data: GameData, seed: number = sc
     map: scenario.map,
     units,
     objectives,
+    depots,
     stepsLost: { blue: 0, red: 0 },
     roundStartLosses: { blue: 0, red: 0 },
     rngState: seedRng(seed),

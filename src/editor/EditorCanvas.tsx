@@ -25,6 +25,7 @@ function renderInput(s: EditorState, map: ReturnType<typeof toMapData>): RenderI
     units: toUnits(s.doc),
     // A inizio partita gli obiettivi sono del difensore.
     objectives: Object.fromEntries(s.doc.objectives.map((o) => [o.id, s.doc.defender])),
+    depots: Object.fromEntries(s.doc.depots.map((d) => [d.id, d.side])),
     hovered: s.hovered,
     hoverArea: brushHover(s),
     selectedUnitId: null,

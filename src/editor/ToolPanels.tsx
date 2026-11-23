@@ -6,8 +6,10 @@ import styles from './Editor.module.css';
 
 const TOOLS: [Tool, string][] = [
   ['terrain', 'Terreno'],
+  ['route', 'Vie'],
   ['unit', 'Unità'],
   ['objective', 'Obiettivo'],
+  ['depot', 'Deposito'],
   ['label', 'Località'],
   ['erase', 'Gomma'],
 ];
@@ -36,11 +38,13 @@ export function ToolBar() {
       {(tool === 'terrain' || tool === 'erase') && <BrushSize />}
       {tool === 'terrain' && <TerrainPalette />}
       {tool === 'unit' && <UnitTool />}
+      {tool === 'route' && <RouteTool />}
       {tool === 'objective' && <ObjectiveTool />}
+      {tool === 'depot' && <DepotTool />}
       {tool === 'label' && <LabelTool />}
       {tool === 'erase' && (
         <section className={app.card}>
-          <p className={app.hint}>Clic o trascina per togliere unità, obiettivi e nomi di località. Il terreno resta.</p>
+          <p className={app.hint}>Clic o trascina per togliere unità, obiettivi, depositi e nomi di località. Terreno e vie restano.</p>
         </section>
       )}
     </>
@@ -131,6 +135,68 @@ function LabelTool() {
         <input type="text" className={styles.wide} value={label} onChange={(e) => set(e.target.value)} />
       </label>
       <p className={app.hint}>Clic per dare il nome all'esagono; con il nome vuoto lo toglie.</p>
+    </section>
+  );
+}
+
+function RouteTool() {
+  const d = useEditorStore((s) => s.routeDraft);
+  const set = useEditorStore((s) => s.setRouteDraft);
+  const counts = useEditorStore((s) => `Strade ${s.doc.map.roads.length} · Ferrovie ${s.doc.map.rails.length}`);
+  return (
+    <section className={app.card}>
+      <h2 className={app.cardTitle}>Vie</h2>
+      <div className={styles.form}>
+        <label className={styles.field}>
+          Tipo
+          <select value={d.kind} onChange={(e) => set({ kind: e.target.value as typeof d.kind })}>
+            <option value="road">Strada</option>
+            <option value="rail">Ferrovia</option>
+          </select>
+        </label>
+        <label className={styles.field}>
+          Modalità
+          <select value={d.erase ? 'erase' : 'draw'} onChange={(e) => set({ erase: e.target.value === 'erase' })}>
+            <option value="draw">Disegna</option>
+            <option value="erase">Cancella</option>
+          </select>
+        </label>
+      </div>
+      <p className={app.hint}>
+        {d.erase
+          ? 'Clic o trascina per togliere gli esagoni dalle vie del tipo scelto, che si spezzano.'
+          : "Trascina per disegnare; partendo dall'estremo di una sola via la prolunga. Tornando indietro di un esagono lo togli. Sull'acqua diventa un ponte."}{' '}
+        {counts}
+      </p>
+    </section>
+  );
+}
+
+function DepotTool() {
+  const d = useEditorStore((s) => s.depotDraft);
+  const set = useEditorStore((s) => s.setDepotDraft);
+  const names = useEditorStore((s) => s.doc.sideNames);
+  const counts = useEditorStore((s) => SIDES.map((side) => `${s.doc.sideNames[side]} ${s.doc.depots.filter((x) => x.side === side).length}`).join(' · '));
+  return (
+    <section className={app.card}>
+      <h2 className={app.cardTitle}>Deposito</h2>
+      <div className={styles.form}>
+        <label className={styles.field}>
+          Nome
+          <input type="text" className={styles.wide} value={d.name} onChange={(e) => set({ name: e.target.value })} />
+        </label>
+        <label className={styles.field}>
+          Fazione
+          <select value={d.side} onChange={(e) => set({ side: e.target.value as typeof d.side })}>
+            {SIDES.map((side) => (
+              <option key={side} value={side}>
+                {names[side]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className={app.hint}>Clic per piazzare; sostituisce il deposito già presente. Serve almeno un deposito per fazione. Depositi: {counts}</p>
     </section>
   );
 }

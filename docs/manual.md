@@ -56,7 +56,7 @@ Each unit has a **mobility** type (tracked, wheeled, foot, air), which sets its 
 | Recon | Fast; ignores enemy ZOC. |
 | Self-propelled artillery | Range 3. Cannot attack after moving. |
 | Tactical missiles | Artillery with range 5. |
-| HQ | No special rules yet (*HQ will be crucial for supply*). |
+| HQ | Extends supply around itself when in supply. |
 | Special forces | Ignore enemy ZOC; last longer out of supply. |
 | Paratroopers | No special rules yet. |
 | Engineers | Dig in even after moving; cancel the entrenchment of adjacent enemies. |
@@ -106,9 +106,18 @@ Friendly units nearby help automatically:
 - **Defensive support:** 1 unit adjacent to the defender adds +15% to defence, once per enemy turn.
 - **Artillery:** in range of the target, reduces its defensive bonus; in range of the attacker, a defensive barrage reduces the attack.
 
-## Supply *(work in progress)*
+## Supply
 
-Units must be connected to a friendly supply source (a map edge or marked hexes). Enemy units and unoccupied enemy ZOC cut the line.
+Supply starts from **depots** (crate icons). A depot changes owner when an enemy ground unit enters it, like an objective.
+
+- **Trunk:** from a friendly depot along roads (up to 12 hexes) and railways (unlimited).
+- **Last mile:** from the trunk, up to 4 MP of wheeled movement cost.
+- **HQ:** an HQ that is itself in supply extends it by 4 MP around its hex. HQs do not chain.
+- Bad weather reduces the ranges.
+
+Enemy units and unoccupied enemy ZOC cut the line, so blocking a road or railway can isolate units far behind it.
+
+Roads and railways crossing water are **bridges**: ground units can only cross them along the route, and may stop on them.
 
 Out of supply:
 

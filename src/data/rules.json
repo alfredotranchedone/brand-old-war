@@ -12,7 +12,8 @@
     "noRetreatExtraLoss": 1
   },
   "supply": {
-    "maxPathCost": 8,
+    "roadRange": 12,
+    "offRoadRange": 4,
     "outOfSupply1": { "attackMultiplier": 0.5, "moveDelta": -1 },
     "outOfSupply2": { "attackMultiplier": 0.5, "defenseMultiplier": 0.75, "moveMultiplier": 0.5, "strengthLossPerTurn": 1 }
   },
@@ -48,7 +49,10 @@
         "outOfSupplyPenalty": 2.0,
         "exposurePenalty": 0.02,
         "holdObjectiveBonus": 3.0,
-        "holdEntrenchedBonus": 8.0
+        "holdEntrenchedBonus": 8.0,
+        "guardTrunkBonus": 1.5,
+        "cutTrunkBonus": 0.5,
+        "leaveGapPenalty": 3.0
       }
     }
   }

@@ -24,12 +24,39 @@ export function drawObjectives(
   }
 }
 
+/** Cassa nel colore del proprietario, a sinistra del centro dell'esagono. */
+export function drawDepots(ctx: CanvasRenderingContext2D, map: MapData, control: Readonly<Record<string, Side>>): void {
+  const t = MAP_THEME.depot;
+  const size = HEX_SIZE * 0.3;
+  ctx.lineWidth = 1.2;
+  for (const d of map.depots) {
+    const owner = control[d.id];
+    const c = hexToPixel(d.pos, HEX_SIZE);
+    const x = c.x - HEX_SIZE * 0.72;
+    const y = c.y - size / 2;
+    ctx.fillStyle = owner ? MAP_THEME.side[owner].solid : t.neutral;
+    ctx.fillRect(x, y, size, size);
+    ctx.strokeStyle = t.stroke;
+    ctx.strokeRect(x, y, size, size);
+    ctx.strokeStyle = t.mark;
+    ctx.beginPath();
+    ctx.moveTo(x + 2, y + 2);
+    ctx.lineTo(x + size - 2, y + size - 2);
+    ctx.moveTo(x + size - 2, y + 2);
+    ctx.lineTo(x + 2, y + size - 2);
+    ctx.stroke();
+  }
+}
+
 /** Disegna i nomi dei luoghi e il valore degli obiettivi in stelle. */
 export function drawLabels(ctx: CanvasRenderingContext2D, map: MapData): void {
   const names = new Map<string, { h: Axial; text: string; bold: boolean }>();
   for (const h of mapHexes(map)) {
     const label = map.hexes[hexKey(h)]?.label;
     if (label) names.set(hexKey(h), { h, text: label, bold: false });
+  }
+  for (const d of map.depots) {
+    if (!names.has(hexKey(d.pos))) names.set(hexKey(d.pos), { h: d.pos, text: d.name, bold: false });
   }
   for (const o of map.objectives) {
     names.set(hexKey(o.pos), { h: o.pos, text: `${o.name} ${'★'.repeat(o.points)}`, bold: true });

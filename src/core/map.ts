@@ -1,5 +1,5 @@
 /**
- * Mappa, terreno, obiettivi e sorgenti di rifornimento.
+ * Mappa, terreno, vie di comunicazione, obiettivi e depositi.
  */
 import { type Axial, type HexKey, axialToOffset, hexKey, offsetToAxial } from './hex';
 import type { GroundMobility, Side } from './units';
@@ -84,6 +84,20 @@ export interface Objective {
   readonly points: number;
 }
 
+/** Deposito di rifornimento; `owner` è la fazione che lo controlla a inizio partita. */
+export interface Depot {
+  readonly id: string;
+  readonly name: string;
+  readonly pos: Axial;
+  readonly owner: Side;
+}
+
+export type RouteKind = 'road' | 'rail';
+export const ROUTE_KINDS: readonly RouteKind[] = ['road', 'rail'];
+
+/** Spezzata di esagoni adiacenti; attraversare acqua invalicabile equivale a un ponte. */
+export type Route = readonly Axial[];
+
 export interface MapData {
   /** Larghezza della mappa in esagoni (coordinate offset odd-q). */
   readonly width: number;
@@ -93,9 +107,9 @@ export interface MapData {
   readonly hexes: Readonly<Record<HexKey, HexData>>;
   /** Lati speciali come fiumi. Vuoto per ora. */
   readonly edges: readonly HexEdge[];
+  readonly routes: Readonly<Record<RouteKind, readonly Route[]>>;
   readonly objectives: readonly Objective[];
-  /** Esagoni di origine per i rifornimenti, uno per fazione. */
-  readonly supplySources: Readonly<Record<Side, readonly HexKey[]>>;
+  readonly depots: readonly Depot[];
 }
 
 export function isOnMap(map: MapData, h: Axial): boolean {
@@ -134,22 +148,6 @@ export function mapHexes(map: MapData): Axial[] {
     }
   }
   return result;
-}
-
-export type MapEdgeName = 'west' | 'east' | 'north' | 'south';
-export const MAP_EDGE_NAMES: readonly MapEdgeName[] = ['west', 'east', 'north', 'south'];
-
-/** Esagoni lungo un bordo della mappa. */
-export function edgeHexes(width: number, height: number, edge: MapEdgeName): Axial[] {
-  const out: Axial[] = [];
-  if (edge === 'west' || edge === 'east') {
-    const col = edge === 'west' ? 0 : width - 1;
-    for (let row = 0; row < height; row++) out.push(offsetToAxial({ col, row }));
-  } else {
-    const row = edge === 'north' ? 0 : height - 1;
-    for (let col = 0; col < width; col++) out.push(offsetToAxial({ col, row }));
-  }
-  return out;
 }
 
 export function assertOnMap(map: Pick<MapData, 'width' | 'height'>, h: Axial, path: string): void {

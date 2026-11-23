@@ -19,6 +19,12 @@ export const MAP_THEME = {
   supportEnemy: '#ff6a5c',
   /** Bolle di contraerea e guerra elettronica. */
   bubble: { aa: '#ff9f1c', ew: '#c77dff' },
+  routes: {
+    road: { edge: '#6b5534', fill: '#e8d3a2' },
+    rail: { edge: '#2b2b2b', fill: '#f4f4f0' },
+    bridge: { edge: '#3a3a36', deck: '#a7a294' },
+  },
+  depot: { stroke: '#22261e', mark: '#ffffff', neutral: '#777777' },
   coordText: 'rgba(60, 70, 50, 0.55)',
   labelText: '#3d4434',
   labelHalo: 'rgba(238, 240, 228, 0.9)',

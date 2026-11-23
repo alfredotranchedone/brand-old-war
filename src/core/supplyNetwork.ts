@@ -1,62 +1,79 @@
-import type { GameData } from './data';
+import { cheapestCosts, type Steps } from './cheapest';
+import { depotsOf } from './control';
+import { type GameData, getUnitType } from './data';
 import { type GameState, currentConditions, groundUnitAt } from './game';
 import { type Axial, type HexKey, hexKey, hexNeighbors, parseHexKey } from './hex';
-import { isPassable, terrainAt } from './map';
-import type { Side, Unit } from './units';
+import { terrainAt } from './map';
+import { canStep, routeLinks } from './routes';
+import { type Side, type Unit, isAirType, isAlive } from './units';
 import { enemyZocOf } from './zoc';
 
-const EPS = 1e-9;
 const SUPPLY_MOBILITY = 'wheeled';
 
 export interface SupplyNetwork {
   readonly side: Side;
-  /** Costo minimo dalla sorgente più vicina, per esagono raggiunto. */
-  readonly cost: ReadonlyMap<HexKey, number>;
+  /** Esagoni riforniti: dorsale, ultimo miglio e raggio degli HQ collegati. */
+  readonly hexes: ReadonlySet<HexKey>;
+  /** Esagoni di strada o ferrovia collegati a un deposito. */
+  readonly trunk: ReadonlySet<HexKey>;
 }
 
-function supplyCost(state: GameState, data: GameData, h: Axial): number {
-  const weather = data.weather[currentConditions(state).weather];
-  return terrainAt(state.map, data.terrain, h).moveCost[SUPPLY_MOBILITY] * (weather?.moveCostMod[SUPPLY_MOBILITY] ?? 1);
-}
-
-/** Esagoni collegati a una sorgente amica senza passare per unità nemiche o ZOC nemica non presidiata. */
-export function supplyNetwork(state: GameState, data: GameData, side: Side): SupplyNetwork {
-  const weather = data.weather[currentConditions(state).weather];
-  const maxCost = data.rules.supply.maxPathCost * (weather?.supplyRangeMod ?? 1);
+/** Esagono attraversabile dai rifornimenti: niente nemici e niente ZOC nemica, salvo presidio amico. */
+function openTo(state: GameState, data: GameData, side: Side): (h: Axial) => boolean {
   const zoc = enemyZocOf(state, data, side);
-  const passable = (h: Axial) => {
-    if (!isPassable(state.map, data.terrain, h)) return false;
+  return (h) => {
     const occupant = groundUnitAt(state, data, h);
-    if (occupant) return occupant.side === side;
-    return !zoc.has(hexKey(h));
+    return occupant ? occupant.side === side : !zoc.has(hexKey(h));
+  };
+}
+
+/**
+ * Esagoni riforniti della fazione:
+ * 1. dorsale: dai depositi lungo strade (portata limitata) e ferrovie (illimitate);
+ * 2. ultimo miglio: dalla dorsale, a costo di movimento su ruote;
+ * 3. HQ riforniti: dal proprio esagono, a costo di movimento (non si concatenano).
+ */
+export function supplyNetwork(state: GameState, data: GameData, side: Side): SupplyNetwork {
+  const rules = data.rules.supply;
+  const weather = data.weather[currentConditions(state).weather];
+  const rangeMod = weather?.supplyRangeMod ?? 1;
+  const costMod = weather?.moveCostMod[SUPPLY_MOBILITY] ?? 1;
+  const open = openTo(state, data, side);
+  const links = routeLinks(state.map);
+
+  const alongRoutes: Steps = function* (from) {
+    for (const l of links.get(hexKey(from)) ?? []) {
+      if (open(l.to)) yield [l.to, l.kind === 'rail' ? 0 : 1];
+    }
+  };
+  const offRoad: Steps = function* (from) {
+    for (const n of hexNeighbors(from)) {
+      if (!canStep(state.map, data.terrain, from, n) || !open(n)) continue;
+      yield [n, terrainAt(state.map, data.terrain, n).moveCost[SUPPLY_MOBILITY] * costMod];
+    }
   };
 
-  const cost = new Map<HexKey, number>();
-  const open: { pos: Axial; cost: number }[] = [];
-  for (const key of state.map.supplySources[side]) {
-    const pos = parseHexKey(key);
-    if (!passable(pos)) continue;
-    cost.set(key, 0);
-    open.push({ pos, cost: 0 });
-  }
+  const depots = depotsOf(state, side).map((d) => d.pos).filter(open);
+  const trunk = cheapestCosts(depots, rules.roadRange * rangeMod, alongRoutes);
+  const base = cheapestCosts([...trunk.keys()].map(parseHexKey), rules.offRoadRange * rangeMod, offRoad);
+  const hexes = new Set(base.keys());
 
-  while (open.length > 0) {
-    let best = 0;
-    for (let i = 1; i < open.length; i++) if (open[i]!.cost < open[best]!.cost) best = i;
-    const node = open.splice(best, 1)[0]!;
-    if (node.cost > (cost.get(hexKey(node.pos)) ?? Infinity) + EPS) continue;
-    for (const n of hexNeighbors(node.pos)) {
-      if (!passable(n)) continue;
-      const c = node.cost + supplyCost(state, data, n);
-      const key = hexKey(n);
-      if (c > maxCost + EPS || c >= (cost.get(key) ?? Infinity) - EPS) continue;
-      cost.set(key, c);
-      open.push({ pos: n, cost: c });
-    }
+  for (const u of supplyHeads(state, data, side)) {
+    if (!base.has(hexKey(u.pos))) continue;
+    const range = getUnitType(data, u.typeId).supplyRange * rangeMod;
+    for (const k of cheapestCosts([u.pos], range, offRoad).keys()) hexes.add(k);
   }
-  return { side, cost };
+  return { side, hexes, trunk: new Set(trunk.keys()) };
+}
+
+function supplyHeads(state: GameState, data: GameData, side: Side): Unit[] {
+  return state.units.filter((u) => {
+    if (u.side !== side || !isAlive(u)) return false;
+    const type = getUnitType(data, u.typeId);
+    return type.supplyRange > 0 && !isAirType(type);
+  });
 }
 
 export function isInSupply(network: SupplyNetwork, unit: Unit): boolean {
-  return network.cost.has(hexKey(unit.pos));
+  return network.hexes.has(hexKey(unit.pos));
 }

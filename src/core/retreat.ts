@@ -1,26 +1,27 @@
+import { depotsOf } from './control';
 import type { GameData } from './data';
 import { type GameState, airUnitAt, groundUnitAt } from './game';
-import { type Axial, hexDistance, hexKey, hexNeighbors, parseHexKey } from './hex';
-import { isPassable } from './map';
+import { type Axial, hexDistance, hexKey, hexNeighbors } from './hex';
+import { canStep } from './routes';
 import type { Unit } from './units';
 import { enemyZocOf } from './zoc';
 
 function distanceToSupply(state: GameState, unit: Unit, h: Axial): number {
   let best = Infinity;
-  for (const key of state.map.supplySources[unit.side]) best = Math.min(best, hexDistance(h, parseHexKey(key)));
+  for (const d of depotsOf(state, unit.side)) best = Math.min(best, hexDistance(h, d.pos));
   return best;
 }
 
 /**
  * Esagono di ritirata: adiacente, libero, fuori dalla ZOC nemica e più lontano dall'attaccante.
- * A parità, il più vicino a una sorgente di rifornimento amica, poi il più lontano dall'attaccante.
+ * A parità, il più vicino a un deposito amico, poi il più lontano dall'attaccante.
  */
 export function findRetreatHex(state: GameState, data: GameData, defender: Unit, attacker: Unit): Axial | null {
   const zoc = enemyZocOf(state, data, defender.side);
   const current = hexDistance(defender.pos, attacker.pos);
   const candidates = hexNeighbors(defender.pos).filter(
     (h) =>
-      isPassable(state.map, data.terrain, h) &&
+      canStep(state.map, data.terrain, defender.pos, h) &&
       !groundUnitAt(state, data, h) &&
       airUnitAt(state, data, h)?.side !== attacker.side &&
       !zoc.has(hexKey(h)) &&
